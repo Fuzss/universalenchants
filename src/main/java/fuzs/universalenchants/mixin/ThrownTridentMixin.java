@@ -1,0 +1,62 @@
+package fuzs.universalenchants.mixin;
+
+import fuzs.universalenchants.mixin.accessor.AbstractArrowAccessor;
+import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.projectile.AbstractArrow;
+import net.minecraft.world.entity.projectile.ThrownTrident;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.phys.EntityHitResult;
+import net.minecraft.world.phys.Vec3;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.Unique;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+
+@Mixin(ThrownTrident.class)
+public abstract class ThrownTridentMixin extends AbstractArrow {
+    @Shadow
+    private boolean dealtDamage;
+
+    protected ThrownTridentMixin(EntityType<? extends AbstractArrow> p_36721_, Level p_36722_) {
+        super(p_36721_, p_36722_);
+    }
+
+    @Inject(method = "onHitEntity", at = @At("TAIL"))
+    protected void onHitEntity$tail(EntityHitResult rayTraceResult, CallbackInfo callbackInfo) {
+        Entity entity = rayTraceResult.getEntity();
+        if (entity instanceof LivingEntity) {
+            int knockbackStrength = ((AbstractArrowAccessor) this).getKnockback();
+            if (knockbackStrength > 0) {
+                // copied from punch behavior
+                Vec3 vector3d = this.getDeltaMovement().multiply(-100.0, 0.0, -100.0).normalize().scale(knockbackStrength * 0.6);
+                if (vector3d.lengthSqr() > 0.0) {
+                    entity.push(vector3d.x, 0.1, vector3d.z);
+                }
+            }
+        }
+        this.applyPiercing(entity);
+    }
+
+    @Unique
+    private void applyPiercing(Entity entity) {
+        int pierceLevel = this.getPierceLevel();
+        if (pierceLevel > 0) {
+            IntOpenHashSet piercedEntities = ((AbstractArrowAccessor) this).getPiercingIgnoreEntityIds();
+            if (piercedEntities == null) {
+                piercedEntities = new IntOpenHashSet(5);
+                ((AbstractArrowAccessor) this).setPiercingIgnoreEntityIds(piercedEntities);
+            }
+            piercedEntities.add(entity.getId());
+            // reverting previous motion change
+            if (piercedEntities.size() <= pierceLevel) {
+                this.setDeltaMovement(this.getDeltaMovement().multiply(-100.0, -10.0, -100.0));
+                this.dealtDamage = true;
+            }
+        }
+    }
+}

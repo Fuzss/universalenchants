@@ -5,8 +5,14 @@
   "package": "fuzs.universalenchants.mixin",
   "refmap": "META-INF/universalenchants.refmap.json",
   "mixins": [
+    "BowItemMixin",
+    "CrossbowItemMixin",
     "DamageEnchantmentMixin",
     "EnchantmentMixin",
+    "ThrownTridentMixin",
+    "TridentItemMixin",
+    "accessor.AbstractArrowAccessor",
+    "accessor.EnchantmentAccessor",
     "accessor.LivingEntityAccessor"
   ],
   "client": [

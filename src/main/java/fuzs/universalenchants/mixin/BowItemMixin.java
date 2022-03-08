@@ -1,24 +1,25 @@
 package fuzs.universalenchants.mixin;
 
-import fuzs.universalenchants.handler.CompatibilityElement;
-import net.minecraft.entity.projectile.AbstractArrowEntity;
-import net.minecraft.item.BowItem;
-import net.minecraft.item.ItemStack;
+import fuzs.universalenchants.handler.ItemCompatHandler;
+import net.minecraft.world.entity.projectile.AbstractArrow;
+import net.minecraft.world.item.BowItem;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.ProjectileWeaponItem;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.asm.mixin.injection.ModifyVariable;
+import org.spongepowered.asm.mixin.injection.Slice;
 
-@SuppressWarnings("unused")
 @Mixin(BowItem.class)
-public abstract class BowItemMixin {
+public abstract class BowItemMixin extends ProjectileWeaponItem {
+    public BowItemMixin(Properties p_43009_) {
+        super(p_43009_);
+    }
 
-    @Redirect(method = "onPlayerStoppedUsing", at = @At(value = "INVOKE", target = "Lnet/minecraft/item/BowItem;customArrow(Lnet/minecraft/entity/projectile/AbstractArrowEntity;)Lnet/minecraft/entity/projectile/AbstractArrowEntity;", remap = false))
-    public AbstractArrowEntity customArrow(BowItem bow, AbstractArrowEntity arrow, ItemStack stack) {
-
-        arrow = bow.customArrow(arrow);
-        CompatibilityElement.applyPiercingEnchantment(arrow, stack);
-        CompatibilityElement.applyLootingEnchantment(arrow, stack);
-
+    @ModifyVariable(method = "releaseUsing", at = @At("STORE"), ordinal = 0, slice = @Slice(to = @At(value = "INVOKE", target = "Lnet/minecraft/world/item/BowItem;customArrow(Lnet/minecraft/world/entity/projectile/AbstractArrow;)Lnet/minecraft/world/entity/projectile/AbstractArrow;", remap = false)))
+    public AbstractArrow releaseUsing$(AbstractArrow arrow, ItemStack stack) {
+        ItemCompatHandler.applyPiercingEnchantment(arrow, stack);
+        ItemCompatHandler.applyLootingEnchantment(arrow, stack);
         return arrow;
     }
 

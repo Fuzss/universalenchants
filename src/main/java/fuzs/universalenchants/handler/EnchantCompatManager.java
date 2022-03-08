@@ -7,8 +7,8 @@ import org.apache.commons.compress.utils.Lists;
 
 import java.util.List;
 
-public class EnchantCompatHandler {
-    public static final EnchantCompatHandler INSTANCE = new EnchantCompatHandler();
+public class EnchantCompatManager {
+    public static final EnchantCompatManager INSTANCE = new EnchantCompatManager();
 
     private final List<CompatibilityEntry> entries = Lists.newArrayList();
 

@@ -1,12 +1,7 @@
 package fuzs.universalenchants.mixin;
 
-import fuzs.universalenchants.handler.CompatibilityElement;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.projectile.AbstractArrowEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.world.World;
-import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.projectile.AbstractArrow;
+import fuzs.universalenchants.handler.ItemCompatHandler;
+import net.minecraft.world.entity.projectile.ThrownTrident;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TridentItem;
@@ -14,7 +9,7 @@ import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.item.enchantment.Enchantments;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.asm.mixin.injection.ModifyVariable;
 
 @Mixin(TridentItem.class)
 public abstract class TridentItemMixin extends Item {
@@ -22,18 +17,14 @@ public abstract class TridentItemMixin extends Item {
         super(p_41383_);
     }
 
-    @Redirect(method = "onPlayerStoppedUsing", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;addEntity(Lnet/minecraft/entity/Entity;)Z"))
-    public boolean addEntity(World worldToAddIn, Entity tridentEntity, ItemStack stack, World worldIn2, LivingEntity itemUserEntity) {
-
+    @ModifyVariable(method = "releaseUsing", at = @At("STORE"), ordinal = 0)
+    public ThrownTrident releaseUsing$storeThrownTrident(ThrownTrident trident, ItemStack stack) {
         // add bow and crossbow enchantments
-        CompatibilityElement.applyPiercingEnchantment((AbstractArrowEntity) tridentEntity, stack);
+        ItemCompatHandler.applyPiercingEnchantment(trident, stack);
         int knockbackLevel = EnchantmentHelper.getItemEnchantmentLevel(Enchantments.KNOCKBACK, stack);
         if (knockbackLevel > 0) {
-
-            ((AbstractArrow) tridentEntity).setKnockbackStrength(knockbackLevel);
+            trident.setKnockback(knockbackLevel);
         }
-
-        return worldToAddIn.addEntity(tridentEntity);
+        return trident;
     }
-
 }

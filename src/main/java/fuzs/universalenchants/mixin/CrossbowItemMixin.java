@@ -1,55 +1,49 @@
 package fuzs.universalenchants.mixin;
 
-import fuzs.universalenchants.handler.CompatibilityElement;
-import net.minecraft.enchantment.EnchantmentHelper;
-import net.minecraft.enchantment.Enchantments;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.projectile.AbstractArrowEntity;
-import net.minecraft.item.CrossbowItem;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.ShootableItem;
-import net.minecraft.world.World;
+import fuzs.universalenchants.handler.ItemCompatHandler;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.projectile.AbstractArrow;
+import net.minecraft.world.item.CrossbowItem;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.ProjectileWeaponItem;
+import net.minecraft.world.item.enchantment.EnchantmentHelper;
+import net.minecraft.world.item.enchantment.Enchantments;
+import net.minecraft.world.level.Level;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyVariable;
-import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.asm.mixin.injection.Slice;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-@SuppressWarnings("unused")
 @Mixin(CrossbowItem.class)
-public abstract class CrossbowItemMixin extends ShootableItem {
-
+public abstract class CrossbowItemMixin extends ProjectileWeaponItem {
     public CrossbowItemMixin(Properties builder) {
-
         super(builder);
     }
 
-    @ModifyVariable(method = "hasAmmo", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/LivingEntity;findAmmo(Lnet/minecraft/item/ItemStack;)Lnet/minecraft/item/ItemStack;"), ordinal = 0)
-    private static boolean hasInfiniteAmmo(boolean isCreativeMode, LivingEntity entityIn, ItemStack stack) {
-
-        return isCreativeMode || EnchantmentHelper.getEnchantmentLevel(Enchantments.INFINITY, stack) > 0;
+    @ModifyVariable(method = "tryLoadProjectiles", at = @At("STORE"), ordinal = 0)
+    private static boolean tryLoadProjectiles$storeHasInfiniteAmmo(boolean hasInfiniteAmmo, LivingEntity entityIn, ItemStack stack) {
+        if (hasInfiniteAmmo) return true;
+        if (!entityIn.getProjectile(stack).isEmpty()) return false;
+        return EnchantmentHelper.getItemEnchantmentLevel(Enchantments.INFINITY_ARROWS, stack) > 0;
     }
 
-    @Redirect(method = "fireProjectile", at = @At(value = "INVOKE", target = "Lnet/minecraft/item/CrossbowItem;createArrow(Lnet/minecraft/world/World;Lnet/minecraft/entity/LivingEntity;Lnet/minecraft/item/ItemStack;Lnet/minecraft/item/ItemStack;)Lnet/minecraft/entity/projectile/AbstractArrowEntity;"))
-    private static AbstractArrowEntity createEnchantedArrow(World worldIn, LivingEntity shooter, ItemStack crossbow, ItemStack ammo) {
+//    @ModifyVariable(method = "tryLoadProjectiles", at = @At("LOAD"), ordinal = 0, slice = @Slice(from = @At(value = "INVOKE", target = "Lnet/minecraft/world/item/ItemStack;<init>(Lnet/minecraft/world/level/ItemLike;)V")))
+//    private static boolean tryLoadProjectiles$loadHasInfiniteAmmo(boolean hasInfiniteAmmo, LivingEntity entityIn, ItemStack stack) {
+//        return entityIn instanceof Player && ((Player) entityIn).getAbilities().instabuild;
+//    }
 
-        AbstractArrowEntity abstractarrowentity = createArrow(worldIn, shooter, crossbow, ammo);
-        CompatibilityElement.applyPowerEnchantment(abstractarrowentity, crossbow);
-        CompatibilityElement.applyPunchEnchantment(abstractarrowentity, crossbow);
-        CompatibilityElement.applyFlameEnchantment(abstractarrowentity, crossbow);
-        CompatibilityElement.applyLootingEnchantment(abstractarrowentity, crossbow);
-        if (EnchantmentHelper.getEnchantmentLevel(Enchantments.INFINITY, crossbow) > 0) {
-
-            abstractarrowentity.pickupStatus = AbstractArrowEntity.PickupStatus.CREATIVE_ONLY;
+    @Inject(method = "getArrow", at = @At("TAIL"))
+    private static void getArrow$tail(Level level, LivingEntity entity, ItemStack stack, ItemStack arrowStack, CallbackInfoReturnable<AbstractArrow> callbackInfo) {
+        AbstractArrow abstractarrowentity = callbackInfo.getReturnValue();
+        ItemCompatHandler.applyPowerEnchantment(abstractarrowentity, stack);
+        ItemCompatHandler.applyPunchEnchantment(abstractarrowentity, stack);
+        ItemCompatHandler.applyFlameEnchantment(abstractarrowentity, stack);
+        ItemCompatHandler.applyLootingEnchantment(abstractarrowentity, stack);
+        if (EnchantmentHelper.getItemEnchantmentLevel(Enchantments.INFINITY_ARROWS, stack) > 0) {
+            abstractarrowentity.pickup = AbstractArrow.Pickup.CREATIVE_ONLY;
         }
-
-        return abstractarrowentity;
     }
-
-    @Shadow
-    private static AbstractArrowEntity createArrow(World worldIn, LivingEntity shooter, ItemStack crossbow, ItemStack ammo) {
-
-        throw new IllegalStateException();
-    }
-
 }

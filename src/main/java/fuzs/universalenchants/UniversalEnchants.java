@@ -4,7 +4,9 @@ import fuzs.puzzleslib.config.AbstractConfig;
 import fuzs.puzzleslib.config.ConfigHolder;
 import fuzs.puzzleslib.config.ConfigHolderImpl;
 import fuzs.universalenchants.config.ServerConfig;
-import fuzs.universalenchants.handler.EnchantCompatHandler;
+import fuzs.universalenchants.handler.EnchantCompatManager;
+import fuzs.universalenchants.handler.ItemCompatHandler;
+import fuzs.universalenchants.handler.ItemCompatManager;
 import fuzs.universalenchants.handler.TrueInfinityHandler;
 import fuzs.universalenchants.registry.ModRegistry;
 import net.minecraftforge.common.MinecraftForge;
@@ -28,16 +30,22 @@ public class UniversalEnchants {
     @SubscribeEvent
     public static void onConstructMod(final FMLConstructModEvent evt) {
         ((ConfigHolderImpl<?, ?>) CONFIG).addConfigs(MOD_ID);
-        registerHandlers();
         ModRegistry.touch();
-        CONFIG.addServerCallback(EnchantCompatHandler.INSTANCE::init);
+        registerHandlers();
+        CONFIG.addServerCallback(EnchantCompatManager.INSTANCE::init);
+        CONFIG.addServerCallback(ItemCompatManager.INSTANCE::buildData);
     }
 
     private static void registerHandlers() {
+        ItemCompatHandler itemCompatHandler = new ItemCompatHandler();
+        MinecraftForge.EVENT_BUS.addListener(itemCompatHandler::onArrowLoose);
+        MinecraftForge.EVENT_BUS.addListener(itemCompatHandler::onItemUseTick);
+        MinecraftForge.EVENT_BUS.addListener(itemCompatHandler::onLootingLevel);
         TrueInfinityHandler trueInfinityHandler = new TrueInfinityHandler();
         MinecraftForge.EVENT_BUS.addListener(trueInfinityHandler::onArrowNock);
         MinecraftForge.EVENT_BUS.addListener(trueInfinityHandler::onRightClickItem);
-        // run after other mods had a chance to change looting level
+        // run after other mods had a chance to change looting level (including us)
         MinecraftForge.EVENT_BUS.addListener(EventPriority.LOW, trueInfinityHandler::onLootingLevel);
+        MinecraftForge.EVENT_BUS.addListener(EventPriority.LOW, trueInfinityHandler::onBlockBreak);
     }
 }
