@@ -9,6 +9,7 @@
     "CrossbowItemMixin",
     "DamageEnchantmentMixin",
     "EnchantmentMixin",
+    "PlayerMixin",
     "ThrownTridentMixin",
     "TridentItemMixin",
     "accessor.AbstractArrowAccessor",

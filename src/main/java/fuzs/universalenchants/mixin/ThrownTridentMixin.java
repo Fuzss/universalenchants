@@ -32,7 +32,7 @@ public abstract class ThrownTridentMixin extends AbstractArrow {
         if (entity instanceof LivingEntity) {
             int knockbackStrength = ((AbstractArrowAccessor) this).getKnockback();
             if (knockbackStrength > 0) {
-                // copied from punch behavior
+                // copied from punch behavior, motion multiplier is adjusted since trident is already stopped by vanilla code running before this
                 Vec3 vector3d = this.getDeltaMovement().multiply(-100.0, 0.0, -100.0).normalize().scale(knockbackStrength * 0.6);
                 if (vector3d.lengthSqr() > 0.0) {
                     entity.push(vector3d.x, 0.1, vector3d.z);
@@ -55,7 +55,7 @@ public abstract class ThrownTridentMixin extends AbstractArrow {
             // reverting previous motion change
             if (piercedEntities.size() <= pierceLevel) {
                 this.setDeltaMovement(this.getDeltaMovement().multiply(-100.0, -10.0, -100.0));
-                this.dealtDamage = true;
+                this.dealtDamage = false;
             }
         }
     }

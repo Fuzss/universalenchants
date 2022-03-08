@@ -20,7 +20,9 @@ public class ServerConfig extends AbstractConfig {
     public boolean multishotPiercingFix = true;
     @Config(category = "enchantment_improvements", description = "Infinity enchantment no longer requires a single arrow to be present in the player inventory.")
     public boolean trueInfinity = true;
-    @Config(name = "looting_and_fortune_boost_xp", category = "enchantment_improvements", description = "Looting also affects dropped experience points.")
+    @Config(category = "enchantment_improvements", description = "Disables damage immunity when hit by a projectile. Makes it possible for entities to be hit by multiple projectiles at once (mainly useful for the multishot enchantment).")
+    public boolean noProjectileImmunity = true;
+    @Config(name = "looting_and_fortune_boost_xp", category = "enchantment_improvements", description = "Looting also affects dropped experience points, so does fortune from certain blocks (e.g. ore blocks).")
     public boolean luckBoostsXp = true;
 
     public ServerConfig() {

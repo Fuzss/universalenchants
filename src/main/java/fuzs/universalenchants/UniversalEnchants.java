@@ -7,7 +7,7 @@ import fuzs.universalenchants.config.ServerConfig;
 import fuzs.universalenchants.handler.EnchantCompatManager;
 import fuzs.universalenchants.handler.ItemCompatHandler;
 import fuzs.universalenchants.handler.ItemCompatManager;
-import fuzs.universalenchants.handler.TrueInfinityHandler;
+import fuzs.universalenchants.handler.BetterEnchantsHandler;
 import fuzs.universalenchants.registry.ModRegistry;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.EventPriority;
@@ -41,11 +41,12 @@ public class UniversalEnchants {
         MinecraftForge.EVENT_BUS.addListener(itemCompatHandler::onArrowLoose);
         MinecraftForge.EVENT_BUS.addListener(itemCompatHandler::onItemUseTick);
         MinecraftForge.EVENT_BUS.addListener(itemCompatHandler::onLootingLevel);
-        TrueInfinityHandler trueInfinityHandler = new TrueInfinityHandler();
-        MinecraftForge.EVENT_BUS.addListener(trueInfinityHandler::onArrowNock);
-        MinecraftForge.EVENT_BUS.addListener(trueInfinityHandler::onRightClickItem);
+        BetterEnchantsHandler betterEnchantsHandler = new BetterEnchantsHandler();
+        MinecraftForge.EVENT_BUS.addListener(betterEnchantsHandler::onArrowNock);
+        MinecraftForge.EVENT_BUS.addListener(betterEnchantsHandler::onRightClickItem);
+        MinecraftForge.EVENT_BUS.addListener(betterEnchantsHandler::onLivingHurt);
         // run after other mods had a chance to change looting level (including us)
-        MinecraftForge.EVENT_BUS.addListener(EventPriority.LOW, trueInfinityHandler::onLootingLevel);
-        MinecraftForge.EVENT_BUS.addListener(EventPriority.LOW, trueInfinityHandler::onBlockBreak);
+        MinecraftForge.EVENT_BUS.addListener(EventPriority.LOW, betterEnchantsHandler::onLivingExperienceDrop);
+        MinecraftForge.EVENT_BUS.addListener(EventPriority.LOW, betterEnchantsHandler::onBlockBreak);
     }
 }

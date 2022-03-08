@@ -17,7 +17,7 @@ public abstract class BowItemMixin extends ProjectileWeaponItem {
     }
 
     @ModifyVariable(method = "releaseUsing", at = @At("STORE"), ordinal = 0, slice = @Slice(to = @At(value = "INVOKE", target = "Lnet/minecraft/world/item/BowItem;customArrow(Lnet/minecraft/world/entity/projectile/AbstractArrow;)Lnet/minecraft/world/entity/projectile/AbstractArrow;", remap = false)))
-    public AbstractArrow releaseUsing$(AbstractArrow arrow, ItemStack stack) {
+    public AbstractArrow releaseUsing$storeArrow(AbstractArrow arrow, ItemStack stack) {
         ItemCompatHandler.applyPiercingEnchantment(arrow, stack);
         ItemCompatHandler.applyLootingEnchantment(arrow, stack);
         return arrow;

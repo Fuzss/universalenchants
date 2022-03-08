@@ -1,24 +1,22 @@
 package fuzs.universalenchants.handler;
 
 import fuzs.universalenchants.UniversalEnchants;
-import fuzs.universalenchants.mixin.accessor.LivingEntityAccessor;
-import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.InteractionResultHolder;
-import net.minecraft.world.entity.ExperienceOrb;
-import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.CrossbowItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.item.enchantment.Enchantments;
-import net.minecraft.world.level.GameRules;
-import net.minecraftforge.event.entity.living.LootingLevelEvent;
+import net.minecraftforge.event.entity.living.LivingExperienceDropEvent;
+import net.minecraftforge.event.entity.living.LivingHurtEvent;
 import net.minecraftforge.event.entity.player.ArrowNockEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.event.world.BlockEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 
-public class TrueInfinityHandler {
+public class BetterEnchantsHandler {
     @SubscribeEvent
     public void onArrowNock(final ArrowNockEvent evt) {
         if (!UniversalEnchants.CONFIG.server().trueInfinity) return;
@@ -45,18 +43,24 @@ public class TrueInfinityHandler {
     }
 
     @SubscribeEvent
-    public void onLootingLevel(final LootingLevelEvent evt) {
-        if (!UniversalEnchants.CONFIG.server().luckBoostsXp) return;
-        if (evt.getLootingLevel() > 0) {
-            this.dropExperience(evt.getEntityLiving(), evt.getLootingLevel());
+    public void onLivingHurt(final LivingHurtEvent evt) {
+        if (!UniversalEnchants.CONFIG.server().noProjectileImmunity) return;
+        // immediately reset damage immunity after being hit by any projectile, fixes multishot
+        if (!(evt.getEntityLiving() instanceof Player) && evt.getSource().isProjectile()) {
+            evt.getEntity().invulnerableTime = 0;
         }
     }
 
-    private void dropExperience(LivingEntity entity, int level) {
-        if (entity.level instanceof ServerLevel && (((LivingEntityAccessor) entity).callIsAlwaysExperienceDropper() || ((LivingEntityAccessor) entity).getLastHurtByPlayerTime() > 0 && ((LivingEntityAccessor) entity).callShouldDropExperience() && entity.level.getGameRules().getBoolean(GameRules.RULE_DOMOBLOOT))) {
-            int reward = net.minecraftforge.event.ForgeEventFactory.getExperienceDrop(entity, ((LivingEntityAccessor) entity).getLastHurtByPlayer(), ((LivingEntityAccessor) entity).callGetExperienceReward(((LivingEntityAccessor) entity).getLastHurtByPlayer()));
-            ExperienceOrb.award((ServerLevel) entity.level, entity.position(), reward * level);
-        }
+    @SubscribeEvent
+    public void onLivingExperienceDrop(final LivingExperienceDropEvent evt) {
+        if (!UniversalEnchants.CONFIG.server().luckBoostsXp) return;
+        // very basic hack for multiplying xp by looting level
+        // e.g. our code for looting on ranged weapons will not trigger as the damage source is not correct
+        // (it will still trigger though when they ranged weapon is still in the main hand, since vanilla checks the main hand enchantments)
+        // unfortunately the original damage source is not obtainable in this context
+        Player lastHurtByPlayer = evt.getAttackingPlayer();
+        int level = net.minecraftforge.common.ForgeHooks.getLootingLevel(evt.getEntityLiving(), lastHurtByPlayer, lastHurtByPlayer != null ? DamageSource.playerAttack(lastHurtByPlayer) : null);
+        if (level > 0) evt.setDroppedExperience(evt.getOriginalExperience() * ++level);
     }
 
     @SubscribeEvent

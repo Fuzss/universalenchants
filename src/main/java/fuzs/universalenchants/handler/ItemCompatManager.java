@@ -83,7 +83,8 @@ public class ItemCompatManager {
                 ((EnchantmentAccessor) this.enchantment).setCategory(this.vanillaCategory);
             } else {
                 if (this.customBuiltCategory == null) {
-                    this.customBuiltCategory = EnchantmentCategory.create(ForgeRegistries.ENCHANTMENTS.getKey(this.enchantment).getPath().toUpperCase(Locale.ROOT), this::canEnchant);
+                    String name = ForgeRegistries.ENCHANTMENTS.getKey(this.enchantment).getPath().toUpperCase(Locale.ROOT);
+                    this.customBuiltCategory = EnchantmentCategory.create(UniversalEnchants.MOD_ID.toUpperCase(Locale.ROOT).concat("_" + name), this::canEnchant);
                 }
                 ((EnchantmentAccessor) this.enchantment).setCategory(this.customBuiltCategory);
             }
