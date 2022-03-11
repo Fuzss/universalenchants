@@ -60,15 +60,20 @@ public class BetterEnchantsHandler {
         // unfortunately the original damage source is not obtainable in this context
         Player lastHurtByPlayer = evt.getAttackingPlayer();
         int level = net.minecraftforge.common.ForgeHooks.getLootingLevel(evt.getEntityLiving(), lastHurtByPlayer, lastHurtByPlayer != null ? DamageSource.playerAttack(lastHurtByPlayer) : null);
-        if (level > 0) evt.setDroppedExperience(evt.getOriginalExperience() * ++level);
+        if (level > 0) evt.setDroppedExperience(this.getDroppedXp(evt.getDroppedExperience(), level));
     }
 
     @SubscribeEvent
     public void onBlockBreak(final BlockEvent.BreakEvent evt) {
         if (!UniversalEnchants.CONFIG.server().luckBoostsXp) return;
         if (evt.getExpToDrop() > 0) {
-            int level = EnchantmentHelper.getItemEnchantmentLevel(Enchantments.MOB_LOOTING, evt.getPlayer().getMainHandItem());
-            if (level > 0) evt.setExpToDrop(evt.getExpToDrop() * level);
+            int level = EnchantmentHelper.getItemEnchantmentLevel(Enchantments.BLOCK_FORTUNE, evt.getPlayer().getMainHandItem());
+            if (level > 0) evt.setExpToDrop(this.getDroppedXp(evt.getExpToDrop(), level));
         }
+    }
+
+    private int getDroppedXp(int droppedXp, int level) {
+        float multiplier = (level * (level + 1)) / 10.0F;
+        return droppedXp + Math.min(50, (int) (droppedXp * multiplier));
     }
 }
