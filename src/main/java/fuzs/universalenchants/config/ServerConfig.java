@@ -15,9 +15,9 @@ public class ServerConfig extends AbstractConfig {
     @Config
     public ItemCompatibilityConfig itemCompatibility = new ItemCompatibilityConfig();
     @Config(category = "enchantment_compatibility", description = "Allow infinity and mending to be applied at the same time.")
-    public boolean infinityMendingFix = true;
+    public boolean infinityMendingFix = false;
     @Config(category = "enchantment_compatibility", description = "Allow multishot and piercing to be applied at the same time.")
-    public boolean multishotPiercingFix = true;
+    public boolean multishotPiercingFix = false;
     @Config(category = "enchantment_improvements", description = "Infinity enchantment no longer requires a single arrow to be present in the player inventory.")
     public boolean trueInfinity = true;
     @Config(category = "enchantment_improvements", description = "Disables damage immunity when hit by a projectile. Makes it possible for entities to be hit by multiple projectiles at once (mainly useful for the multishot enchantment).")
