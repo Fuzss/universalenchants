@@ -34,7 +34,12 @@ public class ItemCompatManager {
         this.enchantsToCategoryData.values().forEach(EnchantmentCategoryData::clear);
         for (ExtendedEnchantmentCategory category : EXTENDED_CATEGORIES) {
             for (Enchantment enchantment : category.additionalEnchantments().get()) {
-                this.enchantsToCategoryData.merge(enchantment, new EnchantmentCategoryData(enchantment, category), EnchantmentCategoryData::merge);
+                EnchantmentCategoryData data = this.enchantsToCategoryData.get(enchantment);
+                if (data != null) {
+                    data.merge(enchantment, category);
+                } else {
+                    this.enchantsToCategoryData.put(enchantment, new EnchantmentCategoryData(enchantment, category));
+                }
             }
         }
         this.enchantsToCategoryData.values().forEach(EnchantmentCategoryData::buildBlacklistCache);
@@ -63,10 +68,9 @@ public class ItemCompatManager {
             this.blacklistCache = null;
         }
 
-        public EnchantmentCategoryData merge(EnchantmentCategoryData other) {
-            if (this.enchantment != other.enchantment) throw new IllegalArgumentException("Can only merge enchantment data for same type");
-            this.customCategories.addAll(other.customCategories);
-            return this;
+        public void merge(Enchantment enchantment, ExtendedEnchantmentCategory customCategory) {
+            if (this.enchantment != enchantment) throw new IllegalArgumentException("Can only merge enchantment data for same type");
+            this.customCategories.add(customCategory);
         }
 
         public void buildBlacklistCache() {

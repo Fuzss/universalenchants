@@ -4,10 +4,10 @@ import fuzs.puzzleslib.config.AbstractConfig;
 import fuzs.puzzleslib.config.ConfigHolder;
 import fuzs.puzzleslib.config.ConfigHolderImpl;
 import fuzs.universalenchants.config.ServerConfig;
+import fuzs.universalenchants.handler.BetterEnchantsHandler;
 import fuzs.universalenchants.handler.EnchantCompatManager;
 import fuzs.universalenchants.handler.ItemCompatHandler;
 import fuzs.universalenchants.handler.ItemCompatManager;
-import fuzs.universalenchants.handler.BetterEnchantsHandler;
 import fuzs.universalenchants.registry.ModRegistry;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.EventPriority;
@@ -47,6 +47,5 @@ public class UniversalEnchants {
         MinecraftForge.EVENT_BUS.addListener(betterEnchantsHandler::onLivingHurt);
         // run after other mods had a chance to change looting level
         MinecraftForge.EVENT_BUS.addListener(EventPriority.LOW, betterEnchantsHandler::onLivingExperienceDrop);
-        MinecraftForge.EVENT_BUS.addListener(EventPriority.LOW, betterEnchantsHandler::onBlockBreak);
     }
 }

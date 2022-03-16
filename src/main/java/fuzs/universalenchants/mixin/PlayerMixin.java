@@ -20,7 +20,7 @@ public abstract class PlayerMixin extends LivingEntity {
         super(p_20966_, p_20967_);
     }
 
-    @ModifyVariable(method = "attack", at = @At("STORE"), ordinal = 3, slice = @Slice(from = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/player/Player;getSpeed()F")))
+    @ModifyVariable(method = "attack", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/item/enchantment/EnchantmentHelper;getFireAspect(Lnet/minecraft/world/entity/LivingEntity;)I"), ordinal = 3)
     public boolean attack$storeCanPerformSweepAction(boolean canPerformSweepAction) {
         if (canPerformSweepAction) return true;
         ItemStack itemstack = this.getItemInHand(InteractionHand.MAIN_HAND);
