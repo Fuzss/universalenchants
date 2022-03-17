@@ -3,6 +3,10 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog].
 
+## [v3.0.3-1.18.2] - 2022-03-17
+### Fixed
+- Fixed mod preventing servers from starting due to faulty import
+
 ## [v3.0.2-1.18.2] - 2022-03-17
 ### Fixed
 - Fixed sweeping edge triggering when it shouldn't
