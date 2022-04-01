@@ -22,6 +22,8 @@ public class ServerConfig extends AbstractConfig {
     public boolean trueInfinity = true;
     @Config(category = "enchantment_improvements", description = "Disables damage immunity when hit by a projectile. Makes it possible for entities to be hit by multiple projectiles at once (mainly useful for the multishot enchantment).")
     public boolean noProjectileImmunity = true;
+    @Config(category = "enchantment_improvements", description = "Any level of feather falling prevents farmland being trampled.")
+    public boolean noFarmlandTrample = true;
     @Config(name = "looting_boosts_xp", category = "enchantment_improvements", description = "Looting also affects dropped experience points.")
     public boolean lootingBoostsXp = true;
 

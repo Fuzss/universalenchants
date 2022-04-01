@@ -4,6 +4,7 @@ import fuzs.universalenchants.UniversalEnchants;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.CrossbowItem;
 import net.minecraft.world.item.ItemStack;
@@ -13,6 +14,7 @@ import net.minecraftforge.event.entity.living.LivingExperienceDropEvent;
 import net.minecraftforge.event.entity.living.LivingHurtEvent;
 import net.minecraftforge.event.entity.player.ArrowNockEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
+import net.minecraftforge.event.world.BlockEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 
 public class BetterEnchantsHandler {
@@ -47,6 +49,16 @@ public class BetterEnchantsHandler {
         // immediately reset damage immunity after being hit by any projectile, fixes multishot
         if (!(evt.getEntityLiving() instanceof Player) && evt.getSource().isProjectile()) {
             evt.getEntity().invulnerableTime = 0;
+        }
+    }
+
+    @SubscribeEvent
+    public void onFarmlandTrample(final BlockEvent.FarmlandTrampleEvent evt) {
+        if (!UniversalEnchants.CONFIG.server().noFarmlandTrample) return;
+        if (evt.getEntity() instanceof LivingEntity entity) {
+            if (EnchantmentHelper.getEnchantmentLevel(Enchantments.FALL_PROTECTION, entity) > 0) {
+                evt.setCanceled(true);
+            }
         }
     }
 

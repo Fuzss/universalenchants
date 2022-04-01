@@ -45,6 +45,7 @@ public class UniversalEnchants {
         MinecraftForge.EVENT_BUS.addListener(betterEnchantsHandler::onArrowNock);
         MinecraftForge.EVENT_BUS.addListener(betterEnchantsHandler::onRightClickItem);
         MinecraftForge.EVENT_BUS.addListener(betterEnchantsHandler::onLivingHurt);
+        MinecraftForge.EVENT_BUS.addListener(betterEnchantsHandler::onFarmlandTrample);
         // run after other mods had a chance to change looting level
         MinecraftForge.EVENT_BUS.addListener(EventPriority.LOW, betterEnchantsHandler::onLivingExperienceDrop);
     }
