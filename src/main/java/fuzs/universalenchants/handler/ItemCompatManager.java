@@ -6,6 +6,7 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import fuzs.universalenchants.UniversalEnchants;
 import fuzs.universalenchants.mixin.accessor.EnchantmentAccessor;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.*;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.EnchantmentCategory;
@@ -17,6 +18,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class ItemCompatManager {
     public static final ItemCompatManager INSTANCE = new ItemCompatManager();
@@ -50,18 +53,20 @@ public class ItemCompatManager {
     }
 
     private static class EnchantmentCategoryData {
+        private static final Map<String, EnchantmentCategory> CUSTOM_ENCHANTMENT_CATEGORIES = Maps.newHashMap();
+
         private final Enchantment enchantment;
         private final EnchantmentCategory vanillaCategory;
+        private final EnchantmentCategory customBuiltCategory;
         private final List<ExtendedEnchantmentCategory> customCategories = Lists.newArrayList();
-        private EnchantmentCategory customBuiltCategory;
         private Set<Item> blacklistCache;
         private boolean rebuilding = true;
 
         public EnchantmentCategoryData(Enchantment enchantment, ExtendedEnchantmentCategory customCategory) {
             this.enchantment = enchantment;
             this.vanillaCategory = enchantment.category;
+            this.customBuiltCategory = getOrBuildCategory(enchantment, this::canEnchant);
             this.customCategories.add(customCategory);
-            this.customBuildCategory();
         }
 
         public void merge(Enchantment enchantment, ExtendedEnchantmentCategory customCategory) {
@@ -102,11 +107,12 @@ public class ItemCompatManager {
             }
         }
 
-        private void customBuildCategory() {
-            if (this.customBuiltCategory == null) {
-                String name = ForgeRegistries.ENCHANTMENTS.getKey(this.enchantment).getPath().toUpperCase(Locale.ROOT);
-                this.customBuiltCategory = EnchantmentCategory.create(UniversalEnchants.MOD_ID.toUpperCase(Locale.ROOT).concat("_" + name), this::canEnchant);
-            }
+        private static synchronized EnchantmentCategory getOrBuildCategory(Enchantment enchantment, Predicate<Item> canApplyTo) {
+            ResourceLocation enchantmentKey = ForgeRegistries.ENCHANTMENTS.getKey(enchantment);
+            String name = Stream.of(UniversalEnchants.MOD_ID, enchantmentKey.getNamespace(), enchantmentKey.getPath())
+                    .map(s -> s.toUpperCase(Locale.ROOT))
+                    .collect(Collectors.joining("_"));
+            return CUSTOM_ENCHANTMENT_CATEGORIES.computeIfAbsent(name, name1 -> EnchantmentCategory.create(name, canApplyTo));
         }
 
         private boolean canEnchant(Item item) {

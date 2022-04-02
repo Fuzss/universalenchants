@@ -3,6 +3,10 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog].
 
+## [v3.0.6-1.18.2] - 2022-04-02
+### Fixed
+- Fixed a potential crash when attempting to create an already existing enum value
+
 ## [v3.0.5-1.18.2] - 2022-04-01
 ### Added
 - Feather falling prevents farmland from being trampled
