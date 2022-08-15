@@ -1,0 +1,19 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "compatibilityLevel": "JAVA_17",
+  "package": "fuzs.universalenchants.mixin",
+  "refmap": "universalenchants.refmap.json",
+  "mixins": [
+    "FabricBowItemMixin",
+    "FarmBlockMixin",
+    "LivingEntityMixin",
+    "LootingEnchantFunctionMixin",
+    "LootItemRandomChanceWithLootingConditionMixin"
+  ],
+  "client": [
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

@@ -1,0 +1,24 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "compatibilityLevel": "JAVA_17",
+  "package": "fuzs.universalenchants.mixin",
+  "refmap": "universalenchants.refmap.json",
+  "mixins": [
+    "BowItemMixin",
+    "CrossbowItemMixin",
+    "DamageEnchantmentMixin",
+    "EnchantmentMixin",
+    "PlayerMixin",
+    "ThrownTridentMixin",
+    "TridentItemMixin",
+    "accessor.AbstractArrowAccessor",
+    "accessor.EnchantmentAccessor",
+    "accessor.LivingEntityAccessor"
+  ],
+  "client": [
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}
