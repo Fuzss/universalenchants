@@ -30,7 +30,7 @@ public class ServerConfig implements ConfigCore {
     public boolean noProjectileImmunity = true;
     @Config(category = "enchantment_improvements", description = "Any level of feather falling prevents farmland being trampled.")
     public boolean noFarmlandTrample = true;
-    @Config(name = "looting_boosts_xp", category = "enchantment_improvements", description = "Looting also affects dropped experience points.")
+    @Config(category = "enchantment_improvements", description = "Looting also affects dropped experience points.")
     public boolean lootingBoostsXp = true;
 
     public static class ItemCompatibilityConfig implements ConfigCore {
