@@ -7,7 +7,6 @@
   "mixins": [
     "CrossbowItemMixin",
     "DamageEnchantmentMixin",
-    "EnchantCommandMixin",
     "EnchantmentMixin",
     "ThrownTridentMixin",
     "TridentItemMixin",

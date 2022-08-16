@@ -32,6 +32,8 @@ public class ServerConfig implements ConfigCore {
     public boolean noFarmlandTrample = true;
     @Config(category = "enchantment_improvements", description = "Looting also affects dropped experience points.")
     public boolean lootingBoostsXp = true;
+    @Config(category = "enchantment_improvements", description = "Remove the max level cap from the /enchant command, also allow overriding existing enchantment levels.")
+    public boolean fixEnchantCommand = true;
 
     public static class ItemCompatibilityConfig implements ConfigCore {
         private static final String COMPATIBILITY_DESCRIPTION = "Additional enchantments to be made usable with ";
