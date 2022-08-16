@@ -23,7 +23,6 @@
       "${mainEntryPoint}"
     ],
     "client": [
-      "${clientEntryPoint}"
     ]
   },
   "mixins": [
@@ -40,5 +39,11 @@
     "cardinal-components-base": "*",
     "cardinal-components-entity": "*",
     "extensibleenums": "*"
+  },
+
+  "custom": {
+    "cardinal-components": [
+      "${modId}:arrow_looting"
+    ]
   }
 }

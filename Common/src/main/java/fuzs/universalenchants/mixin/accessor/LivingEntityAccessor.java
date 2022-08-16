@@ -17,7 +17,7 @@ public interface LivingEntityAccessor {
     boolean callShouldDropExperience();
 
     @Invoker
-    int callGetExperienceReward(Player player);
+    int callGetExperienceReward();
 
     @Accessor
     int getLastHurtByPlayerTime();

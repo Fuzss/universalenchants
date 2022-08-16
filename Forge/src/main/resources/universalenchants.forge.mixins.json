@@ -5,14 +5,8 @@
   "package": "fuzs.universalenchants.mixin",
   "refmap": "universalenchants.refmap.json",
   "mixins": [
-    "CrossbowItemMixin",
-    "DamageEnchantmentMixin",
-    "EnchantmentMixin",
-    "ThrownTridentMixin",
-    "TridentItemMixin",
-    "accessor.AbstractArrowAccessor",
-    "accessor.EnchantmentAccessor",
-    "accessor.LivingEntityAccessor"
+    "ForgeBowItemMixin",
+    "ForgePlayerMixin"
   ],
   "client": [
   ],

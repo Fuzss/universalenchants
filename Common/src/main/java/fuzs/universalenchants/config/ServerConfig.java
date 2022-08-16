@@ -20,7 +20,7 @@ public class ServerConfig implements ConfigCore {
     public boolean infinityMendingFix = true;
     @Config(category = "enchantment_compatibility", description = "Allow multishot and piercing to be applied at the same time.")
     public boolean multishotPiercingFix = true;
-    @Config(category = "enchantment_compatibility", description = {"Allow sharpness and specialized damage enchantments (e.g. smite and bane of arthropods) to be applied at the same time.", "This does not make the specialized enchantments compatible with each other."})
+    @Config(category = "enchantment_compatibility", description = {"Allow sharpness and specialized damage enchantments (e.g. smite, impaling and bane of arthropods) to be applied at the same time.", "This does not make the specialized enchantments compatible with each other."})
     public boolean damageEnchantmentsFix = true;
     @Config(category = "enchantment_compatibility", description = {"Allow protection and specialized protection enchantments (e.g. fire protection, projectile protection and explosion protection) to be applied at the same time.", "This does not make the specialized enchantments compatible with each other."})
     public boolean protectionEnchantmentsFix = true;

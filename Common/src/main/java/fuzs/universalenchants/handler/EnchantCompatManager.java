@@ -30,6 +30,9 @@ public class EnchantCompatManager {
                     this.entries.add(new CompatibilityEntry(Enchantments.SHARPNESS, enchantment));
                 }
             });
+            // we make impaling incompatible with damage enchantments as both can be applied to the same weapons now
+            // with this config option return compatibility with sharpness though
+            this.entries.add(new CompatibilityEntry(Enchantments.SHARPNESS, Enchantments.IMPALING));
         }
         if (UniversalEnchants.CONFIG.get(ServerConfig.class).protectionEnchantmentsFix) {
             Registry.ENCHANTMENT.forEach(enchantment -> {

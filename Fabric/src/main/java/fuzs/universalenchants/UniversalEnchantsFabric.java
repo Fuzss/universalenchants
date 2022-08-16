@@ -12,9 +12,11 @@ import fuzs.universalenchants.handler.ItemCompatHandler;
 import fuzs.universalenchants.init.FabricModRegistry;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.event.player.UseItemCallback;
+import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.BowItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 
@@ -38,7 +40,13 @@ public class UniversalEnchantsFabric implements ModInitializer {
         LivingEntityUseItemEvents.TICK.register(itemCompatHandler::onItemUseTick);
         LootingLevelCallback.EVENT.register(itemCompatHandler::onLootingLevel);
         BetterEnchantsHandler betterEnchantsHandler = new BetterEnchantsHandler();
-        UseItemCallback.EVENT.register(betterEnchantsHandler::onArrowNock);
+        UseItemCallback.EVENT.register((player, world, hand) -> {
+            ItemStack stack = player.getItemInHand(hand);
+            if (stack.getItem() instanceof BowItem) {
+                return betterEnchantsHandler.onArrowNock(player, stack, world, hand);
+            }
+            return InteractionResultHolder.pass(ItemStack.EMPTY);
+        });
         UseItemCallback.EVENT.register(betterEnchantsHandler::onRightClickItem);
         LivingHurtCallback.EVENT.register(betterEnchantsHandler::onLivingHurt);
         FarmlandTrampleCallback.EVENT.register(betterEnchantsHandler::onFarmlandTrample);

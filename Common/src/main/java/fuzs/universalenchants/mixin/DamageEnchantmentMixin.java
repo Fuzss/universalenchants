@@ -21,7 +21,6 @@ public abstract class DamageEnchantmentMixin extends Enchantment {
 
     @Inject(method = "checkCompatibility", at = @At("HEAD"), cancellable = true)
     public void checkCompatibility$head(Enchantment enchantment, CallbackInfoReturnable<Boolean> callbackInfo) {
-        if (UniversalEnchants.CONFIG.get(ServerConfig.class).damageEnchantmentsFix) return;
         if (enchantment instanceof TridentImpalerEnchantment) {
             callbackInfo.setReturnValue(false);
         }

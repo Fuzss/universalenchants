@@ -56,7 +56,7 @@ public abstract class LivingEntityMixin extends Entity {
 
     @Inject(method = "dropExperience", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/ExperienceOrb;award(Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/world/phys/Vec3;I)V"), cancellable = true)
     protected void dropExperience(CallbackInfo callbackInfo) {
-        int experienceReward = this.getExperienceReward(this.lastHurtByPlayer);
+        int experienceReward = this.getExperienceReward();
         int newExperienceReward = LivingExperienceDropCallback.EVENT.invoker().onLivingExperienceDrop((LivingEntity) (Object) this, this.lastHurtByPlayer, experienceReward, experienceReward).orElseThrow();
         if (experienceReward != newExperienceReward) {
             ExperienceOrb.award((ServerLevel) this.level, this.position(), experienceReward);
@@ -65,5 +65,5 @@ public abstract class LivingEntityMixin extends Entity {
     }
 
     @Shadow
-    protected abstract int getExperienceReward(Player player);
+    protected abstract int getExperienceReward();
 }

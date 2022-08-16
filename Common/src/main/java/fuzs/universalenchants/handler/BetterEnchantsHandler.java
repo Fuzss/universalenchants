@@ -2,9 +2,10 @@ package fuzs.universalenchants.handler;
 
 import fuzs.universalenchants.UniversalEnchants;
 import fuzs.universalenchants.config.ServerConfig;
+import fuzs.universalenchants.core.ModServices;
 import net.minecraft.core.BlockPos;
 import net.minecraft.util.Unit;
-import net.minecraft.world.InteractionResult;
+import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
@@ -16,10 +17,6 @@ import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraftforge.event.entity.living.LivingExperienceDropEvent;
-import net.minecraftforge.event.entity.player.ArrowNockEvent;
-import net.minecraftforge.event.entity.player.PlayerInteractEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
 
 import javax.annotation.Nullable;
 import java.util.Optional;
@@ -27,29 +24,30 @@ import java.util.OptionalInt;
 
 public class BetterEnchantsHandler {
 
-    @SubscribeEvent
-    public void onArrowNock(final ArrowNockEvent evt) {
-        if (!UniversalEnchants.CONFIG.server().trueInfinity) return;
+    public InteractionResultHolder<ItemStack> onArrowNock(Player player, ItemStack stack, Level level, InteractionHand hand) {
+        if (!UniversalEnchants.CONFIG.get(ServerConfig.class).trueInfinity) return InteractionResultHolder.pass(ItemStack.EMPTY);
         // true infinity for bows
-        if (EnchantmentHelper.getItemEnchantmentLevel(Enchantments.INFINITY_ARROWS, evt.getBow()) > 0) {
-            evt.getPlayer().startUsingItem(evt.getHand());
-            evt.setAction(InteractionResultHolder.consume(evt.getBow()));
+        if (EnchantmentHelper.getItemEnchantmentLevel(Enchantments.INFINITY_ARROWS, stack) > 0) {
+            player.startUsingItem(hand);
+            // important to return success even on client since this is how the fabric event works
+            return InteractionResultHolder.success(stack);
         }
+        return InteractionResultHolder.pass(ItemStack.EMPTY);
     }
 
-    @SubscribeEvent
-    public void onRightClickItem(final PlayerInteractEvent.RightClickItem evt) {
-        if (!UniversalEnchants.CONFIG.server().trueInfinity) return;
+    public InteractionResultHolder<ItemStack> onRightClickItem(Player player, Level level, InteractionHand hand) {
+        if (!UniversalEnchants.CONFIG.get(ServerConfig.class).trueInfinity) return InteractionResultHolder.pass(ItemStack.EMPTY);
         // true infinity for crossbows
-        ItemStack stack = evt.getPlayer().getItemInHand(evt.getHand());
+        ItemStack stack = player.getItemInHand(hand);
         if (stack.getItem() instanceof CrossbowItem && EnchantmentHelper.getItemEnchantmentLevel(Enchantments.INFINITY_ARROWS, stack) > 0) {
             if (!CrossbowItem.isCharged(stack)) {
-                // resetting startSoundPlayed and midLoadSoundPlayed is not required as they're reset in CrossbowItem#func_219972_a anyways
-                evt.getPlayer().startUsingItem(evt.getHand());
-                evt.setCancellationResult(InteractionResult.CONSUME);
-                evt.setCanceled(true);
+                // resetting startSoundPlayed and midLoadSoundPlayed is not required as they're reset in CrossbowItem#onUseTick anyways
+                player.startUsingItem(hand);
+                // important to return success even on client since this is how the fabric event works
+                return InteractionResultHolder.success(stack);
             }
         }
+        return InteractionResultHolder.pass(ItemStack.EMPTY);
     }
 
     public Optional<Unit> onLivingHurt(LivingEntity entity, DamageSource source, float amount) {
@@ -71,25 +69,13 @@ public class BetterEnchantsHandler {
         return Optional.empty();
     }
 
-    @SubscribeEvent
-    public void onLivingExperienceDrop(final LivingExperienceDropEvent evt) {
-        if (!UniversalEnchants.CONFIG.server().lootingBoostsXp) return;
-        // very basic hack for multiplying xp by looting level
-        // e.g. our code for looting on ranged weapons will not trigger as the damage source is not correct
-        // (it will still trigger though when they ranged weapon is still in the main hand, since vanilla checks the main hand enchantments)
-        // unfortunately the original damage source is not obtainable in this context
-        Player lastHurtByPlayer = evt.getAttackingPlayer();
-        int level = net.minecraftforge.common.ForgeHooks.getLootingLevel(evt.getEntityLiving(), lastHurtByPlayer, lastHurtByPlayer != null ? DamageSource.playerAttack(lastHurtByPlayer) : null);
-        if (level > 0) evt.setDroppedExperience(this.getDroppedXp(evt.getDroppedExperience(), level));
-    }
-
-    public OptionalInt onLivingExperienceDrop(LivingEntity entity, @Nullable Player attackingPlayer, int originalExperience, int droppedExperience) {
+    public OptionalInt onLivingExperienceDrop(LivingEntity target, @Nullable Player killer, int originalExperience, int droppedExperience) {
         if (!UniversalEnchants.CONFIG.get(ServerConfig.class).lootingBoostsXp) return OptionalInt.empty();
         // very basic hack for multiplying xp by looting level
         // e.g. our code for looting on ranged weapons will not trigger as the damage source is not correct
         // (it will still trigger though when they ranged weapon is still in the main hand, since vanilla checks the main hand enchantments)
         // unfortunately the original damage source is not obtainable in this context
-        int level = attackingPlayer != null ? EnchantmentHelper.getMobLooting(entity) : 0;
+        int level = ModServices.ABSTRACTIONS.getMobLootingLevel(target, killer, killer != null ? DamageSource.playerAttack(killer) : null);
         if (level > 0) return OptionalInt.of(this.getDroppedXp(droppedExperience, level));
         return OptionalInt.empty();
     }
