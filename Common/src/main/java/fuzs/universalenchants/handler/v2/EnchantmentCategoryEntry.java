@@ -1,4 +1,4 @@
-package fuzs.universalenchants.handler;
+package fuzs.universalenchants.handler.v2;
 
 import com.google.common.collect.ImmutableList;
 import com.google.gson.JsonArray;
@@ -7,6 +7,7 @@ import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.EnchantmentCategory;
 import org.apache.commons.compress.utils.Lists;
 
@@ -18,6 +19,10 @@ public abstract class EnchantmentCategoryEntry {
     abstract void compile(Set<Item> items) throws JsonSyntaxException;
 
     abstract void serialize(JsonArray jsonArray);
+
+    public static Builder defaultBuilder(Enchantment enchantment) {
+        return new Builder().add(enchantment.category);
+    }
 
     public static class ItemEntry extends EnchantmentCategoryEntry {
         private final Item item;
@@ -81,6 +86,10 @@ public abstract class EnchantmentCategoryEntry {
 
     public static class Builder {
         private final List<EnchantmentCategoryEntry> entries = Lists.newArrayList();
+
+        private Builder() {
+
+        }
 
         public Builder add(Item item) {
             this.entries.add(new ItemEntry(item));

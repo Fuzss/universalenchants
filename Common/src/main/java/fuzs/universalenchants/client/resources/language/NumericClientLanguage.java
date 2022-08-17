@@ -44,7 +44,7 @@ public class NumericClientLanguage extends Language {
     }
 
     public static void injectLanguage() {
-        if (!UniversalEnchants.CONFIG.get(ClientConfig.class).fixRomanNumerals) return;
+        if (UniversalEnchants.CONFIG.get(ClientConfig.class).fixRomanNumerals == ClientConfig.NumeralLanguage.NONE) return;
         Language language = new NumericClientLanguage(Language.getInstance());
         I18nAccessor.callSetLanguage(language);
         Language.inject(language);
@@ -53,11 +53,13 @@ public class NumericClientLanguage extends Language {
     @Override
     public String getOrDefault(String string) {
         if (this.isNumeral(string)) {
-            if (!this.language.has(string)) {
+            if (!this.language.has(string) || UniversalEnchants.CONFIG.get(ClientConfig.class).fixRomanNumerals == ClientConfig.NumeralLanguage.ARABIC) {
                 String number = string.substring(string.lastIndexOf(".") + 1);
-                int intNumber = Integer.parseInt(number);
-                if (string.startsWith("potion.potency.")) intNumber++;
-                return this.numeralsCache.computeIfAbsent(intNumber, this::toNumeral);
+                if (number.chars().allMatch(Character::isDigit)) {
+                    int intNumber = Integer.parseInt(number);
+                    if (string.startsWith("potion.potency.")) intNumber++;
+                    return this.numeralsCache.computeIfAbsent(intNumber, this::toNumeral);
+                }
             }
         }
         return this.language.getOrDefault(string);
@@ -68,7 +70,12 @@ public class NumericClientLanguage extends Language {
     }
 
     private String toNumeral(int number) {
-        return number > 0 && number < 4000 ? toRomanNumeral(number) : String.valueOf(number);
+        if (number > 0 && number < 4000) {
+            if (UniversalEnchants.CONFIG.get(ClientConfig.class).fixRomanNumerals == ClientConfig.NumeralLanguage.ROMAN) {
+                return toRomanNumeral(number);
+            }
+        }
+        return String.valueOf(number);
     }
 
     private static String toRomanNumeral(int number) {
