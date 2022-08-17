@@ -15,6 +15,7 @@
     "accessor.LivingEntityAccessor"
   ],
   "client": [
+    "client.accessor.I18nAccessor"
   ],
   "injectors": {
     "defaultRequire": 1

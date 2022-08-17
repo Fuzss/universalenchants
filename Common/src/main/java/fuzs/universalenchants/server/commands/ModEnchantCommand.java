@@ -17,6 +17,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
@@ -82,6 +83,10 @@ public class ModEnchantCommand {
 		// removed max level check (/effect command doesn't have it as well)
 		if (!UniversalEnchants.CONFIG.get(ServerConfig.class).fixEnchantCommand && level > enchantment.getMaxLevel()) {
 			throw ERROR_LEVEL_TOO_HIGH.create(level, enchantment.getMaxLevel());
+		} else {
+			// this should actually be restricted via the argument type, but doesn't seem to work reliably (maybe because we override vanilla's command?)
+			// so just throw the same exception the argument type would
+			if (level > 255) throw CommandSyntaxException.BUILT_IN_EXCEPTIONS.integerTooHigh().create(level, 255);
 		}
 		int successes = 0;
 		for (Entity entity : collection) {
@@ -104,7 +109,13 @@ public class ModEnchantCommand {
 							// when attempting to override existing enchantment level, vanilla will just add it as a duplicate
 							// this ensures the old entry is overridden instead, this method also supports removing enchantments
 							if (level > 0) {
-								enchantments.put(enchantment, level);
+								Integer oldLevel = enchantments.put(enchantment, level);
+								// don't show a success message later when nothing changes
+								if (oldLevel != null && oldLevel == level) {
+									if (collection.size() == 1) {
+										throw ERROR_INCOMPATIBLE.create(itemStack.getItem().getName(itemStack).getString());
+									}
+								}
 							} else {
 								enchantments.remove(enchantment);
 							}

@@ -4,6 +4,7 @@ import com.mojang.brigadier.CommandDispatcher;
 import fuzs.puzzleslib.config.ConfigHolder;
 import fuzs.puzzleslib.core.CoreServices;
 import fuzs.puzzleslib.core.ModConstructor;
+import fuzs.universalenchants.config.ClientConfig;
 import fuzs.universalenchants.config.ServerConfig;
 import fuzs.universalenchants.handler.EnchantCompatManager;
 import fuzs.universalenchants.handler.ItemCompatManager;
@@ -21,7 +22,9 @@ public class UniversalEnchants implements ModConstructor {
     public static final Logger LOGGER = LogManager.getLogger(MOD_NAME);
 
     @SuppressWarnings("Convert2MethodRef")
-    public static final ConfigHolder CONFIG = CoreServices.FACTORIES.serverConfig(ServerConfig.class, () -> new ServerConfig());
+    public static final ConfigHolder CONFIG = CoreServices.FACTORIES
+            .serverConfig(ServerConfig.class, () -> new ServerConfig())
+            .clientConfig(ClientConfig.class, () -> new ClientConfig());
 
     @Override
     public void onConstructMod() {

@@ -3,6 +3,11 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog].
 
+## [v4.1.0-1.19.1] - 2022-08-17
+### Added
+- Added dynamic support for roman numerals outside of vanilla's default translation range
+- Overhauled vanilla's `/enchant` command, it can now apply enchantment levels above the default max level, supports overriding and removing enchantments, and also handles books now
+
 ## [v4.0.0-1.19.1] - 2022-08-16
 - Ported to Minecraft 1.19.1
 - Split into multi-loader project
