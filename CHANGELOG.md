@@ -10,6 +10,10 @@ The format is based on [Keep a Changelog].
 - To find out how exactly the new system works check out the documentation on the GitHub repository
 - Added dynamic support for roman numerals outside of vanilla's default translation range
 - Overhauled vanilla's `/enchant` command, it can now apply enchantment levels above the default max level, supports overriding and removing enchantments, and also handles books now
+- Horse armor can now receive the following enchantments at an enchanting table or anvil: protection, blast protection, fire protection, projectile protection, feather falling, respiration, thorns, depth strider, frost walker, curse of binding, soul speed, curse of vanishing
+- The enchantment glint now renders on horse armor
+- Added an option to overhaul mending: mending no longer repairs items, instead it makes repairing in an anvil not increase the items repair cost (disabled by default)
+- Additionally mending allows the item to be repaired in the crafting menu in the same way as in an anvil without any experience cost: combining a tool with another one or the appropriate repair item is possible, all enchantments will be preserved
 ### Removed
 - Removed a bunch of server config options as they've been moved to `json`
 

@@ -10,15 +10,21 @@ import com.google.gson.JsonObject;
 import fuzs.puzzleslib.json.JsonConfigFileUtil;
 import fuzs.universalenchants.UniversalEnchants;
 import fuzs.universalenchants.core.ModServices;
+import fuzs.universalenchants.mixin.accessor.EnchantmentAccessor;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.GsonHelper;
+import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.item.AxeItem;
+import net.minecraft.world.item.HorseArmorItem;
 import net.minecraft.world.item.enchantment.*;
 
 import java.io.File;
 import java.io.FileReader;
-import java.util.*;
+import java.util.Collection;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -29,21 +35,33 @@ public class EnchantmentDataManager {
      * vanilla doesn't have an enchantment category just for axes, so we make our own
      */
     private static final EnchantmentCategory AXE_ENCHANTMENT_CATEGORY = ModServices.ABSTRACTIONS.createEnchantmentCategory("AXE", item -> item instanceof AxeItem);
+    private static final EnchantmentCategory HORSE_ARMOR_ENCHANTMENT_CATEGORY = ModServices.ABSTRACTIONS.createEnchantmentCategory("HORSE_ARMOR", item -> item instanceof HorseArmorItem);
     /**
      * we store these manually as vanilla's categories are the only ones we want to mess with, don't accidentally do something with our own or other mods' categories
      */
     public static final BiMap<EnchantmentCategory, ResourceLocation> ENCHANTMENT_CATEGORIES_BY_ID = EnchantmentCategoryMapBuilder.create()
             .putVanillaCategories(EnchantmentCategory.ARMOR, EnchantmentCategory.ARMOR_FEET, EnchantmentCategory.ARMOR_LEGS, EnchantmentCategory.ARMOR_CHEST, EnchantmentCategory.ARMOR_HEAD, EnchantmentCategory.WEAPON, EnchantmentCategory.DIGGER, EnchantmentCategory.FISHING_ROD, EnchantmentCategory.TRIDENT, EnchantmentCategory.BREAKABLE, EnchantmentCategory.BOW, EnchantmentCategory.WEARABLE, EnchantmentCategory.CROSSBOW, EnchantmentCategory.VANISHABLE)
             .putCategory(UniversalEnchants.MOD_ID, AXE_ENCHANTMENT_CATEGORY)
+            .putCategory(UniversalEnchants.MOD_ID, HORSE_ARMOR_ENCHANTMENT_CATEGORY)
             .get();
+    public static final Map<Enchantment, EnchantmentCategory> VANILLA_ENCHANTMENT_CATEGORIES = Registry.ENCHANTMENT.stream().collect(ImmutableMap.toImmutableMap(Function.identity(), e -> e.category));
     private static final List<AdditionalEnchantmentsData> ADDITIONAL_ENCHANTMENTS_DATA = ImmutableList.of(
             new AdditionalEnchantmentsData(EnchantmentCategory.WEAPON, Enchantments.IMPALING),
             new AdditionalEnchantmentsData(AXE_ENCHANTMENT_CATEGORY, Enchantments.SHARPNESS, Enchantments.SMITE, Enchantments.BANE_OF_ARTHROPODS, Enchantments.KNOCKBACK, Enchantments.FIRE_ASPECT, Enchantments.MOB_LOOTING, Enchantments.SWEEPING_EDGE, Enchantments.IMPALING),
             new AdditionalEnchantmentsData(EnchantmentCategory.TRIDENT, Enchantments.SHARPNESS, Enchantments.SMITE, Enchantments.BANE_OF_ARTHROPODS, Enchantments.KNOCKBACK, Enchantments.FIRE_ASPECT, Enchantments.MOB_LOOTING, Enchantments.SWEEPING_EDGE, Enchantments.QUICK_CHARGE, Enchantments.PIERCING),
             new AdditionalEnchantmentsData(EnchantmentCategory.BOW, Enchantments.PIERCING, Enchantments.MULTISHOT, Enchantments.QUICK_CHARGE, Enchantments.MOB_LOOTING),
-            new AdditionalEnchantmentsData(EnchantmentCategory.CROSSBOW, Enchantments.FLAMING_ARROWS, Enchantments.PUNCH_ARROWS, Enchantments.POWER_ARROWS, Enchantments.INFINITY_ARROWS, Enchantments.MOB_LOOTING)
+            new AdditionalEnchantmentsData(EnchantmentCategory.CROSSBOW, Enchantments.FLAMING_ARROWS, Enchantments.PUNCH_ARROWS, Enchantments.POWER_ARROWS, Enchantments.INFINITY_ARROWS, Enchantments.MOB_LOOTING),
+            new AdditionalEnchantmentsData(HORSE_ARMOR_ENCHANTMENT_CATEGORY, Enchantments.ALL_DAMAGE_PROTECTION, Enchantments.FIRE_PROTECTION, Enchantments.FALL_PROTECTION, Enchantments.BLAST_PROTECTION, Enchantments.PROJECTILE_PROTECTION, Enchantments.RESPIRATION, Enchantments.THORNS, Enchantments.DEPTH_STRIDER, Enchantments.FROST_WALKER, Enchantments.BINDING_CURSE, Enchantments.SOUL_SPEED, Enchantments.VANISHING_CURSE)
     );
-    private static final Map<Enchantment, EnchantmentDataHolder> ENCHANTMENT_DATA_HOLDERS = getVanillaEnchantments().collect(Collectors.toMap(Function.identity(), EnchantmentDataHolder::new));
+    private static final Map<Enchantment, EnchantmentDataHolder> ENCHANTMENT_DATA_HOLDERS = Registry.ENCHANTMENT.stream().collect(Collectors.toMap(Function.identity(), EnchantmentDataHolder::new));
+
+    static {
+        // need this to make horse armor work, all other armor enchantments already set all slots (even the specialized ones such as respiration or feather falling)
+        // could expose this in the data driven system, but isn't probably useful outside this case
+        EquipmentSlot[] armorSlots = new EquipmentSlot[]{EquipmentSlot.HEAD, EquipmentSlot.CHEST, EquipmentSlot.LEGS, EquipmentSlot.FEET};
+        ((EnchantmentAccessor) Enchantments.FROST_WALKER).setSlots(armorSlots);
+        ((EnchantmentAccessor) Enchantments.SOUL_SPEED).setSlots(armorSlots);
+    }
     
     private static Map<Enchantment, List<EnchantmentDataEntry<?>>> getDefaultCategoryEntries() {
         // constructing default builders on Forge is quite expensive, so only do this when necessary
@@ -56,18 +74,18 @@ public class EnchantmentDataManager {
     private static void setupAdditionalCompatibility(Map<Enchantment, EnchantmentDataEntry.Builder> builders) {
         applyIncompatibilityToBoth(builders, Enchantments.INFINITY_ARROWS, Enchantments.MENDING, false);
         applyIncompatibilityToBoth(builders, Enchantments.MULTISHOT, Enchantments.PIERCING, false);
-        Registry.ENCHANTMENT.forEach(enchantment -> {
+        for (Enchantment enchantment : Registry.ENCHANTMENT) {
             if (enchantment instanceof DamageEnchantment && enchantment != Enchantments.SHARPNESS) {
                 applyIncompatibilityToBoth(builders, Enchantments.SHARPNESS, enchantment, false);
                 // we make impaling incompatible with damage enchantments as both can be applied to the same weapons now
                 applyIncompatibilityToBoth(builders, Enchantments.IMPALING, enchantment, true);
             }
-        });
-        Registry.ENCHANTMENT.forEach(enchantment -> {
+        }
+        for (Enchantment enchantment : Registry.ENCHANTMENT) {
             if (enchantment instanceof ProtectionEnchantment && enchantment != Enchantments.ALL_DAMAGE_PROTECTION && enchantment != Enchantments.FALL_PROTECTION) {
                 applyIncompatibilityToBoth(builders, Enchantments.ALL_DAMAGE_PROTECTION, enchantment, false);
             }
-        });
+        }
     }
 
     private static void applyIncompatibilityToBoth(Map<Enchantment, EnchantmentDataEntry.Builder> builders, Enchantment enchantment, Enchantment other, boolean add) {
@@ -89,8 +107,7 @@ public class EnchantmentDataManager {
     }
 
     public static boolean isCompatibleWith(Enchantment enchantment, Enchantment other, boolean fallback) {
-        // every enchantment is passed in here, but we only support vanilla, so make sure to handle modded properly
-        return Optional.ofNullable(ENCHANTMENT_DATA_HOLDERS.get(enchantment)).map(holder -> holder.isCompatibleWith(other, fallback)).orElse(fallback);
+        return ENCHANTMENT_DATA_HOLDERS.get(enchantment).isCompatibleWith(other, fallback);
     }
 
     private static void serializeDefaultDataEntries(File directory) {
@@ -126,33 +143,37 @@ public class EnchantmentDataManager {
         JsonElement jsonElement = JsonConfigFileUtil.GSON.fromJson(reader, JsonElement.class);
         JsonObject jsonObject = GsonHelper.convertToJsonObject(jsonElement, "enchantment config");
         ResourceLocation id = new ResourceLocation(GsonHelper.getAsString(jsonObject, "id"));
-        EnchantmentDataHolder holder = ENCHANTMENT_DATA_HOLDERS.get(Registry.ENCHANTMENT.get(id));
-        JsonArray items = GsonHelper.getAsJsonArray(jsonObject, "items");
-        for (JsonElement jsonElement1 : items) {
-            String item;
-            boolean exclude = false;
-            if (jsonElement1.isJsonObject()) {
-                JsonObject jsonObject1 = jsonElement1.getAsJsonObject();
-                item = GsonHelper.getAsString(jsonObject1, "id");
-                exclude = GsonHelper.getAsBoolean(jsonObject1, "exclude");
-            } else {
-                item = GsonHelper.convertToString(jsonElement1, "item");
+        Enchantment key = Registry.ENCHANTMENT.get(id);
+        EnchantmentDataHolder holder = ENCHANTMENT_DATA_HOLDERS.get(key);
+        if (jsonObject.has("items")) {
+            JsonArray items = GsonHelper.getAsJsonArray(jsonObject, "items");
+            for (JsonElement jsonElement1 : items) {
+                String item;
+                boolean exclude = false;
+                if (jsonElement1.isJsonObject()) {
+                    JsonObject jsonObject1 = jsonElement1.getAsJsonObject();
+                    item = GsonHelper.getAsString(jsonObject1, "id");
+                    exclude = GsonHelper.getAsBoolean(jsonObject1, "exclude");
+                } else {
+                    item = GsonHelper.convertToString(jsonElement1, "item");
+                }
+                EnchantmentCategoryEntry entry;
+                if (item.startsWith("$")) {
+                    entry = EnchantmentCategoryEntry.CategoryEntry.deserialize(item);
+                } else if (item.startsWith("#")) {
+                    entry = EnchantmentCategoryEntry.TagEntry.deserialize(item);
+                } else {
+                    entry = EnchantmentCategoryEntry.ItemEntry.deserialize(item);
+                }
+                entry.setExclude(exclude);
+                holder.submit(entry);
             }
-            EnchantmentCategoryEntry entry;
-            if (item.startsWith("$")) {
-                entry = EnchantmentCategoryEntry.CategoryEntry.deserialize(item);
-            } else if (item.startsWith("#")) {
-                entry = EnchantmentCategoryEntry.TagEntry.deserialize(item);
-            } else {
-                entry = EnchantmentCategoryEntry.ItemEntry.deserialize(item);
-            }
-            entry.setExclude(exclude);
-            holder.submit(entry);
         }
-        JsonArray jsonArray = GsonHelper.getAsJsonArray(jsonObject, "incompatible");
-        String[] incompatibles = JsonConfigFileUtil.GSON.fromJson(jsonArray, String[].class);
-        EnchantmentDataEntry<?> entry = EnchantmentDataEntry.IncompatibleEntry.deserialize(incompatibles);
-        holder.submit(entry);
+        if (jsonObject.has("incompatible")) {
+            JsonArray jsonArray = GsonHelper.getAsJsonArray(jsonObject, "incompatible");
+            String[] incompatibles = JsonConfigFileUtil.GSON.fromJson(jsonArray, String[].class);
+            holder.submit(EnchantmentDataEntry.IncompatibleEntry.deserialize(incompatibles));
+        }
     }
 
     private static Stream<Enchantment> getVanillaEnchantments() {

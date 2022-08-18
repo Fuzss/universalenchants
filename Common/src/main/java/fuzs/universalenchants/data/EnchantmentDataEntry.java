@@ -24,7 +24,7 @@ public abstract class EnchantmentDataEntry<T> {
     public abstract void serialize(JsonArray jsonArray);
 
     public static Builder defaultBuilder(Enchantment enchantment) {
-        Builder builder = new Builder().add(enchantment.category);
+        Builder builder = new Builder().add(EnchantmentDataManager.VANILLA_ENCHANTMENT_CATEGORIES.get(enchantment));
         // don't add the enchantment itself, the user is not supposed to remove it
         // we still need this, it will be manually added back later
         Registry.ENCHANTMENT.stream().filter(Predicate.not(enchantment::isCompatibleWith)).filter(other -> enchantment != other).forEach(builder::add);
@@ -46,7 +46,7 @@ public abstract class EnchantmentDataEntry<T> {
             }
         }
 
-        public static EnchantmentDataEntry<?> deserialize(String... s) throws JsonSyntaxException {
+        public static IncompatibleEntry deserialize(String... s) throws JsonSyntaxException {
             IncompatibleEntry entry = new IncompatibleEntry();
             Stream.of(s).map(ResourceLocation::new)
                     .peek(id -> {

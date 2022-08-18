@@ -1,6 +1,7 @@
 package fuzs.universalenchants.core;
 
 import fuzs.universalenchants.data.EnchantmentDataEntry;
+import fuzs.universalenchants.data.EnchantmentDataManager;
 import net.minecraft.core.Registry;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
@@ -40,7 +41,7 @@ public class ForgeAbstractions implements CommonAbstractions {
         // to honor this we need to find all those additional enchantments and add them manually (this means configs will have to be recreated when such mods are added)
         // example: Farmer's Delight's skillet item
         for (Item item : Registry.ITEM) {
-            if (!enchantment.category.canEnchant(item) && item.canApplyAtEnchantingTable(new ItemStack(item), enchantment)) {
+            if (!EnchantmentDataManager.VANILLA_ENCHANTMENT_CATEGORIES.get(enchantment).canEnchant(item) && item.canApplyAtEnchantingTable(new ItemStack(item), enchantment)) {
                 builder.add(item);
             }
         }

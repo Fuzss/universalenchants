@@ -21,10 +21,10 @@ public abstract class FarmBlockMixin extends Block {
     }
 
     @Inject(method = "fallOn", at = @At("HEAD"), cancellable = true)
-    public void fallOn$inject$head(Level level, BlockState blockState, BlockPos blockPos, Entity entity, float fallDistance, CallbackInfo callbackInfo) {
-        if (FarmlandTrampleCallback.EVENT.invoker().onFarmlandTrample(level, blockPos, Blocks.DIRT.defaultBlockState(), fallDistance, entity).isPresent()) {
+    public void fallOn$inject$head(Level level, BlockState blockState, BlockPos blockPos, Entity entity, float fallDistance, CallbackInfo callback) {
+        FarmlandTrampleCallback.EVENT.invoker().onFarmlandTrample(level, blockPos, Blocks.DIRT.defaultBlockState(), fallDistance, entity).ifPresent(unit -> {
             super.fallOn(level, blockState, blockPos, entity, fallDistance);
-            callbackInfo.cancel();
-        }
+            callback.cancel();
+        });
     }
 }

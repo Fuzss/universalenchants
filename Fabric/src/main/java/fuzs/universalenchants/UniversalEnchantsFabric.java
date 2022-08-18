@@ -6,6 +6,7 @@ import fuzs.universalenchants.api.event.entity.living.LivingExperienceDropCallba
 import fuzs.universalenchants.api.event.entity.living.LivingHurtCallback;
 import fuzs.universalenchants.api.event.entity.living.LootingLevelCallback;
 import fuzs.universalenchants.api.event.entity.player.ArrowLooseCallback;
+import fuzs.universalenchants.api.event.entity.player.PlayerXpEvents;
 import fuzs.universalenchants.api.event.world.FarmlandTrampleCallback;
 import fuzs.universalenchants.handler.BetterEnchantsHandler;
 import fuzs.universalenchants.handler.ItemCompatHandler;
@@ -55,5 +56,6 @@ public class UniversalEnchantsFabric implements ModInitializer {
         LivingHurtCallback.EVENT.register(betterEnchantsHandler::onLivingHurt);
         FarmlandTrampleCallback.EVENT.register(betterEnchantsHandler::onFarmlandTrample);
         LivingExperienceDropCallback.EVENT.register(betterEnchantsHandler::onLivingExperienceDrop);
+        PlayerXpEvents.PICKUP_XP.register(betterEnchantsHandler::onPickupXp);
     }
 }

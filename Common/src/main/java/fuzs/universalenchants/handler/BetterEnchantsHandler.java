@@ -3,12 +3,14 @@ package fuzs.universalenchants.handler;
 import fuzs.universalenchants.UniversalEnchants;
 import fuzs.universalenchants.config.ServerConfig;
 import fuzs.universalenchants.core.ModServices;
+import fuzs.universalenchants.mixin.accessor.ExperienceOrbAccessor;
 import net.minecraft.core.BlockPos;
 import net.minecraft.util.Unit;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.ExperienceOrb;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.CrossbowItem;
@@ -83,5 +85,20 @@ public class BetterEnchantsHandler {
     private int getDroppedXp(int droppedXp, int level) {
         float multiplier = (level * (level + 1)) / 10.0F;
         return droppedXp + Math.min(50, (int) (droppedXp * multiplier));
+    }
+
+    public Optional<Unit> onPickupXp(Player player, ExperienceOrb orb) {
+        if (!UniversalEnchants.CONFIG.get(ServerConfig.class).cheapMendingRepair) return Optional.empty();
+        player.takeXpDelay = 2;
+        player.take(orb, 1);
+        if (orb.getValue() > 0) {
+            player.giveExperiencePoints(orb.getValue());
+        }
+        int count = ((ExperienceOrbAccessor) orb).getCount() - 1;
+        ((ExperienceOrbAccessor) orb).setCount(count);
+        if (count == 0) {
+            orb.discard();
+        }
+        return Optional.of(Unit.INSTANCE);
     }
 }

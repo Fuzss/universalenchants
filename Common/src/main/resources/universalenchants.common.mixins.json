@@ -5,15 +5,20 @@
   "package": "fuzs.universalenchants.mixin",
   "refmap": "universalenchants.refmap.json",
   "mixins": [
+    "AnvilMenuMixin",
     "CrossbowItemMixin",
     "EnchantmentMixin",
+    "HorseArmorItemMixin",
+    "HorseInventoryMenu$SlotMixin",
     "ThrownTridentMixin",
     "TridentItemMixin",
     "accessor.AbstractArrowAccessor",
     "accessor.EnchantmentAccessor",
+    "accessor.ExperienceOrbAccessor",
     "accessor.LivingEntityAccessor"
   ],
   "client": [
+    "client.HorseArmorLayerMixin",
     "client.accessor.I18nAccessor"
   ],
   "injectors": {

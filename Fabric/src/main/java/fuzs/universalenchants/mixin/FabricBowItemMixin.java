@@ -31,7 +31,7 @@ public abstract class FabricBowItemMixin extends ProjectileWeaponItem {
     }
 
     @Inject(method = "releaseUsing", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/item/BowItem;getPowerForTime(I)F"), cancellable = true, locals = LocalCapture.CAPTURE_FAILHARD)
-    public void releaseUsing$invokeGetUseDuration(ItemStack bow, Level level, LivingEntity livingEntity, int useDuration, CallbackInfo callbackInfo, Player player, boolean hasInfiniteAmmo, ItemStack arrows, int charge) {
-        if (ArrowLooseCallback.EVENT.invoker().onArrowLoose(player, bow, level, charge, !arrows.isEmpty() || hasInfiniteAmmo).isPresent()) callbackInfo.cancel();
+    public void releaseUsing$invokeGetUseDuration(ItemStack bow, Level level, LivingEntity livingEntity, int useDuration, CallbackInfo callback, Player player, boolean hasInfiniteAmmo, ItemStack arrows, int charge) {
+        ArrowLooseCallback.EVENT.invoker().onArrowLoose(player, bow, level, charge, !arrows.isEmpty() || hasInfiniteAmmo).ifPresent(unit -> callback.cancel());
     }
 }

@@ -18,6 +18,7 @@ import net.minecraftforge.event.entity.living.LootingLevelEvent;
 import net.minecraftforge.event.entity.player.ArrowLooseEvent;
 import net.minecraftforge.event.entity.player.ArrowNockEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
+import net.minecraftforge.event.entity.player.PlayerXpEvent;
 import net.minecraftforge.event.level.BlockEvent;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -75,6 +76,9 @@ public class UniversalEnchantsForge {
         // run after other mods had a chance to change looting level
         MinecraftForge.EVENT_BUS.addListener(EventPriority.LOW, (final LivingExperienceDropEvent evt) -> {
             betterEnchantsHandler.onLivingExperienceDrop(evt.getEntity(), evt.getAttackingPlayer(), evt.getOriginalExperience(), evt.getDroppedExperience()).ifPresent(evt::setDroppedExperience);
+        });
+        MinecraftForge.EVENT_BUS.addListener((final PlayerXpEvent.PickupXp evt) -> {
+            betterEnchantsHandler.onPickupXp(evt.getEntity(), evt.getOrb()).ifPresent(unit -> evt.setCanceled(true));
         });
     }
 }

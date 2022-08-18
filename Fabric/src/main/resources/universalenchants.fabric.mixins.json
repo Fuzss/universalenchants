@@ -5,6 +5,7 @@
   "package": "fuzs.universalenchants.mixin",
   "refmap": "universalenchants.refmap.json",
   "mixins": [
+    "ExperienceOrbMixin",
     "FabricBowItemMixin",
     "FabricPlayerMixin",
     "FarmBlockMixin",

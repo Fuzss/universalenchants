@@ -38,7 +38,7 @@ public abstract class LivingEntityMixin extends Entity {
     }
 
     @Inject(method = "updatingUsingItem", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/LivingEntity;updateUsingItem(Lnet/minecraft/world/item/ItemStack;)V"))
-    private void updatingUsingItem$invokeUpdateUsingItem(CallbackInfo callbackInfo) {
+    private void updatingUsingItem$invokeUpdateUsingItem(CallbackInfo callback) {
         LivingEntityUseItemEvents.TICK.invoker().onUseItemTick((LivingEntity) (Object) this, this.useItem, this.useItemRemaining).ifPresent(newDuration -> {
             this.useItemRemaining = newDuration;
         });
@@ -50,17 +50,17 @@ public abstract class LivingEntityMixin extends Entity {
     }
 
     @Inject(method = "actuallyHurt", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/LivingEntity;getDamageAfterArmorAbsorb(Lnet/minecraft/world/damagesource/DamageSource;F)F"), cancellable = true)
-    protected void actuallyHurt$invokeGetDamageAfterArmorAbsorb(DamageSource damageSource, float damageAmount, CallbackInfo callbackInfo) {
-        if (LivingHurtCallback.EVENT.invoker().onLivingHurt((LivingEntity) (Object) this, damageSource, damageAmount).isPresent()) callbackInfo.cancel();
+    protected void actuallyHurt$invokeGetDamageAfterArmorAbsorb(DamageSource damageSource, float damageAmount, CallbackInfo callback) {
+        LivingHurtCallback.EVENT.invoker().onLivingHurt((LivingEntity) (Object) this, damageSource, damageAmount).ifPresent(unit -> callback.cancel());
     }
 
     @Inject(method = "dropExperience", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/ExperienceOrb;award(Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/world/phys/Vec3;I)V"), cancellable = true)
-    protected void dropExperience(CallbackInfo callbackInfo) {
+    protected void dropExperience(CallbackInfo callback) {
         int experienceReward = this.getExperienceReward();
         int newExperienceReward = LivingExperienceDropCallback.EVENT.invoker().onLivingExperienceDrop((LivingEntity) (Object) this, this.lastHurtByPlayer, experienceReward, experienceReward).orElseThrow();
         if (experienceReward != newExperienceReward) {
             ExperienceOrb.award((ServerLevel) this.level, this.position(), experienceReward);
-            callbackInfo.cancel();
+            callback.cancel();
         }
     }
 

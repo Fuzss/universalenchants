@@ -12,6 +12,8 @@ public class ServerConfig implements ConfigCore {
     public boolean noFarmlandTrample = true;
     @Config(description = "Looting also affects dropped experience points.")
     public boolean lootingBoostsXp = true;
+    @Config(description = "Mending no longer repairs items using xp. Instead repairing items enchanted with mending (only repairing, no renaming or adding more enchantments) in an anvil doesn't increase the items repair cost any further.")
+    public boolean cheapMendingRepair = false;
     @Config(description = {"Remove the max level cap from the /enchant command, also allow overriding and removing (by setting the level to 0) existing enchantment levels.", "Additionally make enchanting books work via the command."})
     public boolean fixEnchantCommand = true;
 }
