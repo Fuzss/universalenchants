@@ -3,12 +3,14 @@ package fuzs.universalenchants;
 import fuzs.puzzleslib.core.CoreServices;
 import fuzs.universalenchants.handler.BetterEnchantsHandler;
 import fuzs.universalenchants.handler.ItemCompatHandler;
+import fuzs.universalenchants.data.EnchantmentDataManager;
 import fuzs.universalenchants.init.ForgeModRegistry;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.event.TagsUpdatedEvent;
 import net.minecraftforge.event.entity.living.LivingEntityUseItemEvent;
 import net.minecraftforge.event.entity.living.LivingExperienceDropEvent;
 import net.minecraftforge.event.entity.living.LivingHurtEvent;
@@ -34,6 +36,11 @@ public class UniversalEnchantsForge {
     }
 
     private static void registerHandlers() {
+        MinecraftForge.EVENT_BUS.addListener((final TagsUpdatedEvent evt) -> {
+            if (evt.getUpdateCause() == TagsUpdatedEvent.UpdateCause.SERVER_DATA_LOAD) {
+                EnchantmentDataManager.loadAll();
+            }
+        });
         ItemCompatHandler itemCompatHandler = new ItemCompatHandler();
         MinecraftForge.EVENT_BUS.addListener((final ArrowLooseEvent evt) -> {
             itemCompatHandler.onArrowLoose(evt.getEntity(), evt.getBow(), evt.getLevel(), evt.getCharge(), evt.hasAmmo());

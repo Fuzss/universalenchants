@@ -1,4 +1,4 @@
-package fuzs.universalenchants.handler;
+package fuzs.universalenchants.data;
 
 import com.google.common.collect.Lists;
 import fuzs.universalenchants.UniversalEnchants;

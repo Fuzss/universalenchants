@@ -6,8 +6,7 @@ import fuzs.puzzleslib.core.CoreServices;
 import fuzs.puzzleslib.core.ModConstructor;
 import fuzs.universalenchants.config.ClientConfig;
 import fuzs.universalenchants.config.ServerConfig;
-import fuzs.universalenchants.handler.EnchantCompatManager;
-import fuzs.universalenchants.handler.ItemCompatManager;
+import fuzs.universalenchants.data.EnchantCompatManager;
 import fuzs.universalenchants.init.ModRegistry;
 import fuzs.universalenchants.server.commands.ModEnchantCommand;
 import net.minecraft.commands.CommandBuildContext;
@@ -31,7 +30,6 @@ public class UniversalEnchants implements ModConstructor {
         CONFIG.bakeConfigs(MOD_ID);
         ModRegistry.touch();
         CONFIG.getHolder(ServerConfig.class).accept(EnchantCompatManager.INSTANCE::init);
-        CONFIG.getHolder(ServerConfig.class).accept(ItemCompatManager.INSTANCE::buildData);
     }
 
     @Override

@@ -9,9 +9,12 @@ import fuzs.universalenchants.api.event.entity.player.ArrowLooseCallback;
 import fuzs.universalenchants.api.event.world.FarmlandTrampleCallback;
 import fuzs.universalenchants.handler.BetterEnchantsHandler;
 import fuzs.universalenchants.handler.ItemCompatHandler;
+import fuzs.universalenchants.data.EnchantmentDataManager;
 import fuzs.universalenchants.init.FabricModRegistry;
 import net.fabricmc.api.ModInitializer;
+import net.fabricmc.fabric.api.event.lifecycle.v1.CommonLifecycleEvents;
 import net.fabricmc.fabric.api.event.player.UseItemCallback;
+import net.minecraft.core.RegistryAccess;
 import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.BowItem;
@@ -30,6 +33,9 @@ public class UniversalEnchantsFabric implements ModInitializer {
     }
 
     private static void registerHandlers() {
+        CommonLifecycleEvents.TAGS_LOADED.register((RegistryAccess registries, boolean client) -> {
+            if (!client) EnchantmentDataManager.loadAll();
+        });
         ItemCompatHandler itemCompatHandler = new ItemCompatHandler();
         ArrowLooseCallback.EVENT.register((Player player, ItemStack bow, Level level, int charge, boolean hasAmmo) -> {
             itemCompatHandler.onArrowLoose(player, bow, level, charge, hasAmmo);

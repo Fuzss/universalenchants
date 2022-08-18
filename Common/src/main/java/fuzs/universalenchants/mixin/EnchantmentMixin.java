@@ -1,6 +1,6 @@
 package fuzs.universalenchants.mixin;
 
-import fuzs.universalenchants.handler.EnchantCompatManager;
+import fuzs.universalenchants.data.EnchantCompatManager;
 import net.minecraft.world.item.enchantment.Enchantment;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
