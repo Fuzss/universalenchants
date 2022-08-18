@@ -6,7 +6,6 @@
   "refmap": "universalenchants.refmap.json",
   "mixins": [
     "CrossbowItemMixin",
-    "DamageEnchantmentMixin",
     "EnchantmentMixin",
     "ThrownTridentMixin",
     "TridentItemMixin",

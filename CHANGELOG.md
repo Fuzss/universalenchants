@@ -3,10 +3,15 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog].
 
-## [v4.1.0-1.19.1] - 2022-08-17
+## [v4.1.0-1.19.1] - 2022-08-18
 ### Added
+- Completely overhauled config for what enchantments are compatible with what items and which enchantments can be applied together
+- The new system uses individual `json` files for each enchantment, this makes configuring every single vanilla enchantment possible
+- To find out how exactly the new system works check out the documentation on the GitHub repository
 - Added dynamic support for roman numerals outside of vanilla's default translation range
 - Overhauled vanilla's `/enchant` command, it can now apply enchantment levels above the default max level, supports overriding and removing enchantments, and also handles books now
+### Removed
+- Removed a bunch of server config options as they've been moved to `json`
 
 ## [v4.0.0-1.19.1] - 2022-08-16
 - Ported to Minecraft 1.19.1

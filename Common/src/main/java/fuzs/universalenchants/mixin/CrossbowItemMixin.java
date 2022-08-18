@@ -34,8 +34,8 @@ public abstract class CrossbowItemMixin extends ProjectileWeaponItem {
     }
 
     @Inject(method = "getArrow", at = @At("TAIL"))
-    private static void getArrow$tail(Level level, LivingEntity entity, ItemStack stack, ItemStack arrowStack, CallbackInfoReturnable<AbstractArrow> callbackInfo) {
-        AbstractArrow abstractarrowentity = callbackInfo.getReturnValue();
+    private static void getArrow$tail(Level level, LivingEntity entity, ItemStack stack, ItemStack arrowStack, CallbackInfoReturnable<AbstractArrow> callback) {
+        AbstractArrow abstractarrowentity = callback.getReturnValue();
         ItemCompatHandler.applyPowerEnchantment(abstractarrowentity, stack);
         ItemCompatHandler.applyPunchEnchantment(abstractarrowentity, stack);
         ItemCompatHandler.applyFlameEnchantment(abstractarrowentity, stack);

@@ -1,6 +1,7 @@
 package fuzs.universalenchants.data;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Sets;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonSyntaxException;
 import net.minecraft.core.Registry;
@@ -14,6 +15,7 @@ import org.apache.commons.compress.utils.Lists;
 import java.util.List;
 import java.util.Set;
 import java.util.function.Predicate;
+import java.util.stream.Stream;
 
 public abstract class EnchantmentDataEntry<T> {
 
@@ -23,39 +25,45 @@ public abstract class EnchantmentDataEntry<T> {
 
     public static Builder defaultBuilder(Enchantment enchantment) {
         Builder builder = new Builder().add(enchantment.category);
-        Registry.ENCHANTMENT.stream().filter(Predicate.not(enchantment::isCompatibleWith)).forEach(builder::add);
+        // don't add the enchantment itself, the user is not supposed to remove it
+        // we still need this, it will be manually added back later
+        Registry.ENCHANTMENT.stream().filter(Predicate.not(enchantment::isCompatibleWith)).filter(other -> enchantment != other).forEach(builder::add);
         return builder;
     }
 
     public static class IncompatibleEntry extends EnchantmentDataEntry<Enchantment> {
-        private final Enchantment incompatible;
-
-        public IncompatibleEntry(Enchantment incompatible) {
-            this.incompatible = incompatible;
-        }
+        public final Set<Enchantment> incompatibles = Sets.newHashSet();
 
         @Override
         void dissolve(Set<Enchantment> items) throws JsonSyntaxException {
-            items.add(this.incompatible);
+            items.addAll(this.incompatibles);
         }
 
         @Override
         public void serialize(JsonArray jsonArray) {
-            jsonArray.add(Registry.ENCHANTMENT.getKey(this.incompatible).toString());
+            for (Enchantment enchantment : this.incompatibles) {
+                jsonArray.add(Registry.ENCHANTMENT.getKey(enchantment).toString());
+            }
         }
 
-        public static EnchantmentDataEntry<?> deserialize(String s) throws JsonSyntaxException {
-            ResourceLocation id = new ResourceLocation(s);
-            if (!Registry.ENCHANTMENT.containsKey(id)) throw new JsonSyntaxException("No enchantment with name %s found".formatted(id));
-            return new IncompatibleEntry(Registry.ENCHANTMENT.get(id));
+        public static EnchantmentDataEntry<?> deserialize(String... s) throws JsonSyntaxException {
+            IncompatibleEntry entry = new IncompatibleEntry();
+            Stream.of(s).map(ResourceLocation::new)
+                    .peek(id -> {
+                        if (!Registry.ENCHANTMENT.containsKey(id)) throw new JsonSyntaxException("No enchantment with name %s found".formatted(id));
+                    })
+                    .map(Registry.ENCHANTMENT::get)
+                    .forEach(entry.incompatibles::add);
+            return entry;
         }
     }
 
     public static class Builder {
         private final List<EnchantmentDataEntry<?>> entries = Lists.newArrayList();
+        private final IncompatibleEntry incompatibleEntry = new IncompatibleEntry();
 
         private Builder() {
-
+            this.entries.add(this.incompatibleEntry);
         }
 
         public Builder add(Item item) {
@@ -92,7 +100,12 @@ public abstract class EnchantmentDataEntry<T> {
         }
 
         public Builder add(Enchantment incompatible) {
-            this.entries.add(new IncompatibleEntry(incompatible));
+            this.incompatibleEntry.incompatibles.add(incompatible);
+            return this;
+        }
+
+        public Builder remove(Enchantment incompatible) {
+            this.incompatibleEntry.incompatibles.remove(incompatible);
             return this;
         }
 

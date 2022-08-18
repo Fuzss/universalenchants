@@ -27,7 +27,7 @@ public abstract class ThrownTridentMixin extends AbstractArrow {
     }
 
     @Inject(method = "onHitEntity", at = @At("TAIL"))
-    protected void onHitEntity$tail(EntityHitResult rayTraceResult, CallbackInfo callbackInfo) {
+    protected void onHitEntity$tail(EntityHitResult rayTraceResult, CallbackInfo callback) {
         Entity entity = rayTraceResult.getEntity();
         if (entity instanceof LivingEntity) {
             int knockbackStrength = ((AbstractArrowAccessor) this).getKnockback();

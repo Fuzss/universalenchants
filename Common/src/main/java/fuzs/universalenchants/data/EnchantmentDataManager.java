@@ -7,7 +7,6 @@ import com.google.common.collect.ImmutableMap;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import com.google.gson.JsonSyntaxException;
 import fuzs.puzzleslib.json.JsonConfigFileUtil;
 import fuzs.universalenchants.UniversalEnchants;
 import fuzs.universalenchants.core.ModServices;
@@ -15,17 +14,12 @@ import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.world.item.AxeItem;
-import net.minecraft.world.item.Items;
-import net.minecraft.world.item.enchantment.Enchantment;
-import net.minecraft.world.item.enchantment.EnchantmentCategory;
-import net.minecraft.world.item.enchantment.Enchantments;
+import net.minecraft.world.item.enchantment.*;
 
 import java.io.File;
 import java.io.FileReader;
-import java.util.Collection;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
+import java.util.*;
+import java.util.function.BiConsumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -55,9 +49,38 @@ public class EnchantmentDataManager {
     static {
         Map<Enchantment, EnchantmentDataEntry.Builder> builders = getVanillaEnchantments().collect(Collectors.toMap(Function.identity(), EnchantmentDataEntry::defaultBuilder));
         ADDITIONAL_ENCHANTMENTS_DATA.forEach(data -> data.addToBuilder(builders));
-        // TODO remove from testing
-        builders.get(Enchantments.BLOCK_FORTUNE).add(Items.SHEARS).add(Items.DIAMOND_PICKAXE, true);
+        setupAdditionalCompatibility(builders);
         DEFAULT_CATEGORY_ENTRIES = builders.entrySet().stream().collect(ImmutableMap.toImmutableMap(Map.Entry::getKey, e -> e.getValue().build()));
+    }
+
+    private static void setupAdditionalCompatibility(Map<Enchantment, EnchantmentDataEntry.Builder> builders) {
+        applyIncompatibilityToBoth(builders, Enchantments.INFINITY_ARROWS, Enchantments.MENDING, false);
+        applyIncompatibilityToBoth(builders, Enchantments.MULTISHOT, Enchantments.PIERCING, false);
+        Registry.ENCHANTMENT.forEach(enchantment -> {
+            if (enchantment instanceof DamageEnchantment && enchantment != Enchantments.SHARPNESS) {
+                applyIncompatibilityToBoth(builders, Enchantments.SHARPNESS, enchantment, false);
+                // we make impaling incompatible with damage enchantments as both can be applied to the same weapons now
+                applyIncompatibilityToBoth(builders, Enchantments.IMPALING, enchantment, true);
+            }
+        });
+        Registry.ENCHANTMENT.forEach(enchantment -> {
+            if (enchantment instanceof ProtectionEnchantment && enchantment != Enchantments.ALL_DAMAGE_PROTECTION && enchantment != Enchantments.FALL_PROTECTION) {
+                applyIncompatibilityToBoth(builders, Enchantments.ALL_DAMAGE_PROTECTION, enchantment, false);
+            }
+        });
+    }
+
+    private static void applyIncompatibilityToBoth(Map<Enchantment, EnchantmentDataEntry.Builder> builders, Enchantment enchantment, Enchantment other, boolean add) {
+        BiConsumer<Enchantment, Enchantment> operation = (e1, e2) -> {
+            EnchantmentDataEntry.Builder builder = builders.get(e1);
+            if (add) {
+                builder.add(e2);
+            } else {
+                builder.remove(e2);
+            }
+        };
+        operation.accept(enchantment, other);
+        operation.accept(other, enchantment);
     }
 
     public static void loadAll() {
@@ -66,7 +89,8 @@ public class EnchantmentDataManager {
     }
 
     public static boolean isCompatibleWith(Enchantment enchantment, Enchantment other, boolean fallback) {
-        return CATEGORY_HOLDERS.get(enchantment).isCompatibleWith(other, fallback);
+        // every enchantment is passed in here, but we only support vanilla, so make sure to handle modded properly
+        return Optional.ofNullable(CATEGORY_HOLDERS.get(enchantment)).map(holder -> holder.isCompatibleWith(other, fallback)).orElse(fallback);
     }
 
     private static void serializeDefaultDataEntries(File directory) {
@@ -114,30 +138,21 @@ public class EnchantmentDataManager {
             } else {
                 item = GsonHelper.convertToString(jsonElement1, "item");
             }
-            EnchantmentCategoryEntry entry = null;
-            try {
-                if (item.startsWith("$")) {
-                    entry = EnchantmentCategoryEntry.CategoryEntry.deserialize(item);
-                } else if (item.startsWith("#")) {
-                    entry = EnchantmentCategoryEntry.TagEntry.deserialize(item);
-                } else {
-                    entry = EnchantmentCategoryEntry.ItemEntry.deserialize(item);
-                }
-            } catch (JsonSyntaxException e) {
-                UniversalEnchants.LOGGER.warn("Failed to deserialize entry", e);
-            } finally {
-                if (entry != null) {
-                    entry.setExclude(exclude);
-                    holder.submit(entry);
-                }
+            EnchantmentCategoryEntry entry;
+            if (item.startsWith("$")) {
+                entry = EnchantmentCategoryEntry.CategoryEntry.deserialize(item);
+            } else if (item.startsWith("#")) {
+                entry = EnchantmentCategoryEntry.TagEntry.deserialize(item);
+            } else {
+                entry = EnchantmentCategoryEntry.ItemEntry.deserialize(item);
             }
-        }
-        JsonArray incompatible = GsonHelper.getAsJsonArray(jsonObject, "incompatible");
-        for (JsonElement jsonElement1 : incompatible) {
-            String enchantment = GsonHelper.convertToString(jsonElement1, "incompatible");
-            EnchantmentDataEntry<?> entry = EnchantmentDataEntry.IncompatibleEntry.deserialize(enchantment);
+            entry.setExclude(exclude);
             holder.submit(entry);
         }
+        JsonArray jsonArray = GsonHelper.getAsJsonArray(jsonObject, "incompatible");
+        String[] incompatibles = JsonConfigFileUtil.GSON.fromJson(jsonArray, String[].class);
+        EnchantmentDataEntry<?> entry = EnchantmentDataEntry.IncompatibleEntry.deserialize(incompatibles);
+        holder.submit(entry);
     }
 
     private static Stream<Enchantment> getVanillaEnchantments() {

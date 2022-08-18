@@ -25,10 +25,9 @@ public class EnchantmentDataHolder {
     private final EnchantmentCategory vanillaCategory;
     private final EnchantmentCategory customBuiltCategory;
     @Nullable
-    private List<EnchantmentDataEntry> entries;
-    private Set<Item> cache;
-    @Nullable
-    private Set<Enchantment> incompatible;
+    private List<EnchantmentDataEntry<?>> entries;
+    private Set<Item> items;
+    private Set<Enchantment> incompatibles;
 
     public EnchantmentDataHolder(Enchantment enchantment) {
         this.enchantment = enchantment;
@@ -38,9 +37,11 @@ public class EnchantmentDataHolder {
 
     public void invalidate() {
         this.entries = null;
+        this.items = null;
+        this.incompatibles = null;
     }
 
-    public void submit(EnchantmentDataEntry entry) {
+    public void submit(EnchantmentDataEntry<?> entry) {
         if (this.entries == null) this.entries = Lists.newArrayList();
         this.entries.add(entry);
     }
@@ -54,24 +55,40 @@ public class EnchantmentDataHolder {
     }
 
     public boolean isCompatibleWith(Enchantment other, boolean fallback) {
-        return this.incompatible != null ? this.incompatible.contains(other) : fallback;
+        if (this.entries != null) {
+            this.dissolve();
+            return !this.incompatibles.contains(other);
+        }
+        return fallback;
     }
 
     private boolean canEnchant(Item item) {
         this.dissolve();
-        return this.cache.contains(item);
+        return this.items.contains(item);
     }
 
     private void dissolve() {
-        if (this.cache == null) {
+        if (this.items == null) {
             Set<Item> include = Sets.newIdentityHashSet();
             Set<Item> exclude = Sets.newIdentityHashSet();
             Objects.requireNonNull(this.entries, "Using invalid enchantment category for enchantment %s, expected vanilla category to be used".formatted(Registry.ENCHANTMENT.getKey(this.enchantment)));
-            for (EnchantmentDataEntry entry : this.entries) {
-                entry.dissolve(entry.isExclude() ? exclude : include);
+            for (EnchantmentDataEntry<?> entry : this.entries) {
+                if (entry instanceof EnchantmentCategoryEntry categoryEntry) {
+                    categoryEntry.dissolve(categoryEntry.isExclude() ? exclude : include);
+                }
             }
             include.removeAll(exclude);
-            this.cache = Collections.unmodifiableSet(include);
+            this.items = Collections.unmodifiableSet(include);
+        }
+        if (this.incompatibles == null) {
+            Objects.requireNonNull(this.entries, "Using invalid enchantment category for enchantment %s, expected vanilla category to be used".formatted(Registry.ENCHANTMENT.getKey(this.enchantment)));
+            Set<Enchantment> incompatibles = this.entries.stream().filter(entry -> entry instanceof EnchantmentDataEntry.IncompatibleEntry)
+                    .findFirst()
+                    .map(entry -> ((EnchantmentDataEntry.IncompatibleEntry) entry))
+                    .orElseThrow(() -> new IllegalStateException("Missing incompatible entry for enchantment data")).incompatibles;
+            // adding this back manually as the user isn't supposed to be able to remove it
+            incompatibles.add(this.enchantment);
+            this.incompatibles = Collections.unmodifiableSet(incompatibles);
         }
     }
 
