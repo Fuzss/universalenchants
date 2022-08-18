@@ -1,9 +1,9 @@
 package fuzs.universalenchants;
 
 import fuzs.puzzleslib.core.CoreServices;
+import fuzs.universalenchants.data.EnchantmentDataManager;
 import fuzs.universalenchants.handler.BetterEnchantsHandler;
 import fuzs.universalenchants.handler.ItemCompatHandler;
-import fuzs.universalenchants.data.EnchantmentDataManager;
 import fuzs.universalenchants.init.ForgeModRegistry;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.InteractionResultHolder;

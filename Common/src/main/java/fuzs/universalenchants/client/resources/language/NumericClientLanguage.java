@@ -4,13 +4,12 @@ import com.google.common.collect.Maps;
 import fuzs.universalenchants.UniversalEnchants;
 import fuzs.universalenchants.config.ClientConfig;
 import fuzs.universalenchants.mixin.client.accessor.I18nAccessor;
-import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
-import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import net.minecraft.Util;
 import net.minecraft.locale.Language;
 import net.minecraft.network.chat.FormattedText;
 import net.minecraft.util.FormattedCharSequence;
 
+import java.util.Map;
 import java.util.TreeMap;
 
 /**
@@ -37,7 +36,7 @@ public class NumericClientLanguage extends Language {
         map.put(1, "I");
     });
     private final Language language;
-    private final Int2ObjectMap<String> numeralsCache = new Int2ObjectOpenHashMap<>();
+    private final Map<String, String> numeralsCache = Maps.newHashMap();
 
     public NumericClientLanguage(Language language) {
         this.language = language;
@@ -53,20 +52,27 @@ public class NumericClientLanguage extends Language {
     @Override
     public String getOrDefault(String string) {
         if (this.isNumeral(string)) {
-            if (!this.language.has(string) || UniversalEnchants.CONFIG.get(ClientConfig.class).fixRomanNumerals == ClientConfig.NumeralLanguage.ARABIC) {
-                String number = string.substring(string.lastIndexOf(".") + 1);
-                if (number.chars().allMatch(Character::isDigit)) {
-                    int intNumber = Integer.parseInt(number);
-                    if (string.startsWith("potion.potency.")) intNumber++;
-                    return this.numeralsCache.computeIfAbsent(intNumber, this::toNumeral);
-                }
-            }
+            return this.numeralsCache.computeIfAbsent(string, this::computeLanguageNumeral);
         }
         return this.language.getOrDefault(string);
     }
 
     private boolean isNumeral(String string) {
         return string.startsWith("potion.potency.") || string.startsWith("enchantment.level.");
+    }
+
+    private String computeLanguageNumeral(String translationKey) {
+        if (!this.language.has(translationKey) || UniversalEnchants.CONFIG.get(ClientConfig.class).fixRomanNumerals == ClientConfig.NumeralLanguage.ARABIC) {
+            String number = translationKey.substring(translationKey.lastIndexOf(".") + 1);
+            if (number.chars().allMatch(Character::isDigit)) {
+                int intNumber = Integer.parseInt(number);
+                if (translationKey.startsWith("potion.potency.")) intNumber++;
+                return this.toNumeral(intNumber);
+            }
+            return translationKey;
+        } else {
+            return this.language.getOrDefault(translationKey);
+        }
     }
 
     private String toNumeral(int number) {

@@ -1,10 +1,12 @@
 package fuzs.universalenchants.core;
 
+import fuzs.universalenchants.data.EnchantmentDataEntry;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.EnchantmentCategory;
 import org.jetbrains.annotations.Nullable;
 
@@ -17,4 +19,8 @@ public interface CommonAbstractions {
     EnchantmentCategory createEnchantmentCategory(String enumConstantName, Predicate<Item> predicate);
 
     int getMobLootingLevel(Entity target, @Nullable Entity killer, @Nullable DamageSource cause);
+
+    default EnchantmentDataEntry.Builder defaultEnchantmentDataBuilder(Enchantment enchantment) {
+        return EnchantmentDataEntry.defaultBuilder(enchantment);
+    }
 }

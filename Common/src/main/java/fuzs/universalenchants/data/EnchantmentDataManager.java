@@ -43,14 +43,14 @@ public class EnchantmentDataManager {
             new AdditionalEnchantmentsData(EnchantmentCategory.BOW, Enchantments.PIERCING, Enchantments.MULTISHOT, Enchantments.QUICK_CHARGE, Enchantments.MOB_LOOTING),
             new AdditionalEnchantmentsData(EnchantmentCategory.CROSSBOW, Enchantments.FLAMING_ARROWS, Enchantments.PUNCH_ARROWS, Enchantments.POWER_ARROWS, Enchantments.INFINITY_ARROWS, Enchantments.MOB_LOOTING)
     );
-    private static final Map<Enchantment, List<EnchantmentDataEntry<?>>> DEFAULT_CATEGORY_ENTRIES;
-    private static final Map<Enchantment, EnchantmentDataHolder> CATEGORY_HOLDERS = getVanillaEnchantments().collect(Collectors.toMap(Function.identity(), EnchantmentDataHolder::new));
+    private static final Map<Enchantment, EnchantmentDataHolder> ENCHANTMENT_DATA_HOLDERS = getVanillaEnchantments().collect(Collectors.toMap(Function.identity(), EnchantmentDataHolder::new));
     
-    static {
-        Map<Enchantment, EnchantmentDataEntry.Builder> builders = getVanillaEnchantments().collect(Collectors.toMap(Function.identity(), EnchantmentDataEntry::defaultBuilder));
+    private static Map<Enchantment, List<EnchantmentDataEntry<?>>> getDefaultCategoryEntries() {
+        // constructing default builders on Forge is quite expensive, so only do this when necessary
+        Map<Enchantment, EnchantmentDataEntry.Builder> builders = getVanillaEnchantments().collect(Collectors.toMap(Function.identity(), ModServices.ABSTRACTIONS::defaultEnchantmentDataBuilder));
         ADDITIONAL_ENCHANTMENTS_DATA.forEach(data -> data.addToBuilder(builders));
         setupAdditionalCompatibility(builders);
-        DEFAULT_CATEGORY_ENTRIES = builders.entrySet().stream().collect(ImmutableMap.toImmutableMap(Map.Entry::getKey, e -> e.getValue().build()));
+        return builders.entrySet().stream().collect(ImmutableMap.toImmutableMap(Map.Entry::getKey, e -> e.getValue().build()));
     }
 
     private static void setupAdditionalCompatibility(Map<Enchantment, EnchantmentDataEntry.Builder> builders) {
@@ -84,17 +84,17 @@ public class EnchantmentDataManager {
     }
 
     public static void loadAll() {
-        JsonConfigFileUtil.getAllAndLoad(UniversalEnchants.MOD_ID, EnchantmentDataManager::serializeDefaultDataEntries, EnchantmentDataManager::deserializeDataEntry, () -> CATEGORY_HOLDERS.values().forEach(EnchantmentDataHolder::invalidate));
-        CATEGORY_HOLDERS.values().forEach(EnchantmentDataHolder::setEnchantmentCategory);
+        JsonConfigFileUtil.getAllAndLoad(UniversalEnchants.MOD_ID, EnchantmentDataManager::serializeDefaultDataEntries, EnchantmentDataManager::deserializeDataEntry, () -> ENCHANTMENT_DATA_HOLDERS.values().forEach(EnchantmentDataHolder::invalidate));
+        ENCHANTMENT_DATA_HOLDERS.values().forEach(EnchantmentDataHolder::setEnchantmentCategory);
     }
 
     public static boolean isCompatibleWith(Enchantment enchantment, Enchantment other, boolean fallback) {
         // every enchantment is passed in here, but we only support vanilla, so make sure to handle modded properly
-        return Optional.ofNullable(CATEGORY_HOLDERS.get(enchantment)).map(holder -> holder.isCompatibleWith(other, fallback)).orElse(fallback);
+        return Optional.ofNullable(ENCHANTMENT_DATA_HOLDERS.get(enchantment)).map(holder -> holder.isCompatibleWith(other, fallback)).orElse(fallback);
     }
 
     private static void serializeDefaultDataEntries(File directory) {
-        serializeAllDataEntries(directory, DEFAULT_CATEGORY_ENTRIES);
+        serializeAllDataEntries(directory, getDefaultCategoryEntries());
     }
 
     private static void serializeAllDataEntries(File directory, Map<Enchantment, List<EnchantmentDataEntry<?>>> categoryEntries) {
@@ -126,7 +126,7 @@ public class EnchantmentDataManager {
         JsonElement jsonElement = JsonConfigFileUtil.GSON.fromJson(reader, JsonElement.class);
         JsonObject jsonObject = GsonHelper.convertToJsonObject(jsonElement, "enchantment config");
         ResourceLocation id = new ResourceLocation(GsonHelper.getAsString(jsonObject, "id"));
-        EnchantmentDataHolder holder = CATEGORY_HOLDERS.get(Registry.ENCHANTMENT.get(id));
+        EnchantmentDataHolder holder = ENCHANTMENT_DATA_HOLDERS.get(Registry.ENCHANTMENT.get(id));
         JsonArray items = GsonHelper.getAsJsonArray(jsonObject, "items");
         for (JsonElement jsonElement1 : items) {
             String item;
