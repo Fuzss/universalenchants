@@ -1,11 +1,13 @@
 package fuzs.universalenchants.data;
 
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import fuzs.universalenchants.core.ModServices;
 import fuzs.universalenchants.mixin.accessor.EnchantmentAccessor;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.EnchantmentCategory;
@@ -16,6 +18,8 @@ import java.util.*;
 import java.util.function.Predicate;
 
 public class EnchantmentDataHolder {
+    private static final EquipmentSlot[] ARMOR_SLOTS = new EquipmentSlot[]{EquipmentSlot.HEAD, EquipmentSlot.CHEST, EquipmentSlot.LEGS, EquipmentSlot.FEET};
+    private static final Set<EnchantmentCategory> SPECIALIZED_ARMOR_CATEGORIES = ImmutableSet.of(EnchantmentCategory.ARMOR_FEET, EnchantmentCategory.ARMOR_LEGS, EnchantmentCategory.ARMOR_CHEST, EnchantmentCategory.ARMOR_HEAD);
     private static final Map<String, EnchantmentCategory> CUSTOM_ENCHANTMENT_CATEGORIES = Maps.newHashMap();
 
     private final Enchantment enchantment;
@@ -54,9 +58,19 @@ public class EnchantmentDataHolder {
     public void setEnchantmentCategory() {
         if (this.categoryEntries != null) {
             ((EnchantmentAccessor) this.enchantment).setCategory(this.category);
+            // need this to make horse armor work for frost walker and soul speed (kinda breaks soul speed as horse armor is equipped in chest slot, but soul speed attempts to damage boots slot, but since horse armor has no durability anyway and there's nothing equipped in the boots slot that's fine)
+            // all other armor enchantments already set all slots (even the specialized ones such as respiration or feather falling)
+            // do this here dynamically to better support modded enchantments
+            if (SPECIALIZED_ARMOR_CATEGORIES.contains(this.vanillaCategory())) {
+                ((EnchantmentAccessor) this.enchantment).setSlots(ARMOR_SLOTS);
+            }
         } else {
-            ((EnchantmentAccessor) this.enchantment).setCategory(EnchantmentDataManager.VANILLA_ENCHANTMENT_CATEGORIES.get(this.enchantment));
+            ((EnchantmentAccessor) this.enchantment).setCategory(this.vanillaCategory());
         }
+    }
+
+    private EnchantmentCategory vanillaCategory() {
+        return EnchantmentDataManager.VANILLA_ENCHANTMENT_CATEGORIES.get(this.enchantment);
     }
 
     private boolean canEnchant(Item item) {

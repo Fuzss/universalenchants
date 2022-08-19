@@ -1,7 +1,11 @@
 package fuzs.universalenchants.mixin;
 
+import fuzs.universalenchants.UniversalEnchants;
+import fuzs.universalenchants.config.ServerConfig;
+import fuzs.universalenchants.world.item.crafting.MendingRepairItemRecipeHelper;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.inventory.CraftingContainer;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.CustomRecipe;
 import net.minecraft.world.item.crafting.RepairItemRecipe;
 import net.minecraft.world.level.Level;
@@ -17,14 +21,19 @@ public abstract class RepairItemRecipeMixin extends CustomRecipe {
         super(resourceLocation);
     }
 
-    @Inject(method = "canCraftInDimensions", at = @At("HEAD"), cancellable = true)
-    public void canCraftInDimensions$inject$head(int i, int j, CallbackInfoReturnable<Boolean> callback) {
-//        callback.setReturnValue(false);
+    @Inject(method = "matches", at = @At("RETURN"), cancellable = true)
+    public void matches$inject$head(CraftingContainer craftingContainer, Level level, CallbackInfoReturnable<Boolean> callback) {
+        if (!UniversalEnchants.CONFIG.get(ServerConfig.class).mendingCraftingRepair) return;
+        if (!callback.getReturnValue()) {
+            if (MendingRepairItemRecipeHelper.matches(craftingContainer, level)) {
+                callback.setReturnValue(true);
+            }
+        }
     }
 
-
-    @Inject(method = "matches", at = @At("HEAD"), cancellable = true)
-    public void matches$inject$head(CraftingContainer craftingContainer, Level level, CallbackInfoReturnable<Boolean> callback) {
-//        callback.setReturnValue(false);
+    @Inject(method = "assemble", at = @At("HEAD"), cancellable = true)
+    public void assemble$inject$head(CraftingContainer craftingContainer, CallbackInfoReturnable<ItemStack> callback) {
+        if (!UniversalEnchants.CONFIG.get(ServerConfig.class).mendingCraftingRepair) return;
+        callback.setReturnValue(MendingRepairItemRecipeHelper.assemble(craftingContainer));
     }
 }

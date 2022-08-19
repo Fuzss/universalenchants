@@ -12,7 +12,9 @@ public abstract class EnchantmentMixin {
 
     @Inject(method = "isCompatibleWith", at = @At("TAIL"), cancellable = true)
     public void isCompatibleWith$head(Enchantment other, CallbackInfoReturnable<Boolean> callback) {
-        boolean result = EnchantmentDataManager.isCompatibleWith((Enchantment) (Object) this, other, callback.getReturnValue());
-        callback.setReturnValue(result);
+        boolean vanillaResult = callback.getReturnValue();
+        boolean result = EnchantmentDataManager.isCompatibleWith((Enchantment) (Object) this, other, vanillaResult);
+        // allow this to short-circuit
+        callback.setReturnValue(result && EnchantmentDataManager.isCompatibleWith(other, (Enchantment) (Object) this, vanillaResult));
     }
 }

@@ -2,16 +2,11 @@ package fuzs.universalenchants.world.item.crafting;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import fuzs.universalenchants.UniversalEnchants;
-import fuzs.universalenchants.config.ServerConfig;
-import fuzs.universalenchants.init.ModRegistry;
+import net.minecraft.Util;
 import net.minecraft.core.Registry;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.inventory.CraftingContainer;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.crafting.CustomRecipe;
-import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.item.enchantment.Enchantments;
@@ -20,76 +15,57 @@ import net.minecraft.world.level.Level;
 import java.util.List;
 import java.util.Map;
 
-public class MendingRepairItemRecipe extends CustomRecipe {
+/**
+ * we apply this using mixin instead of simply providing our own recipe serializer
+ * since this partially has the same functionality with a different outcome from vanilla's {@link net.minecraft.world.item.crafting.RepairItemRecipe}
+ */
+public class MendingRepairItemRecipeHelper {
 
-    public MendingRepairItemRecipe(ResourceLocation resourceLocation) {
-        super(resourceLocation);
-    }
-
-    @Override
-    public boolean matches(CraftingContainer craftingContainer, Level level) {
-        if (vanilla(craftingContainer)) {
-            return true;
-        }
-        if (!UniversalEnchants.CONFIG.get(ServerConfig.class).easyMendingRepair) return false;
-        List<ItemStack> list = Lists.newArrayList();
+    public static boolean matches(CraftingContainer craftingContainer, Level level) {
+        // vanilla's RepairItemRecipe::matches is run before this, we only check our own case
+        // find if there is a single item enchanted with mending
+        List<ItemStack> itemToRepair = Lists.newArrayList();
         for (int i = 0; i < craftingContainer.getContainerSize(); ++i) {
             ItemStack itemStack = craftingContainer.getItem(i);
             if (!itemStack.isEmpty()) {
                 if (itemStack.getCount() == 1 && itemStack.getItem().canBeDepleted()) {
                     if (EnchantmentHelper.getItemEnchantmentLevel(Enchantments.MENDING, itemStack) > 0) {
-                        list.add(itemStack);
+                        itemToRepair.add(itemStack);
                     }
                 }
             }
         }
-        if (list.size() == 1) {
-            ItemStack itemStack1 = list.get(0);
-            List<ItemStack> list2 = Lists.newArrayList();
+        // check if all other items are repair materials for the enchanted item
+        if (itemToRepair.size() == 1) {
+            ItemStack stackToRepair = itemToRepair.get(0);
+            List<ItemStack> repairMaterialItems = Lists.newArrayList();
             for (int i = 0; i < craftingContainer.getContainerSize(); ++i) {
                 ItemStack itemStack = craftingContainer.getItem(i);
-                if (!itemStack.isEmpty() && itemStack != itemStack1) {
-                    if (itemStack1.getItem().isValidRepairItem(itemStack1, itemStack)) {
-                        list2.add(itemStack);
+                if (!itemStack.isEmpty() && itemStack != stackToRepair) {
+                    if (stackToRepair.getItem().isValidRepairItem(stackToRepair, itemStack)) {
+                        repairMaterialItems.add(itemStack);
                     } else {
                         return false;
                     }
                 }
             }
-            return !list2.isEmpty();
+            // make sure to not consume too many repair materials
+            return !repairMaterialItems.isEmpty() && repairMaterialItems.size() <= Math.ceil(stackToRepair.getDamageValue() * 4.0F / stackToRepair.getMaxDamage());
         }
         return false;
     }
 
-    private static boolean vanilla(CraftingContainer craftingContainer) {
-        List<ItemStack> list = Lists.<ItemStack>newArrayList();
-
-        for(int i = 0; i < craftingContainer.getContainerSize(); ++i) {
-            ItemStack itemStack = craftingContainer.getItem(i);
-            if (!itemStack.isEmpty()) {
-                list.add(itemStack);
-                if (list.size() > 1) {
-                    ItemStack itemStack2 = (ItemStack)list.get(0);
-                    if (!itemStack.is(itemStack2.getItem()) || itemStack2.getCount() != 1 || itemStack.getCount() != 1 || !itemStack2.getItem().canBeDepleted()) {
-                        return false;
-                    }
-                }
-            }
-        }
-
-        return list.size() == 2;
-    }
-
-    @Override
-    public ItemStack assemble(CraftingContainer craftingContainer) {
-        List<ItemStack> repairItems = Lists.newArrayList();
+    public static ItemStack assemble(CraftingContainer craftingContainer) {
+        // this replaces vanilla's RepairItemRecipe::assemble
+        // we search for all repairable items, if we find multiples they must all be the same item
+        List<ItemStack> itemsToRepair = Lists.newArrayList();
         for (int i = 0; i < craftingContainer.getContainerSize(); ++i) {
             ItemStack itemStack = craftingContainer.getItem(i);
             if (!itemStack.isEmpty()) {
                 if (itemStack.getCount() == 1 && itemStack.getItem().canBeDepleted()) {
-                    repairItems.add(itemStack);
-                    if (repairItems.size() > 1) {
-                        ItemStack itemStack2 = repairItems.get(0);
+                    itemsToRepair.add(itemStack);
+                    if (itemsToRepair.size() > 1) {
+                        ItemStack itemStack2 = itemsToRepair.get(0);
                         if (!itemStack.is(itemStack2.getItem())) {
                             return ItemStack.EMPTY;
                         }
@@ -97,27 +73,28 @@ public class MendingRepairItemRecipe extends CustomRecipe {
                 }
             }
         }
-
-        List<ItemStack> materialItems = Lists.newArrayList();
-        if (repairItems.size() == 1 && UniversalEnchants.CONFIG.get(ServerConfig.class).easyMendingRepair) {
-            ItemStack stackToRepair = repairItems.get(0);
+        // we search for repair materials if we just found a single item
+        List<ItemStack> repairMaterialItems = Lists.newArrayList();
+        if (itemsToRepair.size() == 1) {
+            ItemStack stackToRepair = itemsToRepair.get(0);
             if (EnchantmentHelper.getItemEnchantmentLevel(Enchantments.MENDING, stackToRepair) > 0) {
                 for (int i = 0; i < craftingContainer.getContainerSize(); ++i) {
                     ItemStack itemStack = craftingContainer.getItem(i);
                     if (!itemStack.isEmpty() && itemStack != stackToRepair) {
                         if (stackToRepair.getItem().isValidRepairItem(stackToRepair, itemStack)) {
-                            materialItems.add(itemStack);
+                            repairMaterialItems.add(itemStack);
                         } else {
                             return ItemStack.EMPTY;
                         }
                     }
                 }
-                if (!materialItems.isEmpty()) {
+                // repair the stack, just like in an anvil (make sure to not consume too many repair materials)
+                if (!repairMaterialItems.isEmpty()) {
                     stackToRepair = stackToRepair.copy();
-                    if (materialItems.size() <= Math.ceil(stackToRepair.getDamageValue() * 4.0F / stackToRepair.getMaxDamage())) {
+                    if (repairMaterialItems.size() <= Math.ceil(stackToRepair.getDamageValue() * 4.0F / stackToRepair.getMaxDamage())) {
                         int repairAmount = Math.min(stackToRepair.getDamageValue(), stackToRepair.getMaxDamage() / 4);
                         if (repairAmount > 0) {
-                            for (int i = 0; i < materialItems.size(); i++) {
+                            for (int i = 0; i < repairMaterialItems.size(); i++) {
                                 stackToRepair.setDamageValue(stackToRepair.getDamageValue() - repairAmount);
                                 repairAmount = Math.min(stackToRepair.getDamageValue(), stackToRepair.getMaxDamage() / 4);
                             }
@@ -127,17 +104,20 @@ public class MendingRepairItemRecipe extends CustomRecipe {
                 }
             }
             return ItemStack.EMPTY;
-        } else if (repairItems.size() == 2) {
+        } else if (itemsToRepair.size() == 2) {
+            // check if an item has mending and which one it is
             ItemStack stack = ItemStack.EMPTY;
             ItemStack otherStack = ItemStack.EMPTY;
-            if (EnchantmentHelper.getItemEnchantmentLevel(Enchantments.MENDING, repairItems.get(0)) > 0) {
-                stack = repairItems.get(0);
-                otherStack = repairItems.get(1);
-            } else if (EnchantmentHelper.getItemEnchantmentLevel(Enchantments.MENDING, repairItems.get(1)) > 0) {
-                stack = repairItems.get(1);
-                otherStack = repairItems.get(0);
+            if (EnchantmentHelper.getItemEnchantmentLevel(Enchantments.MENDING, itemsToRepair.get(0)) > 0) {
+                stack = itemsToRepair.get(0);
+                otherStack = itemsToRepair.get(1);
+            } else if (EnchantmentHelper.getItemEnchantmentLevel(Enchantments.MENDING, itemsToRepair.get(1)) > 0) {
+                stack = itemsToRepair.get(1);
+                otherStack = itemsToRepair.get(0);
             }
-            if (!stack.isEmpty() && UniversalEnchants.CONFIG.get(ServerConfig.class).easyMendingRepair) {
+            // repair the mending item with anvil code, only changes durability, no changes to enchantments
+            // (enchantments on the item repaired with will be lost)
+            if (!stack.isEmpty()) {
                 stack = stack.copy();
                 int l = stack.getMaxDamage() - stack.getDamageValue();
                 int m = otherStack.getMaxDamage() - otherStack.getDamageValue();
@@ -150,10 +130,20 @@ public class MendingRepairItemRecipe extends CustomRecipe {
                 if (p < stack.getDamageValue()) {
                     stack.setDamageValue(p);
                 }
+                // make sure curses are copied just like vanilla
+                Map<Enchantment, Integer> otherEnchantments = EnchantmentHelper.getEnchantments(otherStack).entrySet().stream().filter(e -> e.getKey().isCurse()).collect(Util.toMap());
+                if (!otherEnchantments.isEmpty()) {
+                    Map<Enchantment, Integer> enchantments = EnchantmentHelper.getEnchantments(stack);
+                    for (Map.Entry<Enchantment, Integer> entry : otherEnchantments.entrySet()) {
+                        enchantments.merge(entry.getKey(), entry.getValue(), Math::max);
+                    }
+                    EnchantmentHelper.setEnchantments(enchantments, stack);
+                }
                 return stack;
             } else {
-                ItemStack itemStack3 = repairItems.get(0);
-                ItemStack itemStack = repairItems.get(1);
+                // no mending is present, just let the vanilla code run
+                ItemStack itemStack3 = itemsToRepair.get(0);
+                ItemStack itemStack = itemsToRepair.get(1);
                 if (itemStack3.is(itemStack.getItem()) && itemStack3.getCount() == 1 && itemStack.getCount() == 1 && itemStack3.getItem().canBeDepleted()) {
                     Item item = itemStack3.getItem();
                     int j = item.getMaxDamage() - itemStack3.getDamageValue();
@@ -185,15 +175,5 @@ public class MendingRepairItemRecipe extends CustomRecipe {
             }
         }
         return ItemStack.EMPTY;
-    }
-
-    @Override
-    public boolean canCraftInDimensions(int i, int j) {
-        return i * j >= 2;
-    }
-
-    @Override
-    public RecipeSerializer<?> getSerializer() {
-        return ModRegistry.REPAIR_MENDING_ITEM_RECIPE_SERIALIZER.get();
     }
 }

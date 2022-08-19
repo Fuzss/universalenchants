@@ -10,11 +10,9 @@ import com.google.gson.JsonObject;
 import fuzs.puzzleslib.json.JsonConfigFileUtil;
 import fuzs.universalenchants.UniversalEnchants;
 import fuzs.universalenchants.core.ModServices;
-import fuzs.universalenchants.mixin.accessor.EnchantmentAccessor;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.GsonHelper;
-import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.item.AxeItem;
 import net.minecraft.world.item.HorseArmorItem;
 import net.minecraft.world.item.enchantment.*;
@@ -54,14 +52,6 @@ public class EnchantmentDataManager {
             new AdditionalEnchantmentsData(HORSE_ARMOR_ENCHANTMENT_CATEGORY, Enchantments.ALL_DAMAGE_PROTECTION, Enchantments.FIRE_PROTECTION, Enchantments.FALL_PROTECTION, Enchantments.BLAST_PROTECTION, Enchantments.PROJECTILE_PROTECTION, Enchantments.RESPIRATION, Enchantments.THORNS, Enchantments.DEPTH_STRIDER, Enchantments.FROST_WALKER, Enchantments.BINDING_CURSE, Enchantments.SOUL_SPEED, Enchantments.VANISHING_CURSE)
     );
     private static final Map<Enchantment, EnchantmentDataHolder> ENCHANTMENT_DATA_HOLDERS = Registry.ENCHANTMENT.stream().collect(Collectors.toMap(Function.identity(), EnchantmentDataHolder::new));
-
-    static {
-        // need this to make horse armor work, all other armor enchantments already set all slots (even the specialized ones such as respiration or feather falling)
-        // could expose this in the data driven system, but isn't probably useful outside this case
-        EquipmentSlot[] armorSlots = new EquipmentSlot[]{EquipmentSlot.HEAD, EquipmentSlot.CHEST, EquipmentSlot.LEGS, EquipmentSlot.FEET};
-        ((EnchantmentAccessor) Enchantments.FROST_WALKER).setSlots(armorSlots);
-        ((EnchantmentAccessor) Enchantments.SOUL_SPEED).setSlots(armorSlots);
-    }
     
     private static Map<Enchantment, List<EnchantmentDataEntry<?>>> getDefaultCategoryEntries() {
         // constructing default builders on Forge is quite expensive, so only do this when necessary

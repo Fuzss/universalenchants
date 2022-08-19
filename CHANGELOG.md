@@ -3,7 +3,7 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog].
 
-## [v4.1.0-1.19.1] - 2022-08-18
+## [v4.1.0-1.19.1] - 2022-08-19
 ### Added
 - Completely overhauled config for what enchantments are compatible with what items and which enchantments can be applied together
 - The new system uses individual `json` files for each enchantment, this makes configuring every single vanilla enchantment possible
@@ -12,8 +12,8 @@ The format is based on [Keep a Changelog].
 - Overhauled vanilla's `/enchant` command, it can now apply enchantment levels above the default max level, supports overriding and removing enchantments, and also handles books now
 - Horse armor can now receive the following enchantments at an enchanting table or anvil: protection, blast protection, fire protection, projectile protection, feather falling, respiration, thorns, depth strider, frost walker, curse of binding, soul speed, curse of vanishing
 - The enchantment glint now renders on horse armor
-- Added an option to overhaul mending (disabled by default): mending no longer repairs items, instead it makes repairing (just repairing, not adding new enchantments or anything alike) in an anvil not increase the items repair cost
-- Additionally, mending allows the item to be repaired in the crafting menu in the same way as in an anvil without any experience cost: combining a tool with another one or the appropriate repair item is possible, all enchantments will be preserved
+- Added an option to overhaul mending (disabled by default): mending no longer repairs items, instead mending allows the item to be repaired in the crafting menu in the same way as in an anvil without any experience cost: combining a tool with another one or the appropriate repair item is possible, all enchantments will be preserved
+- Additionally, it makes repairing (just repairing, not adding new enchantments or anything alike) in an anvil not increase the items repair cost
 ### Removed
 - Removed a bunch of server config options as they've been moved to `json`
 
