@@ -88,7 +88,7 @@ public class BetterEnchantsHandler {
     }
 
     public Optional<Unit> onPickupXp(Player player, ExperienceOrb orb) {
-        if (!UniversalEnchants.CONFIG.get(ServerConfig.class).cheapMendingRepair) return Optional.empty();
+        if (!UniversalEnchants.CONFIG.get(ServerConfig.class).easyMendingRepair) return Optional.empty();
         player.takeXpDelay = 2;
         player.take(orb, 1);
         if (orb.getValue() > 0) {

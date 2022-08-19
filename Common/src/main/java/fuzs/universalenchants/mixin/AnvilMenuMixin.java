@@ -25,7 +25,7 @@ public abstract class AnvilMenuMixin extends ItemCombinerMenu {
 
     @Inject(method = "createResult", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/inventory/AnvilMenu;broadcastChanges()V"))
     public void createResult$inject$invoke(CallbackInfo callback) {
-        if (!UniversalEnchants.CONFIG.get(ServerConfig.class).cheapMendingRepair) return;
+        if (!UniversalEnchants.CONFIG.get(ServerConfig.class).easyMendingRepair) return;
         ItemStack resultStack = this.resultSlots.getItem(0);
         if (!resultStack.isEmpty() && EnchantmentHelper.getItemEnchantmentLevel(Enchantments.MENDING, resultStack) > 0) {
             ItemStack inputStack = this.inputSlots.getItem(0);

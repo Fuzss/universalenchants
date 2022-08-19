@@ -10,6 +10,7 @@
     "EnchantmentMixin",
     "HorseArmorItemMixin",
     "HorseInventoryMenu$SlotMixin",
+    "RepairItemRecipeMixin",
     "ThrownTridentMixin",
     "TridentItemMixin",
     "accessor.AbstractArrowAccessor",
