@@ -3,6 +3,10 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog].
 
+## [v4.1.1-1.19.1] - 2022-08-19
+### Fixed
+- Fixed crash on dedicated server due to faulty import
+
 ## [v4.1.0-1.19.1] - 2022-08-19
 ### Added
 - Completely overhauled config for what enchantments are compatible with what items and which enchantments can be applied together
