@@ -7,6 +7,7 @@ import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.resource.IdentifiableResourceReloadListener;
 import net.fabricmc.fabric.api.resource.ResourceManagerHelper;
 import net.fabricmc.fabric.api.resource.ResourceReloadListenerKeys;
+import net.minecraft.locale.Language;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.PackType;
 import net.minecraft.server.packs.resources.ResourceManager;
@@ -35,7 +36,7 @@ public class UniversalEnchantsFabricClient implements ClientModInitializer {
 
             @Override
             public CompletableFuture<Void> reload(PreparationBarrier preparationBarrier, ResourceManager resourceManager, ProfilerFiller profilerFiller, ProfilerFiller profilerFiller2, Executor executor, Executor executor2) {
-                return preparationBarrier.wait(Unit.INSTANCE).thenRunAsync(NumericClientLanguage::injectLanguage, executor2);
+                return preparationBarrier.wait(Unit.INSTANCE).thenRunAsync(() -> NumericClientLanguage.injectLanguage(new NumericClientLanguage(Language.getInstance())), executor2);
             }
         });
     }

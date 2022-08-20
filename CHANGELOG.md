@@ -3,6 +3,10 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog].
 
+## [v4.1.2-1.19.1] - 2022-08-20
+### Fixed
+- Fixed broken Forge translation keys
+
 ## [v4.1.1-1.19.1] - 2022-08-19
 ### Fixed
 - Fixed crash on dedicated server due to faulty import

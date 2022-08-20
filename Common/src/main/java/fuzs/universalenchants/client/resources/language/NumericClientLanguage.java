@@ -42,11 +42,12 @@ public class NumericClientLanguage extends Language {
         this.language = language;
     }
 
-    public static void injectLanguage() {
+    public static void injectLanguage(NumericClientLanguage numericLanguage) {
         if (UniversalEnchants.CONFIG.get(ClientConfig.class).fixRomanNumerals == ClientConfig.NumeralLanguage.NONE) return;
-        Language language = new NumericClientLanguage(Language.getInstance());
-        I18nAccessor.callSetLanguage(language);
-        Language.inject(language);
+        // don't wrap multiple times accidentally
+        if (numericLanguage.language instanceof NumericClientLanguage) return;
+        I18nAccessor.callSetLanguage(numericLanguage);
+        Language.inject(numericLanguage);
     }
 
     @Override

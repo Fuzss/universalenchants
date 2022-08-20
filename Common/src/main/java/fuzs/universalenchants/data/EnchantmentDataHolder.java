@@ -70,7 +70,7 @@ public class EnchantmentDataHolder {
     }
 
     private EnchantmentCategory vanillaCategory() {
-        return EnchantmentDataManager.VANILLA_ENCHANTMENT_CATEGORIES.get(this.enchantment);
+        return EnchantmentDataManager.DEFAULT_ENCHANTMENT_CATEGORIES.get(this.enchantment);
     }
 
     private boolean canEnchant(Item item) {

@@ -42,7 +42,7 @@ public class EnchantmentDataManager {
             .putCategory(UniversalEnchants.MOD_ID, AXE_ENCHANTMENT_CATEGORY)
             .putCategory(UniversalEnchants.MOD_ID, HORSE_ARMOR_ENCHANTMENT_CATEGORY)
             .get();
-    public static final Map<Enchantment, EnchantmentCategory> VANILLA_ENCHANTMENT_CATEGORIES = Registry.ENCHANTMENT.stream().collect(ImmutableMap.toImmutableMap(Function.identity(), e -> e.category));
+    public static final Map<Enchantment, EnchantmentCategory> DEFAULT_ENCHANTMENT_CATEGORIES = Registry.ENCHANTMENT.stream().collect(ImmutableMap.toImmutableMap(Function.identity(), e -> e.category));
     private static final List<AdditionalEnchantmentsData> ADDITIONAL_ENCHANTMENTS_DATA = ImmutableList.of(
             new AdditionalEnchantmentsData(EnchantmentCategory.WEAPON, Enchantments.IMPALING),
             new AdditionalEnchantmentsData(AXE_ENCHANTMENT_CATEGORY, Enchantments.SHARPNESS, Enchantments.SMITE, Enchantments.BANE_OF_ARTHROPODS, Enchantments.KNOCKBACK, Enchantments.FIRE_ASPECT, Enchantments.MOB_LOOTING, Enchantments.SWEEPING_EDGE, Enchantments.IMPALING),
