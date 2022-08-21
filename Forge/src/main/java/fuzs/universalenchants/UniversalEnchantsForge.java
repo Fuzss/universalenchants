@@ -1,15 +1,18 @@
 package fuzs.universalenchants;
 
+import fuzs.puzzleslib.capability.ForgeCapabilityController;
 import fuzs.puzzleslib.core.CoreServices;
+import fuzs.universalenchants.capability.ArrowLootingCapability;
 import fuzs.universalenchants.data.EnchantmentDataManager;
 import fuzs.universalenchants.handler.BetterEnchantsHandler;
 import fuzs.universalenchants.handler.ItemCompatHandler;
-import fuzs.universalenchants.init.ForgeModRegistry;
+import fuzs.universalenchants.init.ModRegistry;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.common.capabilities.CapabilityToken;
 import net.minecraftforge.event.TagsUpdatedEvent;
 import net.minecraftforge.event.entity.living.LivingEntityUseItemEvent;
 import net.minecraftforge.event.entity.living.LivingExperienceDropEvent;
@@ -32,8 +35,12 @@ public class UniversalEnchantsForge {
     @SubscribeEvent
     public static void onConstructMod(final FMLConstructModEvent evt) {
         CoreServices.FACTORIES.modConstructor(UniversalEnchants.MOD_ID).accept(new UniversalEnchants());
-        ForgeModRegistry.touch();
+        registerCapabilities();
         registerHandlers();
+    }
+
+    private static void registerCapabilities() {
+        ForgeCapabilityController.setCapabilityToken(ModRegistry.ARROW_LOOTING_CAPABILITY, new CapabilityToken<ArrowLootingCapability>() {});
     }
 
     private static void registerHandlers() {

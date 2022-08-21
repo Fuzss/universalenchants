@@ -11,7 +11,6 @@ import fuzs.universalenchants.api.event.world.FarmlandTrampleCallback;
 import fuzs.universalenchants.data.EnchantmentDataManager;
 import fuzs.universalenchants.handler.BetterEnchantsHandler;
 import fuzs.universalenchants.handler.ItemCompatHandler;
-import fuzs.universalenchants.init.FabricModRegistry;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.event.lifecycle.v1.CommonLifecycleEvents;
 import net.fabricmc.fabric.api.event.player.UseItemCallback;
@@ -29,7 +28,6 @@ public class UniversalEnchantsFabric implements ModInitializer {
     @Override
     public void onInitialize() {
         CoreServices.FACTORIES.modConstructor(UniversalEnchants.MOD_ID).accept(new UniversalEnchants());
-        FabricModRegistry.touch();
         registerHandlers();
     }
 
