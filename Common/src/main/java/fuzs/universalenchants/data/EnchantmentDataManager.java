@@ -7,6 +7,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.google.gson.JsonSyntaxException;
 import fuzs.puzzleslib.json.JsonConfigFileUtil;
 import fuzs.universalenchants.UniversalEnchants;
 import fuzs.universalenchants.core.ModServices;
@@ -129,10 +130,11 @@ public class EnchantmentDataManager {
         return jsonObject;
     }
 
-    private static void deserializeDataEntry(FileReader reader) {
+    private static void deserializeDataEntry(FileReader reader) throws JsonSyntaxException {
         JsonElement jsonElement = JsonConfigFileUtil.GSON.fromJson(reader, JsonElement.class);
         JsonObject jsonObject = GsonHelper.convertToJsonObject(jsonElement, "enchantment config");
         ResourceLocation id = new ResourceLocation(GsonHelper.getAsString(jsonObject, "id"));
+        if (!Registry.ENCHANTMENT.containsKey(id)) throw new JsonSyntaxException("Enchantment %s not found in registry, skipping...".formatted(id));
         Enchantment key = Registry.ENCHANTMENT.get(id);
         EnchantmentDataHolder holder = ENCHANTMENT_DATA_HOLDERS.get(key);
         if (jsonObject.has("items")) {
