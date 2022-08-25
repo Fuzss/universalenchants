@@ -37,11 +37,6 @@
     "puzzleslib": ">=${minPuzzlesVersion}",
     "minecraft": ">=${minMinecraftVersion} <${nextMinecraftVersion}",
     "java": ">=17",
-    "cardinal-components-base": "*",
-    "cardinal-components-entity": "*",
-    "cardinal-components-block": "*",
-    "cardinal-components-chunk": "*",
-    "cardinal-components-world": "*",
     "extensibleenums": "*"
   },
 

@@ -19,7 +19,7 @@ public abstract class ExperienceOrbMixin extends Entity {
     }
 
     @Inject(method = "playerTouch", at = @At(value = "FIELD", target = "Lnet/minecraft/world/entity/player/Player;takeXpDelay:I", ordinal = 1), cancellable = true)
-    public void playerTouch$inject$invoke(Player player, CallbackInfo callback) {
+    public void playerTouch$inject$field$takeXpDelay(Player player, CallbackInfo callback) {
         PlayerXpEvents.PICKUP_XP.invoker().onPickupXp(player, (ExperienceOrb) (Object) this).ifPresent(unit -> callback.cancel());
     }
 }

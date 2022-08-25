@@ -15,7 +15,7 @@ import org.spongepowered.asm.mixin.injection.ModifyVariable;
 public abstract class LootItemRandomChanceWithLootingConditionMixin {
 
     @ModifyVariable(method = "test", at = @At("LOAD"), ordinal = 0)
-    public int test$loadLootingLevel(int lootingLevel, LootContext lootContext) {
+    public int test$modifyVariable$load$lootingLevel(int lootingLevel, LootContext lootContext) {
         Entity target = lootContext.getParamOrNull(LootContextParams.THIS_ENTITY);
         if (!(target instanceof LivingEntity livingEntity)) return lootingLevel;
         DamageSource damageSource = lootContext.getParamOrNull(LootContextParams.DAMAGE_SOURCE);

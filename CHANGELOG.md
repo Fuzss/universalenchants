@@ -3,6 +3,11 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog].
 
+## [v4.2.1-1.19.2] - 2022-08-26
+- Cardinal Components once again doesn't need a separate download anymore, it is now bundled with Puzzles Lib
+### Fixed
+- Fixed a small bug where xp would not be properly affected from a looting weapon on Fabric
+
 ## [v4.2.0-1.19.2] - 2022-08-21
 - Compiled for Minecraft 1.19.2
 

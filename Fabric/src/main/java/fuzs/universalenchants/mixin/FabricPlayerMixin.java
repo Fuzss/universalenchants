@@ -20,7 +20,7 @@ public abstract class FabricPlayerMixin extends LivingEntity {
     }
 
     @ModifyVariable(method = "attack", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/player/Player;getItemInHand(Lnet/minecraft/world/InteractionHand;)Lnet/minecraft/world/item/ItemStack;"), ordinal = 3)
-    public boolean attack$storeCanPerformSweepAction(boolean canPerformSweepAction) {
+    public boolean attack$modifyVariable$invoke(boolean canPerformSweepAction) {
         // the injection we use on Forge would only be called when sweeping is allowed (which doesn't work for us since we want to enable additional items),
         // so we need this alternative mixin
         // this will only be called when sweeping is allowed to happen and only the check for SwordItem is missing, since that's the behavior we want to change

@@ -16,7 +16,7 @@ import org.spongepowered.asm.mixin.injection.ModifyVariable;
 public abstract class LootingEnchantFunctionMixin {
 
     @ModifyVariable(method = "run", at = @At("STORE"), ordinal = 0)
-    public int run$storeLootingLevel(int lootingLevel, ItemStack itemStack, LootContext lootContext) {
+    public int run$modifyVariable$store$lootingLevel(int lootingLevel, ItemStack itemStack, LootContext lootContext) {
         Entity target = lootContext.getParamOrNull(LootContextParams.THIS_ENTITY);
         if (!(target instanceof LivingEntity livingEntity)) return lootingLevel;
         DamageSource damageSource = lootContext.getParamOrNull(LootContextParams.DAMAGE_SOURCE);
