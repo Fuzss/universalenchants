@@ -1,6 +1,5 @@
 package fuzs.universalenchants;
 
-import com.mojang.brigadier.CommandDispatcher;
 import fuzs.puzzleslib.config.ConfigHolder;
 import fuzs.puzzleslib.core.CoreServices;
 import fuzs.puzzleslib.core.ModConstructor;
@@ -8,9 +7,6 @@ import fuzs.universalenchants.config.ClientConfig;
 import fuzs.universalenchants.config.ServerConfig;
 import fuzs.universalenchants.init.ModRegistry;
 import fuzs.universalenchants.server.commands.ModEnchantCommand;
-import net.minecraft.commands.CommandBuildContext;
-import net.minecraft.commands.CommandSourceStack;
-import net.minecraft.commands.Commands;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -31,7 +27,7 @@ public class UniversalEnchants implements ModConstructor {
     }
 
     @Override
-    public void onRegisterCommands(CommandDispatcher<CommandSourceStack> dispatcher, CommandBuildContext context, Commands.CommandSelection environment) {
-        ModEnchantCommand.register(dispatcher);
+    public void onRegisterCommands(RegisterCommandsContext context) {
+        ModEnchantCommand.register(context.dispatcher());
     }
 }

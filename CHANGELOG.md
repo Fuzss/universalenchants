@@ -3,6 +3,9 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog].
 
+## [v4.2.2-1.19.2] - 2022-09-01
+- Recompile for Puzzles Lib v4.3.0
+
 ## [v4.2.1-1.19.2] - 2022-08-26
 - Cardinal Components once again doesn't need a separate download anymore, it is now bundled with Puzzles Lib
 ### Fixed
