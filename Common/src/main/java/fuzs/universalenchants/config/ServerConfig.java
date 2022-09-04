@@ -1,7 +1,10 @@
 package fuzs.universalenchants.config;
 
 import fuzs.puzzleslib.config.ConfigCore;
+import fuzs.puzzleslib.config.ValueCallback;
 import fuzs.puzzleslib.config.annotation.Config;
+import fuzs.puzzleslib.config.core.AbstractConfigBuilder;
+import fuzs.puzzleslib.core.CoreServices;
 
 public class ServerConfig implements ConfigCore {
     @Config(description = "Infinity enchantment no longer requires a single arrow to be present in the player inventory.")
@@ -16,4 +19,12 @@ public class ServerConfig implements ConfigCore {
     public boolean mendingCraftingRepair = false;
     @Config(description = {"Remove the max level cap from the /enchant command, also allow overriding and removing (by setting the level to 0) existing enchantment levels.", "Additionally make enchanting books work via the command."})
     public boolean fixEnchantCommand = true;
+    public boolean allowModItemSupport;
+
+    @Override
+    public void addToBuilder(AbstractConfigBuilder builder, ValueCallback callback) {
+        if (CoreServices.ENVIRONMENT.getModLoader().isForge()) {
+            callback.accept(builder.comment("Enchanting a few modded items (e.g. Farmer's Delight's skillet) is broken by the changes this mod makes to how enchantments may be applied to items. This option enables a patch for Forge itself to help better support such items.").define("allow_mod_item_support", false), v -> this.allowModItemSupport = v);
+        }
+    }
 }

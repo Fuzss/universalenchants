@@ -6,6 +6,7 @@
   "refmap": "universalenchants.refmap.json",
   "mixins": [
     "ForgeBowItemMixin",
+    "ForgeEnchantment",
     "ForgePlayerMixin"
   ],
   "client": [

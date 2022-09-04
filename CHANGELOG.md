@@ -3,6 +3,10 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog].
 
+## [v4.2.4-1.19.2] - 2022-09-04
+### Changed
+- Improved support for enchantment compatibility on custom modded items, this is a dedicated config option that needs to be manually enabled (all on Forge only)
+
 ## [v4.2.3-1.19.2] - 2022-09-01
 ### Fixed
 - Recompiled to fix start-up crash on Forge due to mixins not having been remapped
