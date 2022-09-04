@@ -82,6 +82,9 @@ public class EnchantmentDataManager {
     private static void applyIncompatibilityToBoth(Map<Enchantment, EnchantmentDataEntry.Builder> builders, Enchantment enchantment, Enchantment other, boolean add) {
         BiConsumer<Enchantment, Enchantment> operation = (e1, e2) -> {
             EnchantmentDataEntry.Builder builder = builders.get(e1);
+            // this might be called for non-vanilla enchantments (currently possible through DamageEnchantment and ProtectionEnchantment instanceof checks)
+            // they won't have a builder, so be careful
+            if (builder == null) return;
             if (add) {
                 builder.add(e2);
             } else {
@@ -98,7 +101,7 @@ public class EnchantmentDataManager {
     }
 
     public static boolean isCompatibleWith(Enchantment enchantment, Enchantment other, boolean fallback) {
-        return ENCHANTMENT_DATA_HOLDERS.get(enchantment).isCompatibleWith(other, fallback);
+        return ENCHANTMENT_DATA_HOLDERS.get(enchantment).isCompatibleWith(other, fallback) && ENCHANTMENT_DATA_HOLDERS.get(other).isCompatibleWith(enchantment, fallback);
     }
 
     private static void serializeDefaultDataEntries(File directory) {
