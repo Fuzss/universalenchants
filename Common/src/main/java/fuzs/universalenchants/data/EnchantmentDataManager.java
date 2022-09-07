@@ -33,15 +33,15 @@ public class EnchantmentDataManager {
     /**
      * vanilla doesn't have an enchantment category just for axes, so we make our own
      */
-    private static final EnchantmentCategory AXE_ENCHANTMENT_CATEGORY = ModServices.ABSTRACTIONS.createEnchantmentCategory("AXE", item -> item instanceof AxeItem);
-    private static final EnchantmentCategory HORSE_ARMOR_ENCHANTMENT_CATEGORY = ModServices.ABSTRACTIONS.createEnchantmentCategory("HORSE_ARMOR", item -> item instanceof HorseArmorItem);
+    private static final EnchantmentCategory AXE_ENCHANTMENT_CATEGORY = ModServices.ABSTRACTIONS.createEnchantmentCategory(UniversalEnchants.MOD_ID.toUpperCase(Locale.ROOT) + "_AXE", item -> item instanceof AxeItem);
+    private static final EnchantmentCategory HORSE_ARMOR_ENCHANTMENT_CATEGORY = ModServices.ABSTRACTIONS.createEnchantmentCategory(UniversalEnchants.MOD_ID.toUpperCase(Locale.ROOT) + "HORSE_ARMOR", item -> item instanceof HorseArmorItem);
     /**
      * we store these manually as vanilla's categories are the only ones we want to mess with, don't accidentally do something with our own or other mods' categories
      */
     public static final BiMap<EnchantmentCategory, ResourceLocation> ENCHANTMENT_CATEGORIES_BY_ID = EnchantmentCategoryMapBuilder.create()
             .putVanillaCategories(EnchantmentCategory.ARMOR, EnchantmentCategory.ARMOR_FEET, EnchantmentCategory.ARMOR_LEGS, EnchantmentCategory.ARMOR_CHEST, EnchantmentCategory.ARMOR_HEAD, EnchantmentCategory.WEAPON, EnchantmentCategory.DIGGER, EnchantmentCategory.FISHING_ROD, EnchantmentCategory.TRIDENT, EnchantmentCategory.BREAKABLE, EnchantmentCategory.BOW, EnchantmentCategory.WEARABLE, EnchantmentCategory.CROSSBOW, EnchantmentCategory.VANISHABLE)
-            .putCategory(UniversalEnchants.MOD_ID, AXE_ENCHANTMENT_CATEGORY)
-            .putCategory(UniversalEnchants.MOD_ID, HORSE_ARMOR_ENCHANTMENT_CATEGORY)
+            .putCategory(new ResourceLocation(UniversalEnchants.MOD_ID, "axe"), AXE_ENCHANTMENT_CATEGORY)
+            .putCategory(new ResourceLocation(UniversalEnchants.MOD_ID, "horse_armor"), HORSE_ARMOR_ENCHANTMENT_CATEGORY)
             .get();
     public static final Map<Enchantment, EnchantmentCategory> DEFAULT_ENCHANTMENT_CATEGORIES = Registry.ENCHANTMENT.stream().collect(ImmutableMap.toImmutableMap(Function.identity(), e -> e.category));
     private static final List<AdditionalEnchantmentsData> ADDITIONAL_ENCHANTMENTS_DATA = ImmutableList.of(
@@ -143,31 +143,39 @@ public class EnchantmentDataManager {
         if (jsonObject.has("items")) {
             JsonArray items = GsonHelper.getAsJsonArray(jsonObject, "items");
             for (JsonElement jsonElement1 : items) {
-                String item;
-                boolean exclude = false;
-                if (jsonElement1.isJsonObject()) {
-                    JsonObject jsonObject1 = jsonElement1.getAsJsonObject();
-                    item = GsonHelper.getAsString(jsonObject1, "id");
-                    exclude = GsonHelper.getAsBoolean(jsonObject1, "exclude");
-                } else {
-                    item = GsonHelper.convertToString(jsonElement1, "item");
-                }
-                EnchantmentCategoryEntry entry;
-                if (item.startsWith("$")) {
-                    entry = EnchantmentCategoryEntry.CategoryEntry.deserialize(item);
-                } else if (item.startsWith("#")) {
-                    entry = EnchantmentCategoryEntry.TagEntry.deserialize(item);
-                } else {
-                    entry = EnchantmentCategoryEntry.ItemEntry.deserialize(item);
-                }
-                entry.setExclude(exclude);
-                holder.submit(entry);
+                deserializeCategoryEntry(holder, jsonElement1);
             }
         }
         if (jsonObject.has("incompatible")) {
             JsonArray jsonArray = GsonHelper.getAsJsonArray(jsonObject, "incompatible");
             String[] incompatibles = JsonConfigFileUtil.GSON.fromJson(jsonArray, String[].class);
             holder.submit(EnchantmentDataEntry.IncompatibleEntry.deserialize(incompatibles));
+        }
+    }
+
+    private static void deserializeCategoryEntry(EnchantmentDataHolder holder, JsonElement jsonElement1) throws JsonSyntaxException {
+        String item;
+        boolean exclude = false;
+        if (jsonElement1.isJsonObject()) {
+            JsonObject jsonObject1 = jsonElement1.getAsJsonObject();
+            item = GsonHelper.getAsString(jsonObject1, "id");
+            exclude = GsonHelper.getAsBoolean(jsonObject1, "exclude");
+        } else {
+            item = GsonHelper.convertToString(jsonElement1, "item");
+        }
+        try {
+            EnchantmentCategoryEntry entry;
+            if (item.startsWith("$")) {
+                entry = EnchantmentCategoryEntry.CategoryEntry.deserialize(item);
+            } else if (item.startsWith("#")) {
+                entry = EnchantmentCategoryEntry.TagEntry.deserialize(item);
+            } else {
+                entry = EnchantmentCategoryEntry.ItemEntry.deserialize(item);
+            }
+            entry.setExclude(exclude);
+            holder.submit(entry);
+        } catch (Exception e) {
+            UniversalEnchants.LOGGER.warn("Failed to deserialize {} enchantment config entry {}: {}", UniversalEnchants.MOD_ID, item, e);
         }
     }
 
@@ -186,8 +194,12 @@ public class EnchantmentDataManager {
         }
 
         public EnchantmentCategoryMapBuilder putCategory(String namespace, EnchantmentCategory category) {
-            ResourceLocation location = new ResourceLocation(namespace, category.name().toLowerCase(Locale.ROOT));
-            this.map.put(category, location);
+            ResourceLocation id = new ResourceLocation(namespace, category.name().toLowerCase(Locale.ROOT));
+            return this.putCategory(id, category);
+        }
+
+        public EnchantmentCategoryMapBuilder putCategory(ResourceLocation id, EnchantmentCategory category) {
+            this.map.put(category, id);
             return this;
         }
 
