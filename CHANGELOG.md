@@ -3,6 +3,10 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog].
 
+## [v4.2.7-1.19.2] - 2022-09-12
+### Fixed
+- Fixed enchanted books having gone missing from dedicated creative inventory tabs
+
 ## [v4.2.6-1.19.2] - 2022-09-07
 ### Fixed
 - Fixed incompatibility with Qu Enchantments mod

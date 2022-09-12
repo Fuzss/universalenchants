@@ -1,9 +1,6 @@
 package fuzs.universalenchants.data;
 
-import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
+import com.google.common.collect.*;
 import fuzs.universalenchants.core.ModServices;
 import fuzs.universalenchants.mixin.accessor.EnchantmentAccessor;
 import net.minecraft.core.Registry;
@@ -20,7 +17,7 @@ import java.util.function.Predicate;
 public class EnchantmentDataHolder {
     private static final EquipmentSlot[] ARMOR_SLOTS = new EquipmentSlot[]{EquipmentSlot.HEAD, EquipmentSlot.CHEST, EquipmentSlot.LEGS, EquipmentSlot.FEET};
     private static final Set<EnchantmentCategory> SPECIALIZED_ARMOR_CATEGORIES = ImmutableSet.of(EnchantmentCategory.ARMOR_FEET, EnchantmentCategory.ARMOR_LEGS, EnchantmentCategory.ARMOR_CHEST, EnchantmentCategory.ARMOR_HEAD);
-    private static final Map<String, EnchantmentCategory> CUSTOM_ENCHANTMENT_CATEGORIES = Maps.newHashMap();
+    private static final BiMap<Enchantment, EnchantmentCategory> CUSTOM_ENCHANTMENT_CATEGORIES = HashBiMap.create();
 
     private final Enchantment enchantment;
     private final EnchantmentCategory category;
@@ -110,8 +107,22 @@ public class EnchantmentDataHolder {
     }
 
     private static EnchantmentCategory getOrBuildCategory(Enchantment enchantment, Predicate<Item> canApplyTo) {
+        return CUSTOM_ENCHANTMENT_CATEGORIES.computeIfAbsent(enchantment, enchantment1 -> ModServices.ABSTRACTIONS.createEnchantmentCategory(createCategoryName(enchantment), canApplyTo));
+    }
+
+    private static String createCategoryName(Enchantment enchantment) {
         ResourceLocation id = Registry.ENCHANTMENT.getKey(enchantment);
-        String name = "%s_%s".formatted(id.getNamespace(), id.getPath()).toUpperCase(Locale.ROOT);
-        return CUSTOM_ENCHANTMENT_CATEGORIES.computeIfAbsent(name, name1 -> ModServices.ABSTRACTIONS.createEnchantmentCategory(name1, canApplyTo));
+        return "%s_%s".formatted(id.getNamespace(), id.getPath()).toUpperCase(Locale.ROOT);
+    }
+
+    public static EnchantmentCategory findVanillaCategory(EnchantmentCategory category) {
+        Enchantment enchantment = CUSTOM_ENCHANTMENT_CATEGORIES.inverse().get(category);
+        if (enchantment != null) {
+            EnchantmentDataHolder holder = EnchantmentDataManager.ENCHANTMENT_DATA_HOLDERS.get(enchantment);
+            if (holder != null) {
+                return holder.vanillaCategory();
+            }
+        }
+        return category;
     }
 }

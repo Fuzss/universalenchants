@@ -52,7 +52,7 @@ public class EnchantmentDataManager {
             new AdditionalEnchantmentsData(EnchantmentCategory.CROSSBOW, Enchantments.FLAMING_ARROWS, Enchantments.PUNCH_ARROWS, Enchantments.POWER_ARROWS, Enchantments.INFINITY_ARROWS, Enchantments.MOB_LOOTING),
             new AdditionalEnchantmentsData(HORSE_ARMOR_ENCHANTMENT_CATEGORY, Enchantments.ALL_DAMAGE_PROTECTION, Enchantments.FIRE_PROTECTION, Enchantments.FALL_PROTECTION, Enchantments.BLAST_PROTECTION, Enchantments.PROJECTILE_PROTECTION, Enchantments.RESPIRATION, Enchantments.THORNS, Enchantments.DEPTH_STRIDER, Enchantments.FROST_WALKER, Enchantments.BINDING_CURSE, Enchantments.SOUL_SPEED, Enchantments.VANISHING_CURSE)
     );
-    private static final Map<Enchantment, EnchantmentDataHolder> ENCHANTMENT_DATA_HOLDERS = Registry.ENCHANTMENT.stream().collect(Collectors.toMap(Function.identity(), EnchantmentDataHolder::new));
+    static final Map<Enchantment, EnchantmentDataHolder> ENCHANTMENT_DATA_HOLDERS = Registry.ENCHANTMENT.stream().collect(Collectors.toMap(Function.identity(), EnchantmentDataHolder::new));
     
     private static Map<Enchantment, List<EnchantmentDataEntry<?>>> getDefaultCategoryEntries() {
         // constructing default builders on Forge is quite expensive, so only do this when necessary
