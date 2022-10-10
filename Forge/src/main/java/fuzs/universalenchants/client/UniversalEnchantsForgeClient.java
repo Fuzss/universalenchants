@@ -21,13 +21,17 @@ public class UniversalEnchantsForgeClient {
     @SubscribeEvent
     public static void onRegisterClientReloadListeners(final RegisterClientReloadListenersEvent evt) {
         evt.registerReloadListener((PreparableReloadListener.PreparationBarrier preparationBarrier, ResourceManager resourceManager, ProfilerFiller profilerFiller, ProfilerFiller profilerFiller2, Executor executor, Executor executor2) -> {
-            return preparationBarrier.wait(Unit.INSTANCE).thenRunAsync(() -> NumericClientLanguage.injectLanguage(new NumericClientLanguage(Language.getInstance()) {
+            return preparationBarrier.wait(Unit.INSTANCE).thenRunAsync(() -> {
+                // store this, will be the instance from here when Language::getLanguageData is called
+                Language language = Language.getInstance();
+                NumericClientLanguage.injectLanguage(new NumericClientLanguage(language) {
 
-                @Override
-                public Map<String, String> getLanguageData() {
-                    return Language.getInstance().getLanguageData();
-                }
-            }), executor2);
+                    @Override
+                    public Map<String, String> getLanguageData() {
+                        return language.getLanguageData();
+                    }
+                });
+            }, executor2);
         });
     }
 }

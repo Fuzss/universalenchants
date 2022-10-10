@@ -3,6 +3,10 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog].
 
+## [v4.2.8-1.19.2] - 2022-10-10
+### Fixed
+- Fixed custom language causing `StackOverflowError` on Forge
+
 ## [v4.2.7-1.19.2] - 2022-09-12
 ### Fixed
 - Fixed enchanted books having gone missing from dedicated creative inventory tabs
