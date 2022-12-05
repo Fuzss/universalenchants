@@ -3,6 +3,11 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog].
 
+## [v4.2.9-1.19.2] - 2022-12-05
+### Fixed
+- Fixed custom language causing `StackOverflowError` when Server Translation API mod is installed on Fabric
+- The roman numerals fix will no longer apply when Server Translation API is present
+
 ## [v4.2.8-1.19.2] - 2022-10-10
 ### Fixed
 - Fixed custom language causing `StackOverflowError` on Forge

@@ -5,6 +5,7 @@ import fuzs.universalenchants.UniversalEnchants;
 import fuzs.universalenchants.config.ClientConfig;
 import fuzs.universalenchants.mixin.client.accessor.I18nAccessor;
 import net.minecraft.Util;
+import net.minecraft.client.resources.language.ClientLanguage;
 import net.minecraft.locale.Language;
 import net.minecraft.network.chat.FormattedText;
 import net.minecraft.util.FormattedCharSequence;
@@ -14,12 +15,12 @@ import java.util.TreeMap;
 
 /**
  * wrap {@link net.minecraft.client.resources.language.ClientLanguage} to add dynamic support for all enchantment/mob effect numerals
- *
  * <p>we generate these dynamically, so we don't have to pollute the language key map with a bunch of values that'll never be used
- *
- * <p>really cool solution for converting to roman numerals from <a href="https://stackoverflow.com/a/19759564">here</a>
  */
 public class NumericClientLanguage extends Language {
+    /**
+     * really cool solution for converting to roman numerals from <a href="https://stackoverflow.com/a/19759564">here</a>
+     */
     private final static TreeMap<Integer, String> ROMAN_NUMERALS = Util.make(Maps.newTreeMap(), map -> {
         map.put(1000, "M");
         map.put(900, "CM");
@@ -35,6 +36,7 @@ public class NumericClientLanguage extends Language {
         map.put(4, "IV");
         map.put(1, "I");
     });
+
     private final Language language;
     private final Map<String, String> numeralsCache = Maps.newHashMap();
 
@@ -44,10 +46,13 @@ public class NumericClientLanguage extends Language {
 
     public static void injectLanguage(NumericClientLanguage numericLanguage) {
         if (UniversalEnchants.CONFIG.get(ClientConfig.class).fixRomanNumerals == ClientConfig.NumeralLanguage.NONE) return;
-        // don't wrap multiple times accidentally
-        if (numericLanguage.language instanceof NumericClientLanguage) return;
-        I18nAccessor.callSetLanguage(numericLanguage);
-        Language.inject(numericLanguage);
+        // ClientLanguage cannot be extended, so this must be vanilla
+        // prevents us wrapping ourselves accidentally, also prevents wrapping custom language implementations from other mods
+        // which might result in an infinite loop (an issue with Server Translation API on Fabric)
+        if (numericLanguage.language instanceof ClientLanguage) {
+            I18nAccessor.callSetLanguage(numericLanguage);
+            Language.inject(numericLanguage);
+        }
     }
 
     @Override
