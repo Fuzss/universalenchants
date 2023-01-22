@@ -7,6 +7,8 @@ import fuzs.puzzleslib.config.core.AbstractConfigBuilder;
 import fuzs.puzzleslib.core.CoreServices;
 
 public class ServerConfig implements ConfigCore {
+    private static final String NEWLY_ENCHANTABLE_NOTICE = "Disabling this will still allow for applying enchantments in an anvil, that needs to be disabled per enchantment in the custom .json configs.";
+
     @Config(description = "Infinity enchantment no longer requires a single arrow to be present in the player inventory.")
     public boolean trueInfinity = true;
     @Config(description = "Disables damage immunity when hit by a projectile. Makes it possible for entities to be hit by multiple projectiles at once (mainly useful for the multishot enchantment).")
@@ -19,12 +21,16 @@ public class ServerConfig implements ConfigCore {
     public boolean mendingCraftingRepair = false;
     @Config(description = {"Remove the max level cap from the /enchant command, also allow overriding and removing (by setting the level to 0) existing enchantment levels.", "Additionally make enchanting books work via the command."})
     public boolean fixEnchantCommand = true;
+    @Config(description = {"Allow all kinds of horse armor to be enchanted directly in the enchanting table.", NEWLY_ENCHANTABLE_NOTICE})
+    public boolean enchantableHorseArmor = true;
+    @Config(description = {"Allow shields to be enchanted directly in the enchanting table.", NEWLY_ENCHANTABLE_NOTICE})
+    public boolean enchantableShields = true;
     public boolean allowModItemSupport;
 
     @Override
     public void addToBuilder(AbstractConfigBuilder builder, ValueCallback callback) {
         if (CoreServices.ENVIRONMENT.getModLoader().isForge()) {
-            callback.accept(builder.comment("Enchanting a few modded items (e.g. Farmer's Delight's skillet) is broken by the changes this mod makes to how enchantments may be applied to items. This option enables a patch for Forge itself to help better support such items.").define("allow_mod_item_support", false), v -> this.allowModItemSupport = v);
+            callback.accept(builder.comment("Enchanting a few modded items (e.g. Farmer's Delight's skillet) is broken by the changes this mod makes to how enchantments may be applied to items. This option enables a patch for Forge itself to help better support such items.").define("allow_mod_item_support", true), v -> this.allowModItemSupport = v);
         }
     }
 }

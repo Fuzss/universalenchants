@@ -1,9 +1,6 @@
 package fuzs.universalenchants.mixin;
 
-import fuzs.universalenchants.api.event.entity.living.LivingEntityUseItemEvents;
-import fuzs.universalenchants.api.event.entity.living.LivingExperienceDropCallback;
-import fuzs.universalenchants.api.event.entity.living.LivingHurtCallback;
-import fuzs.universalenchants.api.event.entity.living.LootingLevelCallback;
+import fuzs.universalenchants.api.event.entity.living.*;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
@@ -16,15 +13,14 @@ import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyVariable;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-import java.util.OptionalInt;
-
 @Mixin(LivingEntity.class)
-public abstract class LivingEntityMixin extends Entity {
+abstract class LivingEntityFabricMixin extends Entity {
     @Shadow
     protected ItemStack useItem = ItemStack.EMPTY;
     @Shadow
@@ -32,8 +28,10 @@ public abstract class LivingEntityMixin extends Entity {
     @Shadow
     @Nullable
     protected Player lastHurtByPlayer;
+    @Unique
+    private float universalenchants$hurtAmount;
 
-    public LivingEntityMixin(EntityType<?> entityType, Level level) {
+    public LivingEntityFabricMixin(EntityType<?> entityType, Level level) {
         super(entityType, level);
     }
 
@@ -66,4 +64,31 @@ public abstract class LivingEntityMixin extends Entity {
 
     @Shadow
     protected abstract int getExperienceReward();
+
+    @ModifyVariable(method = "hurt", at = @At(value = "LOAD", ordinal = 1), ordinal = 0)
+    public float hurt$0(float amount, DamageSource source) {
+        // hook in before any blocking checks are done, there is no good way to cancel the block after this
+        // check everything again, it shouldn't affect anything
+        if (amount > 0.0F && this.isDamageSourceBlocked(source)) {
+            if (ShieldBlockCallback.EVENT.invoker().onShieldBlock(LivingEntity.class.cast(this), source, amount).isPresent()) {
+                this.universalenchants$hurtAmount = amount;
+                // prevent vanilla shield logic from running when the callback was cancelled
+                return 0.0F;
+            }
+        }
+        return amount;
+    }
+
+    @Shadow
+    public abstract boolean isDamageSourceBlocked(DamageSource damageSource);
+
+    @ModifyVariable(method = "hurt", at = @At(value = "FIELD", target = "Lnet/minecraft/world/entity/LivingEntity;animationSpeed:F"), ordinal = 0)
+    public float hurt$1(float amount, DamageSource source) {
+        if (this.universalenchants$hurtAmount != 0.0F) {
+            // restore original amount when the shield blocking callback was cancelled
+            amount = this.universalenchants$hurtAmount;
+            this.universalenchants$hurtAmount = 0.0F;
+        }
+        return amount;
+    }
 }

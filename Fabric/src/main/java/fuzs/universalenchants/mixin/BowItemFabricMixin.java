@@ -17,9 +17,9 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 
 @Mixin(BowItem.class)
-public abstract class FabricBowItemMixin extends ProjectileWeaponItem {
+abstract class BowItemFabricMixin extends ProjectileWeaponItem {
 
-    public FabricBowItemMixin(Properties p_43009_) {
+    public BowItemFabricMixin(Properties p_43009_) {
         super(p_43009_);
     }
 

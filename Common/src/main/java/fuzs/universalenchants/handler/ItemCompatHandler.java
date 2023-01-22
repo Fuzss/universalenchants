@@ -3,9 +3,12 @@ package fuzs.universalenchants.handler;
 import fuzs.universalenchants.capability.ArrowLootingCapability;
 import fuzs.universalenchants.init.ModRegistry;
 import fuzs.universalenchants.mixin.accessor.AbstractArrowAccessor;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.RandomSource;
+import net.minecraft.util.Unit;
+import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
@@ -13,14 +16,27 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.AbstractArrow;
 import net.minecraft.world.entity.projectile.ThrownTrident;
 import net.minecraft.world.item.*;
+import net.minecraft.world.item.crafting.AbstractCookingRecipe;
+import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.level.Level;
 
 import javax.annotation.Nullable;
+import java.util.ListIterator;
+import java.util.Optional;
 import java.util.OptionalInt;
+import java.util.function.Predicate;
 
 public class ItemCompatHandler {
+
+    public static void replaceSmeltableItems(ServerLevel level, ListIterator<ItemStack> iterator) {
+        while (iterator.hasNext()) {
+            ItemStack stack = iterator.next();
+            if (stack.isEmpty()) continue;
+            level.getRecipeManager().getRecipeFor(RecipeType.SMELTING, new SimpleContainer(stack), level).map(AbstractCookingRecipe::getResultItem).filter(Predicate.not(ItemStack::isEmpty)).map(ItemStack::copy).ifPresent(iterator::set);
+        }
+    }
 
     public void onArrowLoose(Player player, ItemStack stack, Level level, int charge, boolean hasAmmo) {
         // multishot enchantment for bows
@@ -82,6 +98,14 @@ public class ItemCompatHandler {
             }
         }
         return OptionalInt.empty();
+    }
+
+    public static Optional<Unit> onShieldBlock(LivingEntity blocker, DamageSource source, float amount) {
+        if (!source.isProjectile() && source.getDirectEntity() instanceof LivingEntity attacker) {
+            int level = EnchantmentHelper.getItemEnchantmentLevel(Enchantments.THORNS, blocker.getUseItem());
+            Enchantments.THORNS.doPostHurt(blocker, attacker, level);
+        }
+        return Optional.empty();
     }
 
     public static void applyPowerEnchantment(AbstractArrow arrow, ItemStack stack) {

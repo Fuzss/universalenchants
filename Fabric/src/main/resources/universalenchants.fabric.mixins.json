@@ -5,13 +5,13 @@
   "package": "fuzs.universalenchants.mixin",
   "refmap": "universalenchants.refmap.json",
   "mixins": [
-    "ExperienceOrbMixin",
-    "FabricBowItemMixin",
-    "FabricPlayerMixin",
-    "FarmBlockMixin",
-    "LivingEntityMixin",
-    "LootingEnchantFunctionMixin",
-    "LootItemRandomChanceWithLootingConditionMixin"
+    "BowItemFabricMixin",
+    "ExperienceOrbFabricMixin",
+    "FarmBlockFabricMixin",
+    "LivingEntityFabricMixin",
+    "LootingEnchantFunctionFabricMixin",
+    "LootItemRandomChanceWithLootingConditionFabricMixin",
+    "PlayerFabricMixin"
   ],
   "client": [
   ],

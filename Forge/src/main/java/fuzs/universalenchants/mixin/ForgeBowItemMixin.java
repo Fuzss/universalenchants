@@ -11,7 +11,7 @@ import org.spongepowered.asm.mixin.injection.ModifyVariable;
 import org.spongepowered.asm.mixin.injection.Slice;
 
 @Mixin(BowItem.class)
-public abstract class ForgeBowItemMixin extends ProjectileWeaponItem {
+abstract class ForgeBowItemMixin extends ProjectileWeaponItem {
 
     public ForgeBowItemMixin(Properties p_43009_) {
         super(p_43009_);

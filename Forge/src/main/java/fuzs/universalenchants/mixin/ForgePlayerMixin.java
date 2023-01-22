@@ -14,7 +14,7 @@ import org.spongepowered.asm.mixin.injection.ModifyVariable;
 import org.spongepowered.asm.mixin.injection.Slice;
 
 @Mixin(Player.class)
-public abstract class ForgePlayerMixin extends LivingEntity {
+abstract class ForgePlayerMixin extends LivingEntity {
 
     protected ForgePlayerMixin(EntityType<? extends LivingEntity> p_20966_, Level p_20967_) {
         super(p_20966_, p_20967_);

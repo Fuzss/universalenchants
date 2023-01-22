@@ -24,7 +24,7 @@ abstract class ForgeEnchantmentMixin {
         // for modded items that would naturally not be enchantable, they often check for a specific enchantment category in this method implemented on the item
         // this fails as we exchange all of them, but there is a custom implementation in ForgeAbstractions::defaultEnchantmentDataBuilder to find all affected modded items manually
         // so this theoretically shouldn't be relevant anyway...
-        if (!UniversalEnchants.CONFIG.get(ServerConfig.class).allowModItemSupport) return;
+        if (!UniversalEnchants.CONFIG.getHolder(ServerConfig.class).isAvailable() || !UniversalEnchants.CONFIG.get(ServerConfig.class).allowModItemSupport) return;
         callback.setReturnValue(this.category.canEnchant(stack.getItem()));
     }
 }

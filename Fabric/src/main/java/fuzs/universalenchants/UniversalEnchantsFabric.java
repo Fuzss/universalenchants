@@ -8,7 +8,7 @@ import fuzs.universalenchants.api.event.entity.living.LootingLevelCallback;
 import fuzs.universalenchants.api.event.entity.player.ArrowLooseCallback;
 import fuzs.universalenchants.api.event.entity.player.PlayerXpEvents;
 import fuzs.universalenchants.api.event.world.FarmlandTrampleCallback;
-import fuzs.universalenchants.data.EnchantmentDataManager;
+import fuzs.universalenchants.world.item.enchantment.serialize.EnchantmentHoldersManager;
 import fuzs.universalenchants.handler.BetterEnchantsHandler;
 import fuzs.universalenchants.handler.ItemCompatHandler;
 import net.fabricmc.api.ModInitializer;
@@ -33,7 +33,7 @@ public class UniversalEnchantsFabric implements ModInitializer {
 
     private static void registerHandlers() {
         CommonLifecycleEvents.TAGS_LOADED.register((RegistryAccess registries, boolean client) -> {
-            if (!client) EnchantmentDataManager.loadAll();
+            if (!client) EnchantmentHoldersManager.loadAll();
         });
         ItemCompatHandler itemCompatHandler = new ItemCompatHandler();
         ArrowLooseCallback.EVENT.register((Player player, ItemStack bow, Level level, int charge, boolean hasAmmo) -> {

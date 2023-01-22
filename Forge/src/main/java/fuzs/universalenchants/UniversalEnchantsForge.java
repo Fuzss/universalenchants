@@ -3,7 +3,7 @@ package fuzs.universalenchants;
 import fuzs.puzzleslib.capability.ForgeCapabilityController;
 import fuzs.puzzleslib.core.CoreServices;
 import fuzs.universalenchants.capability.ArrowLootingCapability;
-import fuzs.universalenchants.data.EnchantmentDataManager;
+import fuzs.universalenchants.world.item.enchantment.serialize.EnchantmentHoldersManager;
 import fuzs.universalenchants.handler.BetterEnchantsHandler;
 import fuzs.universalenchants.handler.ItemCompatHandler;
 import fuzs.universalenchants.init.ModRegistry;
@@ -14,10 +14,7 @@ import net.minecraft.world.level.Level;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.capabilities.CapabilityToken;
 import net.minecraftforge.event.TagsUpdatedEvent;
-import net.minecraftforge.event.entity.living.LivingEntityUseItemEvent;
-import net.minecraftforge.event.entity.living.LivingExperienceDropEvent;
-import net.minecraftforge.event.entity.living.LivingHurtEvent;
-import net.minecraftforge.event.entity.living.LootingLevelEvent;
+import net.minecraftforge.event.entity.living.*;
 import net.minecraftforge.event.entity.player.ArrowLooseEvent;
 import net.minecraftforge.event.entity.player.ArrowNockEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
@@ -46,7 +43,7 @@ public class UniversalEnchantsForge {
     private static void registerHandlers() {
         MinecraftForge.EVENT_BUS.addListener((final TagsUpdatedEvent evt) -> {
             if (evt.getUpdateCause() == TagsUpdatedEvent.UpdateCause.SERVER_DATA_LOAD) {
-                EnchantmentDataManager.loadAll();
+                EnchantmentHoldersManager.loadAll();
             }
         });
         ItemCompatHandler itemCompatHandler = new ItemCompatHandler();
@@ -86,6 +83,9 @@ public class UniversalEnchantsForge {
         });
         MinecraftForge.EVENT_BUS.addListener((final PlayerXpEvent.PickupXp evt) -> {
             betterEnchantsHandler.onPickupXp(evt.getEntity(), evt.getOrb()).ifPresent(unit -> evt.setCanceled(true));
+        });
+        MinecraftForge.EVENT_BUS.addListener((final ShieldBlockEvent evt) -> {
+            ItemCompatHandler.onShieldBlock(evt.getEntity(), evt.getDamageSource(), evt.getBlockedDamage()).ifPresent(unit -> evt.setCanceled(true));
         });
     }
 }

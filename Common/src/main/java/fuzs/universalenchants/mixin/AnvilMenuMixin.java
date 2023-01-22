@@ -17,7 +17,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(AnvilMenu.class)
-public abstract class AnvilMenuMixin extends ItemCombinerMenu {
+abstract class AnvilMenuMixin extends ItemCombinerMenu {
 
     public AnvilMenuMixin(@Nullable MenuType<?> menuType, int i, Inventory inventory, ContainerLevelAccess containerLevelAccess) {
         super(menuType, i, inventory, containerLevelAccess);

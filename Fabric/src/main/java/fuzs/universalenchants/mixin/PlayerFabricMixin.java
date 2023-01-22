@@ -13,9 +13,9 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.ModifyVariable;
 
 @Mixin(Player.class)
-public abstract class FabricPlayerMixin extends LivingEntity {
+abstract class PlayerFabricMixin extends LivingEntity {
 
-    protected FabricPlayerMixin(EntityType<? extends LivingEntity> p_20966_, Level p_20967_) {
+    protected PlayerFabricMixin(EntityType<? extends LivingEntity> p_20966_, Level p_20967_) {
         super(p_20966_, p_20967_);
     }
 

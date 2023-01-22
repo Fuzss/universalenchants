@@ -1,6 +1,6 @@
 package fuzs.universalenchants.mixin;
 
-import fuzs.universalenchants.data.EnchantmentDataManager;
+import fuzs.universalenchants.world.item.enchantment.serialize.EnchantmentHoldersManager;
 import net.minecraft.world.item.enchantment.Enchantment;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -12,6 +12,6 @@ public abstract class EnchantmentMixin {
 
     @Inject(method = "isCompatibleWith", at = @At("TAIL"), cancellable = true)
     public void isCompatibleWith$head(Enchantment other, CallbackInfoReturnable<Boolean> callback) {
-        callback.setReturnValue(EnchantmentDataManager.isCompatibleWith((Enchantment) (Object) this, other, callback.getReturnValue()));
+        callback.setReturnValue(EnchantmentHoldersManager.isCompatibleWith((Enchantment) (Object) this, other, callback.getReturnValue()));
     }
 }

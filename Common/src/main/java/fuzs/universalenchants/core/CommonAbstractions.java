@@ -1,6 +1,6 @@
 package fuzs.universalenchants.core;
 
-import fuzs.universalenchants.data.EnchantmentDataEntry;
+import fuzs.universalenchants.world.item.enchantment.serialize.entry.DataEntry;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
@@ -20,7 +20,7 @@ public interface CommonAbstractions {
 
     int getMobLootingLevel(Entity target, @Nullable Entity killer, @Nullable DamageSource cause);
 
-    default EnchantmentDataEntry.Builder defaultEnchantmentDataBuilder(Enchantment enchantment) {
-        return EnchantmentDataEntry.defaultBuilder(enchantment);
+    default DataEntry.Builder defaultEnchantmentDataBuilder(Enchantment enchantment) {
+        return DataEntry.defaultBuilder(enchantment);
     }
 }

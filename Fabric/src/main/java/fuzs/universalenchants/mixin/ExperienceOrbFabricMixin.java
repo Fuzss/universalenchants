@@ -12,9 +12,9 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(ExperienceOrb.class)
-public abstract class ExperienceOrbMixin extends Entity {
+abstract class ExperienceOrbFabricMixin extends Entity {
 
-    public ExperienceOrbMixin(EntityType<?> entityType, Level level) {
+    public ExperienceOrbFabricMixin(EntityType<?> entityType, Level level) {
         super(entityType, level);
     }
 

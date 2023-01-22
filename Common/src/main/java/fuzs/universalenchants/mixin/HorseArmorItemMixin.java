@@ -1,5 +1,7 @@
 package fuzs.universalenchants.mixin;
 
+import fuzs.universalenchants.UniversalEnchants;
+import fuzs.universalenchants.config.ServerConfig;
 import net.minecraft.world.item.HorseArmorItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -16,13 +18,13 @@ public abstract class HorseArmorItemMixin extends Item {
     @Override
     public boolean isEnchantable(ItemStack itemStack) {
         // need to override this as enchantable items usually must have durability
-        return true;
+        return UniversalEnchants.CONFIG.get(ServerConfig.class).enchantableHorseArmor || super.isEnchantable(itemStack);
     }
 
     @Override
     public int getEnchantmentValue() {
         // just use this value, it's similar enough to other item's enchantment value
-        return this.getProtection();
+        return UniversalEnchants.CONFIG.get(ServerConfig.class).enchantableHorseArmor ? this.getProtection() : 0;
     }
 
     @Shadow

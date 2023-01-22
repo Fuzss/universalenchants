@@ -10,11 +10,11 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 @Mixin(Enchantment.class)
 public interface EnchantmentAccessor {
 
-    @Accessor
+    @Accessor("category")
     @Mutable
-    void setCategory(EnchantmentCategory category);
+    void universalenchants$setCategory(EnchantmentCategory category);
 
-    @Accessor
+    @Accessor("slots")
     @Mutable
-    void setSlots(EquipmentSlot[] slots);
+    void universalenchants$setSlots(EquipmentSlot[] slots);
 }

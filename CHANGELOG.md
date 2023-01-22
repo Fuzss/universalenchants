@@ -3,6 +3,18 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog].
 
+## [v4.2.10-1.19.2] - 2023-01-22
+### Added
+- Shields can now be enchanted directly in enchanting tables
+- Thorns and knockback can be applied to shields
+- Shields knock back attackers after successfully blocking (this is a bugfix for vanilla actually)
+- Fire Aspect works on digging tools and immediately smelts the harvested block upon mining (if possible)
+### Changed
+- Universal Enchants now is a lot more forgiving when trying to read invalid entries in the enchantment `.json` files, the problematic entries will be printed out, but will no longer make reading the file fail (an attempt to improve compatibility with the Enchancement mod)
+- Enchanting horse armor in an enchanting table is now configurable (also goes for shields)
+### Fixed
+- Fixed compatibility with mods that alter enchantment categories of vanilla enchantments (like Ensorcellation)
+
 ## [v4.2.9-1.19.2] - 2022-12-05
 ### Fixed
 - Fixed custom language causing `StackOverflowError` when Server Translation API mod is installed on Fabric
