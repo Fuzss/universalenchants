@@ -10,6 +10,7 @@
     "CreativeModeTabMixin",
     "CrossbowItemMixin",
     "EnchantCommandMixin",
+    "EnchantmentHelperMixin",
     "EnchantmentMixin",
     "HorseArmorItemMixin",
     "HorseInventoryMenu$SlotMixin",

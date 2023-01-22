@@ -4,6 +4,7 @@ import fuzs.puzzleslib.config.ConfigHolder;
 import fuzs.puzzleslib.core.CoreServices;
 import fuzs.puzzleslib.core.ModConstructor;
 import fuzs.universalenchants.config.ClientConfig;
+import fuzs.universalenchants.config.CommonConfig;
 import fuzs.universalenchants.config.ServerConfig;
 import fuzs.universalenchants.init.ModRegistry;
 import fuzs.universalenchants.server.commands.ModEnchantCommand;
@@ -17,8 +18,9 @@ public class UniversalEnchants implements ModConstructor {
 
     @SuppressWarnings("Convert2MethodRef")
     public static final ConfigHolder CONFIG = CoreServices.FACTORIES
-            .serverConfig(ServerConfig.class, () -> new ServerConfig())
-            .clientConfig(ClientConfig.class, () -> new ClientConfig());
+            .clientConfig(ClientConfig.class, () -> new ClientConfig())
+            .commonConfig(CommonConfig.class, () -> new CommonConfig())
+            .serverConfig(ServerConfig.class, () -> new ServerConfig());
 
     @Override
     public void onConstructMod() {
@@ -28,6 +30,8 @@ public class UniversalEnchants implements ModConstructor {
 
     @Override
     public void onRegisterCommands(RegisterCommandsContext context) {
-        ModEnchantCommand.register(context.dispatcher());
+        if (CONFIG.get(CommonConfig.class).enchantCommand.fixEnchantCommand || CONFIG.get(CommonConfig.class).enchantCommand.removeMaxLevelLimit) {
+            ModEnchantCommand.register(context.dispatcher());
+        }
     }
 }

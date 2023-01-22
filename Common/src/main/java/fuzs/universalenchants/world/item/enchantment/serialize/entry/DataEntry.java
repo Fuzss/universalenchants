@@ -23,7 +23,7 @@ public abstract class DataEntry<T> {
     public abstract void serialize(JsonArray jsonArray);
 
     public static Builder defaultBuilder(Enchantment enchantment) {
-        Builder builder = new Builder(enchantment).add(enchantment.category);
+        Builder builder = new Builder(enchantment).add(BuiltInEnchantmentDataManager.INSTANCE.getVanillaCategory(enchantment));
         // don't add the enchantment itself, the user is not supposed to remove it
         // we still need this, it will be manually added back later
         Registry.ENCHANTMENT.stream().filter(Predicate.not(enchantment::isCompatibleWith)).filter(other -> enchantment != other).forEach(builder::add);

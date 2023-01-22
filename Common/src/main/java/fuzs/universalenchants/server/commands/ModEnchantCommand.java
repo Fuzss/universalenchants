@@ -7,7 +7,7 @@ import com.mojang.brigadier.exceptions.Dynamic2CommandExceptionType;
 import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import fuzs.universalenchants.UniversalEnchants;
-import fuzs.universalenchants.config.ServerConfig;
+import fuzs.universalenchants.config.CommonConfig;
 import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
@@ -80,7 +80,7 @@ public class ModEnchantCommand {
 
 	private static int enchant(CommandSourceStack commandSourceStack, Collection<? extends Entity> collection, Enchantment enchantment, int level) throws CommandSyntaxException {
 		// removed max level check (/effect command doesn't have it as well)
-		if (!UniversalEnchants.CONFIG.get(ServerConfig.class).fixEnchantCommand && level > enchantment.getMaxLevel()) {
+		if (!UniversalEnchants.CONFIG.get(CommonConfig.class).enchantCommand.removeMaxLevelLimit && level > enchantment.getMaxLevel()) {
 			throw ERROR_LEVEL_TOO_HIGH.create(level, enchantment.getMaxLevel());
 		} else {
 			// this should actually be restricted via the argument type, but doesn't seem to work reliably (maybe because we override vanilla's command?)
@@ -92,7 +92,7 @@ public class ModEnchantCommand {
 			if (entity instanceof LivingEntity livingEntity) {
 				ItemStack itemStack = livingEntity.getMainHandItem();
 				if (!itemStack.isEmpty()) {
-					if (UniversalEnchants.CONFIG.get(ServerConfig.class).fixEnchantCommand) {
+					if (UniversalEnchants.CONFIG.get(CommonConfig.class).enchantCommand.fixEnchantCommand) {
 						ItemStack stack = itemStack;
 						// handle books, don't forget to set the new stack to the main hand when successful
 						if (stack.getCount() == 1 && stack.is(Items.BOOK)) {
@@ -152,13 +152,13 @@ public class ModEnchantCommand {
 		} else {
 			if (collection.size() == 1) {
 				commandSourceStack.sendSuccess(
-						level > 0 || !UniversalEnchants.CONFIG.get(ServerConfig.class).fixEnchantCommand
+						level > 0 || !UniversalEnchants.CONFIG.get(CommonConfig.class).enchantCommand.fixEnchantCommand
 								? Component.translatable("commands.enchant.success.single", enchantment.getFullname(level), collection.iterator().next().getDisplayName())
 								: Component.translatable("commands.enchant.remove.success.single", getEnchantmentName(enchantment), collection.iterator().next().getDisplayName()), true
 				);
 			} else {
 				commandSourceStack.sendSuccess(
-						level > 0 || !UniversalEnchants.CONFIG.get(ServerConfig.class).fixEnchantCommand
+						level > 0 || !UniversalEnchants.CONFIG.get(CommonConfig.class).enchantCommand.fixEnchantCommand
 							? Component.translatable("commands.enchant.success.multiple", enchantment.getFullname(level), collection.size())
 							: Component.translatable("commands.enchant.remove.success.multiple", getEnchantmentName(enchantment), collection.size()), true);
 			}

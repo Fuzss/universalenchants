@@ -19,18 +19,18 @@ import java.util.Set;
 public class EnchantmentHolder {
     private final Enchantment enchantment;
     private final EnchantmentCategory vanillaCategory;
-    private final EnchantmentCategory customCategory;
-    @Nullable
+    private final EnchantmentCategory category;
     private List<TypeEntry> categoryEntries;
-    @Nullable
     private IncompatibleEntry incompatibleEntry;
+    @Nullable
     private Set<Item> items;
+    @Nullable
     private Set<Enchantment> incompatibles;
 
     public EnchantmentHolder(Enchantment enchantment) {
         this.enchantment = enchantment;
         this.vanillaCategory = BuiltInEnchantmentDataManager.INSTANCE.getVanillaCategory(enchantment);
-        this.customCategory = BuiltInEnchantmentDataManager.INSTANCE.getOrBuildCustomCategory(enchantment, this::canEnchant);
+        this.category = BuiltInEnchantmentDataManager.INSTANCE.getOrBuildCustomCategory(enchantment, this::canEnchant);
     }
 
     public void invalidate() {
@@ -38,13 +38,17 @@ public class EnchantmentHolder {
         this.incompatibleEntry = null;
         this.items = null;
         this.incompatibles = null;
-        // reset to vanilla enchantment customCategory for now just in case something goes wrong during rebuilding
-        this.setEnchantmentCategory(true);
+        // reset to vanilla enchantment category for now just in case something goes wrong during rebuilding
+        BuiltInEnchantmentDataManager.INSTANCE.setEnchantmentCategory(this.enchantment, this.vanillaCategory);
+    }
+
+    public void initializeCategoryEntries() {
+        if (this.categoryEntries == null) this.categoryEntries = Lists.newArrayList();
     }
 
     public void submit(TypeEntry entry) {
-        if (this.categoryEntries == null) this.categoryEntries = Lists.newArrayList();
-        this.categoryEntries.add(entry);
+        Objects.requireNonNull(this.categoryEntries, "category entries for enchantment %s is null".formatted(Registry.ENCHANTMENT.getKey(this.enchantment)));
+        if (!entry.isEmpty()) this.categoryEntries.add(entry);
     }
 
     public void submit(IncompatibleEntry entry) {
@@ -52,15 +56,9 @@ public class EnchantmentHolder {
         this.incompatibleEntry = entry;
     }
 
-    public void setEnchantmentCategory() {
-        this.setEnchantmentCategory(false);
-    }
-
-    private void setEnchantmentCategory(boolean forceVanilla) {
-        if (!forceVanilla && this.categoryEntries != null) {
-            BuiltInEnchantmentDataManager.INSTANCE.setEnchantmentCategory(this.enchantment, this.customCategory);
-        } else {
-            BuiltInEnchantmentDataManager.INSTANCE.setEnchantmentCategory(this.enchantment, this.vanillaCategory);
+    public void applyEnchantmentCategory() {
+        if (this.categoryEntries != null) {
+            BuiltInEnchantmentDataManager.INSTANCE.setEnchantmentCategory(this.enchantment, this.category);
         }
     }
 
@@ -73,7 +71,7 @@ public class EnchantmentHolder {
         if (this.items == null) {
             Set<Item> include = Sets.newIdentityHashSet();
             Set<Item> exclude = Sets.newIdentityHashSet();
-            Objects.requireNonNull(this.categoryEntries, "Using invalid enchantment customCategory for enchantment %s, expected vanilla customCategory to be used".formatted(Registry.ENCHANTMENT.getKey(this.enchantment)));
+            Objects.requireNonNull(this.categoryEntries, "Using invalid enchantment category for enchantment %s, expected vanilla category to be used".formatted(Registry.ENCHANTMENT.getKey(this.enchantment)));
             for (TypeEntry entry : this.categoryEntries) {
                 entry.dissolve(entry.isExclude() ? exclude : include);
             }

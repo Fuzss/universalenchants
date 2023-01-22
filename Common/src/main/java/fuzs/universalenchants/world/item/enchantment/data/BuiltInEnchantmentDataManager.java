@@ -1,7 +1,6 @@
 package fuzs.universalenchants.world.item.enchantment.data;
 
 import com.google.common.collect.*;
-import fuzs.universalenchants.UniversalEnchants;
 import fuzs.universalenchants.core.ModServices;
 import fuzs.universalenchants.mixin.accessor.EnchantmentAccessor;
 import net.minecraft.core.Registry;
@@ -19,10 +18,9 @@ import java.util.Set;
 import java.util.function.Predicate;
 
 public class BuiltInEnchantmentDataManager {
-    public static final BuiltInEnchantmentDataManager INSTANCE = new BuiltInEnchantmentDataManager();
-    private static final String CUSTOM_CATEGORIES_PREFIX = UniversalEnchants.MOD_ID.toUpperCase(Locale.ROOT) + "_CUSTOM_";
-    private static final EquipmentSlot[] ARMOR_SLOTS = new EquipmentSlot[]{EquipmentSlot.HEAD, EquipmentSlot.CHEST, EquipmentSlot.LEGS, EquipmentSlot.FEET};
+    private static final EquipmentSlot[] ARMOR_SLOTS = {EquipmentSlot.HEAD, EquipmentSlot.CHEST, EquipmentSlot.LEGS, EquipmentSlot.FEET};
     private static final Set<EnchantmentCategory> SPECIALIZED_ARMOR_CATEGORIES = ImmutableSet.of(EnchantmentCategory.ARMOR_FEET, EnchantmentCategory.ARMOR_LEGS, EnchantmentCategory.ARMOR_CHEST, EnchantmentCategory.ARMOR_HEAD);
+    public static final BuiltInEnchantmentDataManager INSTANCE = new BuiltInEnchantmentDataManager();
 
     private final BiMap<Enchantment, EnchantmentCategory> customEnchantmentCategories = HashBiMap.create();
     private final Map<Enchantment, EnchantmentCategory> defaultEnchantmentCategories = Maps.newIdentityHashMap();
@@ -58,11 +56,11 @@ public class BuiltInEnchantmentDataManager {
         // do this here dynamically to better support modded enchantments
         EnchantmentCategory vanillaCategory = this.defaultEnchantmentCategories.get(enchantment);
         if (SPECIALIZED_ARMOR_CATEGORIES.contains(vanillaCategory)) {
-            ((EnchantmentAccessor) enchantment).universalenchants$setSlots(ARMOR_SLOTS);
+            ((EnchantmentAccessor) enchantment).universalenchants$setSlots(ARMOR_SLOTS.clone());
         }
         // need this for thorns to work on shields
         if (enchantment == Enchantments.THORNS) {
-            ((EnchantmentAccessor) enchantment).universalenchants$setSlots(EquipmentSlot.values());
+            ((EnchantmentAccessor) enchantment).universalenchants$setSlots(EquipmentSlot.values().clone());
         }
     }
 
@@ -72,7 +70,7 @@ public class BuiltInEnchantmentDataManager {
 
     private static String createCategoryName(Enchantment enchantment) {
         ResourceLocation id = Registry.ENCHANTMENT.getKey(enchantment);
-        return CUSTOM_CATEGORIES_PREFIX + "%s_%s".formatted(id.getNamespace(), id.getPath()).toUpperCase(Locale.ROOT);
+        return AdditionalEnchantmentDataProvider.ENCHANTMENT_CATEGORY_PREFIX + "%s_%s".formatted(id.getNamespace(), id.getPath()).toUpperCase(Locale.ROOT);
     }
 
     public boolean testVanillaCategory(EnchantmentCategory category) {
@@ -96,16 +94,18 @@ public class BuiltInEnchantmentDataManager {
     }
 
     private void tryRebuildCategoriesIdMap() {
-        if (this.enchantmentCategoriesIdMap == null || this.lastEnchantmentCategoriesSize != EnchantmentCategory.values().length) {
+        AdditionalEnchantmentDataProvider.INSTANCE.initialize();
+        EnchantmentCategory[] values = EnchantmentCategory.values();
+        if (this.enchantmentCategoriesIdMap == null || this.lastEnchantmentCategoriesSize != values.length) {
             ImmutableBiMap.Builder<EnchantmentCategory, ResourceLocation> builder = ImmutableBiMap.builder();
-            for (EnchantmentCategory category : EnchantmentCategory.values()) {
+            for (EnchantmentCategory category : values) {
                 if (this.testVanillaCategory(category)) {
                     String identifier = category.name().replaceAll("\\W", "_").toLowerCase(Locale.ROOT);
                     builder.put(category, new ResourceLocation(identifier));
                 }
             }
             this.enchantmentCategoriesIdMap = builder.build();
-            this.lastEnchantmentCategoriesSize = EnchantmentCategory.values().length;
+            this.lastEnchantmentCategoriesSize = values.length;
         }
     }
 }

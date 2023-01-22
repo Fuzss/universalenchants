@@ -12,6 +12,8 @@ The format is based on [Keep a Changelog].
 ### Changed
 - Universal Enchants now is a lot more forgiving when trying to read invalid entries in the enchantment `.json` files, the problematic entries will be printed out, but will no longer make reading the file fail (an attempt to improve compatibility with the Enchancement mod)
 - Enchanting horse armor in an enchanting table is now configurable (also goes for shields)
+- Enchantment configs now prevent an enchantment from going on any item when the `items` entry is left as a blank list; vanilla compatibilities will be used when it is completely missing
+- Disabling all changes related to the `/enchant` command now fully restores the vanilla command in an effort to help mod compatibility (mostly with Apotheosis)
 ### Fixed
 - Fixed compatibility with mods that alter enchantment categories of vanilla enchantments (like Ensorcellation)
 

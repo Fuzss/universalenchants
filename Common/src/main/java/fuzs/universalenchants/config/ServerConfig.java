@@ -8,7 +8,6 @@ import fuzs.puzzleslib.core.CoreServices;
 
 public class ServerConfig implements ConfigCore {
     private static final String NEWLY_ENCHANTABLE_NOTICE = "Disabling this will still allow for applying enchantments in an anvil, that needs to be disabled per enchantment in the custom .json configs.";
-
     @Config(description = "Infinity enchantment no longer requires a single arrow to be present in the player inventory.")
     public boolean trueInfinity = true;
     @Config(description = "Disables damage immunity when hit by a projectile. Makes it possible for entities to be hit by multiple projectiles at once (mainly useful for the multishot enchantment).")
@@ -19,12 +18,12 @@ public class ServerConfig implements ConfigCore {
     public boolean lootingBoostsXp = true;
     @Config(description = {"Mending no longer repairs items using xp.", "Instead mending allows the item to be repaired in the crafting menu in the same way as in an anvil without any experience cost: combining a tool with another one or the appropriate repair item is possible, all enchantments will be preserved (but no new ones from the item repaired with will be added as an anvil would do).", "Additionally, repairing items enchanted with mending (only repairing, no renaming or adding more enchantments) in an anvil doesn't increase the items repair cost any further."})
     public boolean mendingCraftingRepair = false;
-    @Config(description = {"Remove the max level cap from the /enchant command, also allow overriding and removing (by setting the level to 0) existing enchantment levels.", "Additionally make enchanting books work via the command."})
-    public boolean fixEnchantCommand = true;
     @Config(description = {"Allow all kinds of horse armor to be enchanted directly in the enchanting table.", NEWLY_ENCHANTABLE_NOTICE})
     public boolean enchantableHorseArmor = true;
     @Config(description = {"Allow shields to be enchanted directly in the enchanting table.", NEWLY_ENCHANTABLE_NOTICE})
     public boolean enchantableShields = true;
+    @Config(description = {"Prevent the fire aspect enchantment from working as usually on digging tools: It will not set hit mobs on fire, but will only be usable to instantly smelt harvested blocks.", "The behavior of fire aspect on weapons including axes is unchanged."})
+    public boolean nerfFireAspectOnTools = true;
     public boolean allowModItemSupport;
 
     @Override

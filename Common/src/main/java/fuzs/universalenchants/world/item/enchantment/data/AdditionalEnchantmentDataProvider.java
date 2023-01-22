@@ -3,6 +3,7 @@ package fuzs.universalenchants.world.item.enchantment.data;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import fuzs.universalenchants.UniversalEnchants;
+import fuzs.universalenchants.config.CommonConfig;
 import fuzs.universalenchants.core.ModServices;
 import fuzs.universalenchants.world.item.enchantment.serialize.entry.DataEntry;
 import net.minecraft.core.Registry;
@@ -20,11 +21,11 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class AdditionalEnchantmentDataProvider {
+    static final String ENCHANTMENT_CATEGORY_PREFIX = UniversalEnchants.MOD_ID.toUpperCase(Locale.ROOT) + "_";
+    public static final EnchantmentCategory AXE_ENCHANTMENT_CATEGORY = ModServices.ABSTRACTIONS.createEnchantmentCategory(ENCHANTMENT_CATEGORY_PREFIX + "AXE", item -> item instanceof AxeItem);
+    public static final EnchantmentCategory HORSE_ARMOR_ENCHANTMENT_CATEGORY = ModServices.ABSTRACTIONS.createEnchantmentCategory(ENCHANTMENT_CATEGORY_PREFIX + "HORSE_ARMOR", item -> item instanceof HorseArmorItem);
+    public static final EnchantmentCategory SHIELD_ENCHANTMENT_CATEGORY = ModServices.ABSTRACTIONS.createEnchantmentCategory(ENCHANTMENT_CATEGORY_PREFIX + "SHIELD", item -> item instanceof ShieldItem);
     public static final AdditionalEnchantmentDataProvider INSTANCE = new AdditionalEnchantmentDataProvider();
-    private static final String BUILT_IN_CATEGORIES_PREFIX = UniversalEnchants.MOD_ID.toUpperCase(Locale.ROOT) + "_";
-    private static final EnchantmentCategory AXE_ENCHANTMENT_CATEGORY = ModServices.ABSTRACTIONS.createEnchantmentCategory(BUILT_IN_CATEGORIES_PREFIX + "AXE", item -> item instanceof AxeItem);
-    private static final EnchantmentCategory HORSE_ARMOR_ENCHANTMENT_CATEGORY = ModServices.ABSTRACTIONS.createEnchantmentCategory(BUILT_IN_CATEGORIES_PREFIX + "HORSE_ARMOR", item -> item instanceof HorseArmorItem);
-    private static final EnchantmentCategory SHIELD_ENCHANTMENT_CATEGORY = ModServices.ABSTRACTIONS.createEnchantmentCategory(BUILT_IN_CATEGORIES_PREFIX + "SHIELD", item -> item instanceof ShieldItem);
 
     private final List<AdditionalEnchantmentsData> additionalEnchantmentsData = ImmutableList.of(
             new AdditionalEnchantmentsData(EnchantmentCategory.WEAPON, Enchantments.IMPALING),
@@ -41,34 +42,38 @@ public class AdditionalEnchantmentDataProvider {
 
     }
 
+    public void initialize() {
+        // make sure enum values are created
+    }
+
     public Map<Enchantment, List<DataEntry<?>>> getDefaultCategoryEntries() {
         // constructing default builders on Forge is quite expensive, so only do this when necessary
-        Map<Enchantment, DataEntry.Builder> builders = this.getVanillaEnchantments().collect(Collectors.toMap(Function.identity(), ModServices.ABSTRACTIONS::defaultEnchantmentDataBuilder));
+        Map<Enchantment, DataEntry.Builder> builders = getValidEnchantments().collect(Collectors.toMap(Function.identity(), ModServices.ABSTRACTIONS::defaultEnchantmentDataBuilder));
         this.additionalEnchantmentsData.forEach(data -> data.addToBuilder(builders));
-        this.setupAdditionalCompatibility(builders);
+        setupAdditionalCompatibility(builders);
         return builders.entrySet().stream().collect(ImmutableMap.toImmutableMap(Map.Entry::getKey, e -> e.getValue().build()));
     }
 
-    private void setupAdditionalCompatibility(Map<Enchantment, DataEntry.Builder> builders) {
-        this.applyIncompatibilityToBoth(builders, Enchantments.INFINITY_ARROWS, Enchantments.MENDING, false);
-        this.applyIncompatibilityToBoth(builders, Enchantments.MULTISHOT, Enchantments.PIERCING, false);
-        this.applyIncompatibilityToBoth(builders, Enchantments.SILK_TOUCH, Enchantments.FIRE_ASPECT, true);
+    private static void setupAdditionalCompatibility(Map<Enchantment, DataEntry.Builder> builders) {
+        applyIncompatibilityToBoth(builders, Enchantments.INFINITY_ARROWS, Enchantments.MENDING, false);
+        applyIncompatibilityToBoth(builders, Enchantments.MULTISHOT, Enchantments.PIERCING, false);
+        applyIncompatibilityToBoth(builders, Enchantments.SILK_TOUCH, Enchantments.FIRE_ASPECT, true);
         for (Enchantment enchantment : Registry.ENCHANTMENT) {
             if (enchantment instanceof DamageEnchantment && enchantment != Enchantments.SHARPNESS) {
-                this.applyIncompatibilityToBoth(builders, Enchantments.SHARPNESS, enchantment, false);
+                applyIncompatibilityToBoth(builders, Enchantments.SHARPNESS, enchantment, false);
                 // we make impaling incompatible with damage enchantments as both can be applied to the same weapons now
-                this.applyIncompatibilityToBoth(builders, Enchantments.IMPALING, enchantment, true);
+                applyIncompatibilityToBoth(builders, Enchantments.IMPALING, enchantment, true);
             }
             if (enchantment instanceof ProtectionEnchantment && enchantment != Enchantments.ALL_DAMAGE_PROTECTION && enchantment != Enchantments.FALL_PROTECTION) {
-                this.applyIncompatibilityToBoth(builders, Enchantments.ALL_DAMAGE_PROTECTION, enchantment, false);
+                applyIncompatibilityToBoth(builders, Enchantments.ALL_DAMAGE_PROTECTION, enchantment, false);
             }
             if (enchantment instanceof LootBonusEnchantment) {
-                this.applyIncompatibilityToBoth(builders, Enchantments.FIRE_ASPECT, enchantment, true);
+                applyIncompatibilityToBoth(builders, Enchantments.FIRE_ASPECT, enchantment, true);
             }
         }
     }
 
-    private void applyIncompatibilityToBoth(Map<Enchantment, DataEntry.Builder> builders, Enchantment enchantment, Enchantment other, boolean add) {
+    private static void applyIncompatibilityToBoth(Map<Enchantment, DataEntry.Builder> builders, Enchantment enchantment, Enchantment other, boolean add) {
         BiConsumer<Enchantment, Enchantment> operation = (e1, e2) -> {
             DataEntry.Builder builder = builders.get(e1);
             // this might be called for non-vanilla enchantments (currently possible through DamageEnchantment and ProtectionEnchantment instanceof checks)
@@ -84,7 +89,10 @@ public class AdditionalEnchantmentDataProvider {
         operation.accept(other, enchantment);
     }
 
-    private Stream<Enchantment> getVanillaEnchantments() {
+    private static Stream<Enchantment> getValidEnchantments() {
+        if (UniversalEnchants.CONFIG.get(CommonConfig.class).generateModdedEnchantmentConfigs) {
+            return Registry.ENCHANTMENT.stream();
+        }
         return Registry.ENCHANTMENT.entrySet().stream().filter(entry -> entry.getKey().location().getNamespace().equals("minecraft")).map(Map.Entry::getValue);
     }
 

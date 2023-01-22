@@ -14,7 +14,7 @@ import fuzs.universalenchants.world.item.enchantment.serialize.entry.TypeEntry;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.GsonHelper;
-import net.minecraft.world.item.enchantment.*;
+import net.minecraft.world.item.enchantment.Enchantment;
 
 import java.io.File;
 import java.io.FileReader;
@@ -26,8 +26,9 @@ public class EnchantmentHoldersManager {
     private static final Map<Enchantment, EnchantmentHolder> ENCHANTMENT_DATA_HOLDERS = Maps.newIdentityHashMap();
 
     public static void loadAll() {
-        JsonConfigFileUtil.getAllAndLoad(UniversalEnchants.MOD_ID, EnchantmentHoldersManager::serializeDefaultDataEntries, EnchantmentHoldersManager::deserializeDataEntry, () -> ENCHANTMENT_DATA_HOLDERS.values().forEach(EnchantmentHolder::invalidate));
-        ENCHANTMENT_DATA_HOLDERS.values().forEach(EnchantmentHolder::setEnchantmentCategory);
+        ENCHANTMENT_DATA_HOLDERS.values().forEach(EnchantmentHolder::invalidate);
+        JsonConfigFileUtil.getAllAndLoad(UniversalEnchants.MOD_ID, EnchantmentHoldersManager::serializeDefaultDataEntries, EnchantmentHoldersManager::deserializeDataEntry, () -> {});
+        ENCHANTMENT_DATA_HOLDERS.values().forEach(EnchantmentHolder::applyEnchantmentCategory);
     }
 
     private static EnchantmentHolder getEnchantmentHolder(Enchantment enchantment) {
@@ -75,6 +76,7 @@ public class EnchantmentHoldersManager {
         Enchantment enchantment = Registry.ENCHANTMENT.get(id);
         EnchantmentHolder holder = getEnchantmentHolder(enchantment);
         if (jsonObject.has("items")) {
+            holder.initializeCategoryEntries();
             JsonArray items = GsonHelper.getAsJsonArray(jsonObject, "items");
             for (JsonElement itemElement : items) {
                 deserializeCategoryEntry(id, holder, itemElement);
@@ -106,10 +108,8 @@ public class EnchantmentHoldersManager {
             } else {
                 entry = TypeEntry.ItemEntry.deserialize(enchantment, item);
             }
-            if (!entry.isEmpty()) {
-                entry.setExclude(exclude);
-                holder.submit(entry);
-            }
+            entry.setExclude(exclude);
+            holder.submit(entry);
         } catch (Exception e) {
             UniversalEnchants.LOGGER.warn("Failed to deserialize {} enchantment config entry {}: {}", enchantment, item, e);
         }
