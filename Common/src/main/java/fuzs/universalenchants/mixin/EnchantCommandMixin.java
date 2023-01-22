@@ -17,6 +17,6 @@ public abstract class EnchantCommandMixin {
     private static void register$inject$head(CommandDispatcher<CommandSourceStack> commandDispatcher, CallbackInfo callback) {
         // we provide our own version of the command which is generally possible and will just override vanilla as it'll be registered afterwards
         // just to make sure really everything is replaced and vanilla doesn't interfere we also disable vanilla's command
-        if (!UniversalEnchants.CONFIG.get(CommonConfig.class).enchantCommand.fixEnchantCommand) callback.cancel();
+        if (UniversalEnchants.CONFIG.get(CommonConfig.class).enchantCommand.replaceVanillaCommand()) callback.cancel();
     }
 }

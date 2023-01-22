@@ -1,14 +1,17 @@
 package fuzs.universalenchants.world.item.enchantment.serialize.entry;
 
 import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonSyntaxException;
 import fuzs.universalenchants.UniversalEnchants;
 import fuzs.universalenchants.world.item.enchantment.data.BuiltInEnchantmentDataManager;
+import fuzs.universalenchants.world.item.enchantment.serialize.EnchantmentHolder;
 import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
+import net.minecraft.util.GsonHelper;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.enchantment.EnchantmentCategory;
 
@@ -35,6 +38,32 @@ public abstract class TypeEntry extends DataEntry<Item> {
     };
 
     private boolean exclude;
+
+    public static void deserializeCategoryEntry(ResourceLocation enchantment, EnchantmentHolder holder, JsonElement jsonElement) throws JsonSyntaxException {
+        String item;
+        boolean exclude = false;
+        if (jsonElement.isJsonObject()) {
+            JsonObject jsonObject1 = jsonElement.getAsJsonObject();
+            item = GsonHelper.getAsString(jsonObject1, "id");
+            exclude = GsonHelper.getAsBoolean(jsonObject1, "exclude");
+        } else {
+            item = GsonHelper.convertToString(jsonElement, "item");
+        }
+        try {
+            TypeEntry entry;
+            if (item.startsWith("$")) {
+                entry = CategoryEntry.deserialize(enchantment, item);
+            } else if (item.startsWith("#")) {
+                entry = TagEntry.deserialize(enchantment, item);
+            } else {
+                entry = ItemEntry.deserialize(enchantment, item);
+            }
+            entry.setExclude(exclude);
+            holder.submit(entry);
+        } catch (Exception e) {
+            UniversalEnchants.LOGGER.warn("Failed to deserialize {} enchantment config entry {}: {}", enchantment, item, e);
+        }
+    }
 
     public final void serialize(JsonArray jsonArray) {
         if (!this.exclude) {

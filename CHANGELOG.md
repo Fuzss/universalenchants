@@ -3,6 +3,12 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog].
 
+## [v4.2.11-1.19.2] - 2023-01-22
+### Changed
+- Overhauled `.json` config files to allow for individual files to regenerate when missing or invalid
+- The `id` field is gone, the file name is now used to determine the enchantment the config file is for
+- Config files are now generated for modded enchantments
+
 ## [v4.2.10-1.19.2] - 2023-01-22
 ### Added
 - Shields can now be enchanted directly in enchanting tables

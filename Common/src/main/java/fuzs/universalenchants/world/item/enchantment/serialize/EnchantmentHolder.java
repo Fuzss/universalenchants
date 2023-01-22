@@ -3,21 +3,21 @@ package fuzs.universalenchants.world.item.enchantment.serialize;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import fuzs.universalenchants.world.item.enchantment.data.BuiltInEnchantmentDataManager;
+import fuzs.universalenchants.world.item.enchantment.serialize.entry.DataEntry;
 import fuzs.universalenchants.world.item.enchantment.serialize.entry.IncompatibleEntry;
 import fuzs.universalenchants.world.item.enchantment.serialize.entry.TypeEntry;
 import net.minecraft.core.Registry;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.EnchantmentCategory;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 
 public class EnchantmentHolder {
     private final Enchantment enchantment;
+    private final ResourceLocation id;
     private final EnchantmentCategory vanillaCategory;
     private final EnchantmentCategory category;
     private List<TypeEntry> categoryEntries;
@@ -31,6 +31,17 @@ public class EnchantmentHolder {
         this.enchantment = enchantment;
         this.vanillaCategory = BuiltInEnchantmentDataManager.INSTANCE.getVanillaCategory(enchantment);
         this.category = BuiltInEnchantmentDataManager.INSTANCE.getOrBuildCustomCategory(enchantment, this::canEnchant);
+        this.id = Registry.ENCHANTMENT.getKey(enchantment);
+    }
+
+    public ResourceLocation id() {
+        return this.id;
+    }
+    
+    public void ensureInvalidated() {
+        if (this.items != null || this.incompatibles != null) {
+            throw new IllegalStateException("Holder for enchantment %s has not been invalidated".formatted(this.id));
+        }
     }
 
     public void invalidate() {
@@ -44,6 +55,18 @@ public class EnchantmentHolder {
 
     public void initializeCategoryEntries() {
         if (this.categoryEntries == null) this.categoryEntries = Lists.newArrayList();
+    }
+
+    public void submitAll(Collection<DataEntry<?>> dataEntries) {
+        for (DataEntry<?> entry : dataEntries) {
+            if (entry instanceof TypeEntry typeEntry) {
+                this.submit(typeEntry);
+            } else if (entry instanceof IncompatibleEntry incompatibleEntry1) {
+                this.submit(incompatibleEntry1);
+            } else {
+                throw new IllegalStateException("Unknown data entry type %s".formatted(entry.getClass()));
+            }
+        }
     }
 
     public void submit(TypeEntry entry) {

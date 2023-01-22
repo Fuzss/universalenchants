@@ -30,7 +30,7 @@ public class UniversalEnchants implements ModConstructor {
 
     @Override
     public void onRegisterCommands(RegisterCommandsContext context) {
-        if (CONFIG.get(CommonConfig.class).enchantCommand.fixEnchantCommand || CONFIG.get(CommonConfig.class).enchantCommand.removeMaxLevelLimit) {
+        if (CONFIG.get(CommonConfig.class).enchantCommand.replaceVanillaCommand()) {
             ModEnchantCommand.register(context.dispatcher());
         }
     }

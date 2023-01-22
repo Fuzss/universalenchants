@@ -5,6 +5,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonSyntaxException;
+import fuzs.puzzleslib.core.CoreServices;
 import fuzs.puzzleslib.json.JsonConfigFileUtil;
 import fuzs.universalenchants.UniversalEnchants;
 import fuzs.universalenchants.world.item.enchantment.data.AdditionalEnchantmentDataProvider;
@@ -18,16 +19,43 @@ import net.minecraft.world.item.enchantment.Enchantment;
 
 import java.io.File;
 import java.io.FileReader;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
 public class EnchantmentHoldersManager {
+    private static final int SCHEMA_VERSION = 2;
     private static final Map<Enchantment, EnchantmentHolder> ENCHANTMENT_DATA_HOLDERS = Maps.newIdentityHashMap();
+
+    public static boolean isCompatibleWith(Enchantment enchantment, Enchantment other, boolean fallback) {
+        return getEnchantmentHolder(enchantment).isCompatibleWith(other, fallback) && getEnchantmentHolder(other).isCompatibleWith(enchantment, fallback);
+    }
 
     public static void loadAll() {
         ENCHANTMENT_DATA_HOLDERS.values().forEach(EnchantmentHolder::invalidate);
-        JsonConfigFileUtil.getAllAndLoad(UniversalEnchants.MOD_ID, EnchantmentHoldersManager::serializeDefaultDataEntries, EnchantmentHoldersManager::deserializeDataEntry, () -> {});
+        Path modConfigPath = CoreServices.ENVIRONMENT.getConfigDir().resolve(UniversalEnchants.MOD_ID);
+        JsonConfigFileUtil.mkdirs(modConfigPath.toFile());
+        for (Map.Entry<Enchantment, List<DataEntry<?>>> entry : AdditionalEnchantmentDataProvider.INSTANCE.getEnchantmentDataEntries().entrySet()) {
+            ResourceLocation id = Registry.ENCHANTMENT.getKey(entry.getKey());
+            Path configRootPath = modConfigPath.resolve(id.getNamespace());
+            JsonConfigFileUtil.mkdirs(configRootPath.toFile());
+            String fileName = id.getPath() + ".json";
+            Path configFilePath = configRootPath.resolve(fileName);
+            File configFile = configFilePath.toFile();
+            EnchantmentHolder holder = getEnchantmentHolder(entry.getKey());
+            holder.ensureInvalidated();
+            if (!loadFromFile(holder, configFilePath, configFile)) {
+                if (JsonConfigFileUtil.saveToFile(configFile, serializeDataEntry(entry.getValue()))) {
+                    UniversalEnchants.LOGGER.info("Created new enchantment config file for {} in config directory", holder.id());
+                }
+                holder.initializeCategoryEntries();
+                holder.submitAll(entry.getValue());
+            }
+        }
         ENCHANTMENT_DATA_HOLDERS.values().forEach(EnchantmentHolder::applyEnchantmentCategory);
     }
 
@@ -35,25 +63,46 @@ public class EnchantmentHoldersManager {
         return ENCHANTMENT_DATA_HOLDERS.computeIfAbsent(enchantment, EnchantmentHolder::new);
     }
 
-    public static boolean isCompatibleWith(Enchantment enchantment, Enchantment other, boolean fallback) {
-        return getEnchantmentHolder(enchantment).isCompatibleWith(other, fallback) && getEnchantmentHolder(other).isCompatibleWith(enchantment, fallback);
+    private static boolean loadFromFile(EnchantmentHolder holder, Path configFilePath, File configFile) {
+        if (configFile.exists()) {
+            try (FileReader reader = new FileReader(configFile)) {
+                deserializeDataEntry(holder, reader);
+                UniversalEnchants.LOGGER.debug("Read enchantment config file for {} in config directory", holder.id());
+                return true;
+            } catch (IOException | JsonSyntaxException e) {
+                UniversalEnchants.LOGGER.error("Failed to read enchantment config file for {} in config directory: {}", holder.id(), e);
+                try {
+                    Files.move(configFilePath, configFilePath.getParent().resolve(configFilePath.getFileName() + ".bak"), StandardCopyOption.REPLACE_EXISTING);
+                } catch (IOException ignored) {
+
+                }
+            }
+        }
+        return false;
     }
 
-    private static void serializeDefaultDataEntries(File directory) {
-        serializeAllDataEntries(directory, AdditionalEnchantmentDataProvider.INSTANCE.getDefaultCategoryEntries());
-    }
-
-    private static void serializeAllDataEntries(File directory, Map<Enchantment, List<DataEntry<?>>> categoryEntries) {
-        for (Map.Entry<Enchantment, List<DataEntry<?>>> entry : categoryEntries.entrySet()) {
-            String fileName = "%s.json".formatted(Registry.ENCHANTMENT.getKey(entry.getKey()).getPath());
-            File file = new File(directory, fileName);
-            JsonConfigFileUtil.saveToFile(file, serializeDataEntry(entry.getKey(), entry.getValue()));
+    private static void deserializeDataEntry(EnchantmentHolder holder, FileReader reader) throws JsonSyntaxException {
+        JsonElement jsonElement = JsonConfigFileUtil.GSON.fromJson(reader, JsonElement.class);
+        JsonObject jsonObject = GsonHelper.convertToJsonObject(jsonElement, "enchantment config");
+        int schemaVersion = GsonHelper.getAsInt(jsonObject, "schemaVersion");
+        if (schemaVersion != SCHEMA_VERSION) throw new JsonSyntaxException("Invalid config file schema %s (current format is %s) for enchantment %s".formatted(schemaVersion, SCHEMA_VERSION, holder.id()));
+        if (jsonObject.has("items")) {
+            holder.initializeCategoryEntries();
+            JsonArray items = GsonHelper.getAsJsonArray(jsonObject, "items");
+            for (JsonElement itemElement : items) {
+                TypeEntry.deserializeCategoryEntry(holder.id(), holder, itemElement);
+            }
+        }
+        if (jsonObject.has("incompatible")) {
+            JsonArray jsonArray = GsonHelper.getAsJsonArray(jsonObject, "incompatible");
+            String[] incompatibles = JsonConfigFileUtil.GSON.fromJson(jsonArray, String[].class);
+            holder.submit(IncompatibleEntry.deserialize(holder.id(), incompatibles));
         }
     }
 
-    private static JsonElement serializeDataEntry(Enchantment enchantment, Collection<DataEntry<?>> entries) {
+    private static JsonElement serializeDataEntry(Collection<DataEntry<?>> entries) {
         JsonObject jsonObject = new JsonObject();
-        jsonObject.addProperty("id", Registry.ENCHANTMENT.getKey(enchantment).toString());
+        jsonObject.addProperty("schemaVersion", SCHEMA_VERSION);
         JsonArray jsonArray = new JsonArray();
         JsonArray jsonArray1 = new JsonArray();
         for (DataEntry<?> entry : entries) {
@@ -66,52 +115,5 @@ public class EnchantmentHoldersManager {
         jsonObject.add("items", jsonArray);
         jsonObject.add("incompatible", jsonArray1);
         return jsonObject;
-    }
-
-    private static void deserializeDataEntry(FileReader reader) throws JsonSyntaxException {
-        JsonElement jsonElement = JsonConfigFileUtil.GSON.fromJson(reader, JsonElement.class);
-        JsonObject jsonObject = GsonHelper.convertToJsonObject(jsonElement, "enchantment config");
-        ResourceLocation id = new ResourceLocation(GsonHelper.getAsString(jsonObject, "id"));
-        if (!Registry.ENCHANTMENT.containsKey(id)) throw new JsonSyntaxException("Enchantment %s not found in registry, skipping...".formatted(id));
-        Enchantment enchantment = Registry.ENCHANTMENT.get(id);
-        EnchantmentHolder holder = getEnchantmentHolder(enchantment);
-        if (jsonObject.has("items")) {
-            holder.initializeCategoryEntries();
-            JsonArray items = GsonHelper.getAsJsonArray(jsonObject, "items");
-            for (JsonElement itemElement : items) {
-                deserializeCategoryEntry(id, holder, itemElement);
-            }
-        }
-        if (jsonObject.has("incompatible")) {
-            JsonArray jsonArray = GsonHelper.getAsJsonArray(jsonObject, "incompatible");
-            String[] incompatibles = JsonConfigFileUtil.GSON.fromJson(jsonArray, String[].class);
-            holder.submit(IncompatibleEntry.deserialize(id, incompatibles));
-        }
-    }
-
-    private static void deserializeCategoryEntry(ResourceLocation enchantment, EnchantmentHolder holder, JsonElement jsonElement) throws JsonSyntaxException {
-        String item;
-        boolean exclude = false;
-        if (jsonElement.isJsonObject()) {
-            JsonObject jsonObject1 = jsonElement.getAsJsonObject();
-            item = GsonHelper.getAsString(jsonObject1, "id");
-            exclude = GsonHelper.getAsBoolean(jsonObject1, "exclude");
-        } else {
-            item = GsonHelper.convertToString(jsonElement, "item");
-        }
-        try {
-            TypeEntry entry;
-            if (item.startsWith("$")) {
-                entry = TypeEntry.CategoryEntry.deserialize(enchantment, item);
-            } else if (item.startsWith("#")) {
-                entry = TypeEntry.TagEntry.deserialize(enchantment, item);
-            } else {
-                entry = TypeEntry.ItemEntry.deserialize(enchantment, item);
-            }
-            entry.setExclude(exclude);
-            holder.submit(entry);
-        } catch (Exception e) {
-            UniversalEnchants.LOGGER.warn("Failed to deserialize {} enchantment config entry {}: {}", enchantment, item, e);
-        }
     }
 }

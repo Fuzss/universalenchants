@@ -3,7 +3,6 @@ package fuzs.universalenchants.world.item.enchantment.data;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import fuzs.universalenchants.UniversalEnchants;
-import fuzs.universalenchants.config.CommonConfig;
 import fuzs.universalenchants.core.ModServices;
 import fuzs.universalenchants.world.item.enchantment.serialize.entry.DataEntry;
 import net.minecraft.core.Registry;
@@ -18,10 +17,9 @@ import java.util.Map;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public class AdditionalEnchantmentDataProvider {
-    static final String ENCHANTMENT_CATEGORY_PREFIX = UniversalEnchants.MOD_ID.toUpperCase(Locale.ROOT) + "_";
+    static final String ENCHANTMENT_CATEGORY_PREFIX = UniversalEnchants.MOD_NAME.toUpperCase(Locale.ROOT).replace(" ", "_") + "_";
     public static final EnchantmentCategory AXE_ENCHANTMENT_CATEGORY = ModServices.ABSTRACTIONS.createEnchantmentCategory(ENCHANTMENT_CATEGORY_PREFIX + "AXE", item -> item instanceof AxeItem);
     public static final EnchantmentCategory HORSE_ARMOR_ENCHANTMENT_CATEGORY = ModServices.ABSTRACTIONS.createEnchantmentCategory(ENCHANTMENT_CATEGORY_PREFIX + "HORSE_ARMOR", item -> item instanceof HorseArmorItem);
     public static final EnchantmentCategory SHIELD_ENCHANTMENT_CATEGORY = ModServices.ABSTRACTIONS.createEnchantmentCategory(ENCHANTMENT_CATEGORY_PREFIX + "SHIELD", item -> item instanceof ShieldItem);
@@ -37,6 +35,7 @@ public class AdditionalEnchantmentDataProvider {
             new AdditionalEnchantmentsData(HORSE_ARMOR_ENCHANTMENT_CATEGORY, Enchantments.ALL_DAMAGE_PROTECTION, Enchantments.FIRE_PROTECTION, Enchantments.FALL_PROTECTION, Enchantments.BLAST_PROTECTION, Enchantments.PROJECTILE_PROTECTION, Enchantments.RESPIRATION, Enchantments.THORNS, Enchantments.DEPTH_STRIDER, Enchantments.FROST_WALKER, Enchantments.BINDING_CURSE, Enchantments.SOUL_SPEED, Enchantments.VANISHING_CURSE),
             new AdditionalEnchantmentsData(SHIELD_ENCHANTMENT_CATEGORY, Enchantments.THORNS, Enchantments.KNOCKBACK)
     );
+    private Map<Enchantment, List<DataEntry<?>>> defaultCategoryEntries;
 
     private AdditionalEnchantmentDataProvider() {
 
@@ -46,12 +45,15 @@ public class AdditionalEnchantmentDataProvider {
         // make sure enum values are created
     }
 
-    public Map<Enchantment, List<DataEntry<?>>> getDefaultCategoryEntries() {
-        // constructing default builders on Forge is quite expensive, so only do this when necessary
-        Map<Enchantment, DataEntry.Builder> builders = getValidEnchantments().collect(Collectors.toMap(Function.identity(), ModServices.ABSTRACTIONS::defaultEnchantmentDataBuilder));
-        this.additionalEnchantmentsData.forEach(data -> data.addToBuilder(builders));
-        setupAdditionalCompatibility(builders);
-        return builders.entrySet().stream().collect(ImmutableMap.toImmutableMap(Map.Entry::getKey, e -> e.getValue().build()));
+    public Map<Enchantment, List<DataEntry<?>>> getEnchantmentDataEntries() {
+        if (this.defaultCategoryEntries == null) {
+            // constructing default builders on Forge is quite expensive, so only do this when necessary
+            Map<Enchantment, DataEntry.Builder> builders = Registry.ENCHANTMENT.stream().collect(Collectors.toMap(Function.identity(), ModServices.ABSTRACTIONS::defaultEnchantmentDataBuilder));
+            this.additionalEnchantmentsData.forEach(data -> data.addToBuilder(builders));
+            setupAdditionalCompatibility(builders);
+            this.defaultCategoryEntries = builders.entrySet().stream().collect(ImmutableMap.toImmutableMap(Map.Entry::getKey, e -> e.getValue().build()));
+        }
+        return this.defaultCategoryEntries;
     }
 
     private static void setupAdditionalCompatibility(Map<Enchantment, DataEntry.Builder> builders) {
@@ -89,13 +91,6 @@ public class AdditionalEnchantmentDataProvider {
         operation.accept(other, enchantment);
     }
 
-    private static Stream<Enchantment> getValidEnchantments() {
-        if (UniversalEnchants.CONFIG.get(CommonConfig.class).generateModdedEnchantmentConfigs) {
-            return Registry.ENCHANTMENT.stream();
-        }
-        return Registry.ENCHANTMENT.entrySet().stream().filter(entry -> entry.getKey().location().getNamespace().equals("minecraft")).map(Map.Entry::getValue);
-    }
-
     private record AdditionalEnchantmentsData(EnchantmentCategory category, List<Enchantment> enchantments) {
 
         AdditionalEnchantmentsData(EnchantmentCategory category, Enchantment... enchantments) {
@@ -104,7 +99,9 @@ public class AdditionalEnchantmentDataProvider {
 
         public void addToBuilder(Map<Enchantment, DataEntry.Builder> builders) {
             for (Enchantment enchantment : this.enchantments) {
-                builders.get(enchantment).add(this.category);
+                if (builders.containsKey(enchantment)) {
+                    builders.get(enchantment).add(this.category);
+                }
             }
         }
     }
