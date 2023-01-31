@@ -27,7 +27,7 @@ public class AdditionalEnchantmentDataProvider {
 
     private final List<AdditionalEnchantmentsData> additionalEnchantmentsData = ImmutableList.of(
             new AdditionalEnchantmentsData(EnchantmentCategory.WEAPON, Enchantments.IMPALING),
-            new AdditionalEnchantmentsData(EnchantmentCategory.DIGGER, Enchantments.FIRE_ASPECT),
+//            new AdditionalEnchantmentsData(EnchantmentCategory.DIGGER, Enchantments.FIRE_ASPECT),
             new AdditionalEnchantmentsData(AXE_ENCHANTMENT_CATEGORY, Enchantments.SHARPNESS, Enchantments.SMITE, Enchantments.BANE_OF_ARTHROPODS, Enchantments.KNOCKBACK, Enchantments.FIRE_ASPECT, Enchantments.MOB_LOOTING, Enchantments.SWEEPING_EDGE, Enchantments.IMPALING),
             new AdditionalEnchantmentsData(EnchantmentCategory.TRIDENT, Enchantments.SHARPNESS, Enchantments.SMITE, Enchantments.BANE_OF_ARTHROPODS, Enchantments.KNOCKBACK, Enchantments.FIRE_ASPECT, Enchantments.MOB_LOOTING, Enchantments.SWEEPING_EDGE, Enchantments.QUICK_CHARGE, Enchantments.PIERCING),
             new AdditionalEnchantmentsData(EnchantmentCategory.BOW, Enchantments.PIERCING, Enchantments.MULTISHOT, Enchantments.QUICK_CHARGE, Enchantments.MOB_LOOTING),

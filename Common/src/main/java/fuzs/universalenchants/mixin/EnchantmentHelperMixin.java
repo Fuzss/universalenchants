@@ -6,6 +6,8 @@ import fuzs.universalenchants.world.item.enchantment.data.AdditionalEnchantmentD
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.ShieldItem;
+import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.EnchantmentCategory;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.item.enchantment.Enchantments;
@@ -22,5 +24,11 @@ abstract class EnchantmentHelperMixin {
         if (!UniversalEnchants.CONFIG.get(ServerConfig.class).nerfFireAspectOnTools) return;
         ItemStack stack = Enchantments.FIRE_ASPECT.getSlotItems(player).getOrDefault(EquipmentSlot.MAINHAND, ItemStack.EMPTY);
         if (!stack.isEmpty() && EnchantmentCategory.DIGGER.canEnchant(stack.getItem()) && !AdditionalEnchantmentDataProvider.AXE_ENCHANTMENT_CATEGORY.canEnchant(stack.getItem())) callback.setReturnValue(0);
+    }
+
+    @Inject(method = "getKnockbackBonus", at = @At("HEAD"), cancellable = true)
+    private static void getKnockbackBonus(LivingEntity player, CallbackInfoReturnable<Integer> callback) {
+        // prevent shields from applying knockback when hitting targets
+        if (player.getMainHandItem().getItem() instanceof ShieldItem) callback.setReturnValue(0);
     }
 }

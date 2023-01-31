@@ -3,6 +3,11 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog].
 
+## [v4.2.12-1.19.2] - 2023-01-31
+### Changed
+- Prevent knockback on shields from being applied when hitting mobs, it is only supposed to work when blocking
+- Disabled fire aspect on tools as auto-smelt by default, it can be re-enabled in the configs though
+
 ## [v4.2.11-1.19.2] - 2023-01-22
 ### Changed
 - Overhauled `.json` config files to allow for individual files to regenerate when missing or invalid
