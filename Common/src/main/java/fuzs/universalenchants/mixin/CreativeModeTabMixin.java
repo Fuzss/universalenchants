@@ -8,7 +8,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.ModifyVariable;
 
 @Mixin(CreativeModeTab.class)
-class CreativeModeTabMixin {
+abstract class CreativeModeTabMixin {
 
     @ModifyVariable(method = "hasEnchantmentCategory", at = @At("HEAD"))
     public EnchantmentCategory hasEnchantmentCategory$modifyVariable$head(EnchantmentCategory category) {

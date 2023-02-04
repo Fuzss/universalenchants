@@ -6,7 +6,6 @@
   "refmap": "universalenchants.refmap.json",
   "mixins": [
     "AnvilMenuMixin",
-    "BlockMixin",
     "CreativeModeTabMixin",
     "CrossbowItemMixin",
     "EnchantCommandMixin",

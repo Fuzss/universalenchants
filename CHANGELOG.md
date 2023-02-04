@@ -3,6 +3,10 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog].
 
+## [v4.2.13-1.19.2] - 2023-02-04
+### Removed
+- Removed auto-smelt functionality of fire aspect on digging tools, was a bit out-of-scope for Universal Enchants and is better served in a separate mod dedicated to all new enchantments
+
 ## [v4.2.12-1.19.2] - 2023-01-31
 ### Changed
 - Prevent knockback on shields from being applied when hitting mobs, it is only supposed to work when blocking
