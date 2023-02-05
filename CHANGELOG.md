@@ -3,6 +3,10 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog].
 
+## [v4.2.14-1.19.2] - 2023-02-05
+### Fixed
+- Fix fire aspect and looting incompatibility
+
 ## [v4.2.13-1.19.2] - 2023-02-04
 ### Removed
 - Removed auto-smelt functionality of fire aspect on digging tools, was a bit out-of-scope for Universal Enchants and is better served in a separate mod dedicated to all new enchantments

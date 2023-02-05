@@ -58,7 +58,6 @@ public class AdditionalEnchantmentDataProvider {
     private static void setupAdditionalCompatibility(Map<Enchantment, DataEntry.Builder> builders) {
         applyIncompatibilityToBoth(builders, Enchantments.INFINITY_ARROWS, Enchantments.MENDING, false);
         applyIncompatibilityToBoth(builders, Enchantments.MULTISHOT, Enchantments.PIERCING, false);
-        applyIncompatibilityToBoth(builders, Enchantments.SILK_TOUCH, Enchantments.FIRE_ASPECT, true);
         for (Enchantment enchantment : Registry.ENCHANTMENT) {
             if (enchantment instanceof DamageEnchantment && enchantment != Enchantments.SHARPNESS) {
                 applyIncompatibilityToBoth(builders, Enchantments.SHARPNESS, enchantment, false);
@@ -67,9 +66,6 @@ public class AdditionalEnchantmentDataProvider {
             }
             if (enchantment instanceof ProtectionEnchantment && enchantment != Enchantments.ALL_DAMAGE_PROTECTION && enchantment != Enchantments.FALL_PROTECTION) {
                 applyIncompatibilityToBoth(builders, Enchantments.ALL_DAMAGE_PROTECTION, enchantment, false);
-            }
-            if (enchantment instanceof LootBonusEnchantment) {
-                applyIncompatibilityToBoth(builders, Enchantments.FIRE_ASPECT, enchantment, true);
             }
         }
     }
