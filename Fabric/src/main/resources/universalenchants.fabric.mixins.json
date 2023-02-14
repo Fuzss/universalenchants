@@ -4,6 +4,7 @@
   "compatibilityLevel": "JAVA_17",
   "package": "fuzs.universalenchants.mixin",
   "refmap": "universalenchants.refmap.json",
+  "plugin": "fuzs.universalenchants.mixin.ModMixinConfigPlugin",
   "mixins": [
     "BowItemFabricMixin",
     "ExperienceOrbFabricMixin",

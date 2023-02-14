@@ -3,6 +3,11 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog].
 
+## [v4.2.15-1.19.2] - 2023-02-14
+### Fixed
+- Fixed crash on world loading with [UniqueEnchantments](https://www.curseforge.com/minecraft/mc-mods/unique-enchantments) mod installed
+- Implement Mixin `IModConfigPlugin` to prevent a start-up crash when [Puzzles Lib](https://www.curseforge.com/minecraft/mc-mods/puzzles-lib) is missing on Forge, instead the user will see a proper screen with the necessary info
+
 ## [v4.2.14-1.19.2] - 2023-02-05
 ### Fixed
 - Fix fire aspect and looting incompatibility

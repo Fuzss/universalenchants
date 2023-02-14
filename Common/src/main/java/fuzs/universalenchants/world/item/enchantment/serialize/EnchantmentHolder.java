@@ -86,8 +86,13 @@ public class EnchantmentHolder {
     }
 
     private boolean canEnchant(Item item) {
-        this.dissolveItems();
-        return this.items.contains(item);
+        // might be called by other mods when category entries haven't been set up yet, so use vanilla then
+        if (this.categoryEntries != null) {
+            this.dissolveItems();
+            return this.items.contains(item);
+        } else {
+            return this.vanillaCategory.canEnchant(item);
+        }
     }
 
     private void dissolveItems() {
