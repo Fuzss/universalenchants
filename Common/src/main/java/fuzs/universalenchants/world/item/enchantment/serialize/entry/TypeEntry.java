@@ -8,7 +8,8 @@ import fuzs.universalenchants.UniversalEnchants;
 import fuzs.universalenchants.world.item.enchantment.data.BuiltInEnchantmentDataManager;
 import fuzs.universalenchants.world.item.enchantment.serialize.EnchantmentHolder;
 import net.minecraft.core.Holder;
-import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
 import net.minecraft.util.GsonHelper;
@@ -104,17 +105,17 @@ public abstract class TypeEntry extends DataEntry<Item> {
 
         @Override
         String serialize() {
-            return Registry.ITEM.getKey(this.item).toString();
+            return BuiltInRegistries.ITEM.getKey(this.item).toString();
         }
 
         public static TypeEntry deserialize(ResourceLocation enchantment, String s) throws JsonSyntaxException {
             ResourceLocation id = new ResourceLocation(s);
-            if (!Registry.ITEM.containsKey(id)) {
+            if (!BuiltInRegistries.ITEM.containsKey(id)) {
                 JsonSyntaxException e = new JsonSyntaxException("No item with name %s found".formatted(id));
                 UniversalEnchants.LOGGER.warn("Failed to deserialize {} enchantment config entry {}: {}", enchantment, id, e);
                 return EMPTY;
             }
-            return new ItemEntry(Registry.ITEM.get(id));
+            return new ItemEntry(BuiltInRegistries.ITEM.get(id));
         }
     }
 
@@ -127,7 +128,7 @@ public abstract class TypeEntry extends DataEntry<Item> {
 
         @Override
         public void dissolve(Set<Item> items) throws JsonSyntaxException {
-            for (Item item : Registry.ITEM) {
+            for (Item item : BuiltInRegistries.ITEM) {
                 if (this.category.canEnchant(item)) {
                     items.add(item);
                 }
@@ -166,7 +167,7 @@ public abstract class TypeEntry extends DataEntry<Item> {
 
         @Override
         public void dissolve(Set<Item> items) throws JsonSyntaxException {
-            for (Holder<Item> holder : Registry.ITEM.getTagOrEmpty(this.tag)) {
+            for (Holder<Item> holder : BuiltInRegistries.ITEM.getTagOrEmpty(this.tag)) {
                 items.add(holder.value());
             }
         }
@@ -181,8 +182,8 @@ public abstract class TypeEntry extends DataEntry<Item> {
                 s = s.substring(1);
             }
             ResourceLocation id = new ResourceLocation(s);
-            TagKey<Item> tag = TagKey.create(Registry.ITEM_REGISTRY, id);
-            if (!Registry.ITEM.isKnownTagName(tag)) {
+            TagKey<Item> tag = TagKey.create(Registries.ITEM, id);
+            if (BuiltInRegistries.ITEM.getTag(tag).isEmpty()) {
                 JsonSyntaxException e = new JsonSyntaxException("No tag with name %s found".formatted(id));
                 UniversalEnchants.LOGGER.warn("Failed to deserialize {} enchantment config entry {}: {}", enchantment, id, e);
                 return EMPTY;

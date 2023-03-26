@@ -7,7 +7,6 @@
   "plugin": "fuzs.universalenchants.mixin.ModMixinConfigPlugin",
   "mixins": [
     "AnvilMenuMixin",
-    "CreativeModeTabMixin",
     "CrossbowItemMixin",
     "EnchantCommandMixin",
     "EnchantmentHelperMixin",

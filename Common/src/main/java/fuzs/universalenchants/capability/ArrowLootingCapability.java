@@ -1,6 +1,6 @@
 package fuzs.universalenchants.capability;
 
-import fuzs.puzzleslib.capability.data.CapabilityComponent;
+import fuzs.puzzleslib.api.capability.v2.data.CapabilityComponent;
 
 public interface ArrowLootingCapability extends CapabilityComponent {
 

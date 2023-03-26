@@ -7,11 +7,6 @@
   "plugin": "fuzs.universalenchants.mixin.ModMixinConfigPlugin",
   "mixins": [
     "BowItemFabricMixin",
-    "ExperienceOrbFabricMixin",
-    "FarmBlockFabricMixin",
-    "LivingEntityFabricMixin",
-    "LootingEnchantFunctionFabricMixin",
-    "LootItemRandomChanceWithLootingConditionFabricMixin",
     "PlayerFabricMixin"
   ],
   "client": [

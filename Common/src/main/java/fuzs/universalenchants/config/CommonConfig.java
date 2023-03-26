@@ -1,7 +1,7 @@
 package fuzs.universalenchants.config;
 
-import fuzs.puzzleslib.config.ConfigCore;
-import fuzs.puzzleslib.config.annotation.Config;
+import fuzs.puzzleslib.api.config.v3.Config;
+import fuzs.puzzleslib.api.config.v3.ConfigCore;
 
 public class CommonConfig implements ConfigCore {
     @Config(description = "To return to the vanilla /enchant command (in case of mod incompatibilities), make sure all settings in this category are disabled.")

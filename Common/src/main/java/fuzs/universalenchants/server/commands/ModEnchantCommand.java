@@ -9,10 +9,13 @@ import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import fuzs.universalenchants.UniversalEnchants;
 import fuzs.universalenchants.config.CommonConfig;
 import net.minecraft.ChatFormatting;
+import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.EntityArgument;
-import net.minecraft.commands.arguments.ItemEnchantmentArgument;
+import net.minecraft.commands.arguments.ResourceArgument;
+import net.minecraft.core.Holder;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.network.chat.Component;
@@ -44,20 +47,19 @@ public class ModEnchantCommand {
 	);
 	private static final SimpleCommandExceptionType ERROR_NOTHING_HAPPENED = new SimpleCommandExceptionType(Component.translatable("commands.enchant.failed"));
 
-	public static void register(CommandDispatcher<CommandSourceStack> commandDispatcher) {
+	public static void register(CommandDispatcher<CommandSourceStack> commandDispatcher, CommandBuildContext context) {
 		commandDispatcher.register(
 			Commands.literal("enchant")
 				.requires(commandSourceStack -> commandSourceStack.hasPermission(2))
 				.then(
 					Commands.argument("targets", EntityArgument.entities())
 						.then(
-							Commands.argument("enchantment", ItemEnchantmentArgument.enchantment())
+							Commands.argument("enchantment", ResourceArgument.resource(context, Registries.ENCHANTMENT))
 								.executes(
 									commandContext -> enchant(
 											commandContext.getSource(),
 											EntityArgument.getEntities(commandContext, "targets"),
-											ItemEnchantmentArgument.getEnchantment(commandContext, "enchantment"),
-											1
+											ResourceArgument.getEnchantment(commandContext, "enchantment")
 										)
 								)
 								.then(
@@ -68,7 +70,7 @@ public class ModEnchantCommand {
 											commandContext -> enchant(
 													commandContext.getSource(),
 													EntityArgument.getEntities(commandContext, "targets"),
-													ItemEnchantmentArgument.getEnchantment(commandContext, "enchantment"),
+													ResourceArgument.getEnchantment(commandContext, "enchantment"),
 													IntegerArgumentType.getInteger(commandContext, "level")
 												)
 										)
@@ -78,7 +80,12 @@ public class ModEnchantCommand {
 		);
 	}
 
-	private static int enchant(CommandSourceStack commandSourceStack, Collection<? extends Entity> collection, Enchantment enchantment, int level) throws CommandSyntaxException {
+	private static int enchant(CommandSourceStack commandSourceStack, Collection<? extends Entity> collection, Holder<Enchantment> holder) throws CommandSyntaxException {
+		return enchant(commandSourceStack, collection, holder, holder.value().getMaxLevel());
+	}
+
+	private static int enchant(CommandSourceStack commandSourceStack, Collection<? extends Entity> collection, Holder<Enchantment> holder, int level) throws CommandSyntaxException {
+		Enchantment enchantment = holder.value();
 		// removed max level check (/effect command doesn't have it as well)
 		if (!UniversalEnchants.CONFIG.get(CommonConfig.class).enchantCommand.removeMaxLevelLimit && level > enchantment.getMaxLevel()) {
 			throw ERROR_LEVEL_TOO_HIGH.create(level, enchantment.getMaxLevel());

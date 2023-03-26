@@ -1,5 +1,7 @@
 package fuzs.universalenchants.handler;
 
+import fuzs.puzzleslib.api.event.v1.core.EventResult;
+import fuzs.puzzleslib.api.event.v1.data.MutableInt;
 import fuzs.universalenchants.capability.ArrowLootingCapability;
 import fuzs.universalenchants.init.ModRegistry;
 import fuzs.universalenchants.mixin.accessor.AbstractArrowAccessor;
@@ -17,17 +19,16 @@ import net.minecraft.world.item.*;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.level.Level;
+import org.jetbrains.annotations.Nullable;
 
-import javax.annotation.Nullable;
 import java.util.Optional;
-import java.util.OptionalInt;
 
 public class ItemCompatHandler {
 
-    public void onArrowLoose(Player player, ItemStack stack, Level level, int charge, boolean hasAmmo) {
+    public static EventResult onArrowLoose(Player player, ItemStack stack, Level level, MutableInt charge, boolean hasAmmo) {
         // multishot enchantment for bows
         if (hasAmmo && EnchantmentHelper.getItemEnchantmentLevel(Enchantments.MULTISHOT, stack) > 0) {
-            float velocity = BowItem.getPowerForTime(charge);
+            float velocity = BowItem.getPowerForTime(charge.getAsInt());
             if (!level.isClientSide && velocity >= 0.1F) {
                 ItemStack itemstack = player.getProjectile(stack);
                 ArrowItem arrowitem = (ArrowItem) (itemstack.getItem() instanceof ArrowItem ? itemstack.getItem() : Items.ARROW);
@@ -46,6 +47,7 @@ public class ItemCompatHandler {
                 }
             }
         }
+        return EventResult.PASS;
     }
 
     private static float[] getShotPitches(RandomSource random, float velocity) {
@@ -58,32 +60,33 @@ public class ItemCompatHandler {
         return 1.0F / (random.nextFloat() * 0.5F + 1.8F) + f * velocity;
     }
 
-    public OptionalInt onItemUseTick(LivingEntity entity, ItemStack item, int duration) {
-        Item item2 = item.getItem();
-        int duration2 = item.getUseDuration() - duration;
+    public static EventResult onUseItemTick(LivingEntity entity, ItemStack useItem, MutableInt useItemRemaining) {
+        Item item2 = useItem.getItem();
+        int duration2 = useItem.getUseDuration() - useItemRemaining.getAsInt();
         if (item2 instanceof BowItem && duration2 < 20 || item2 instanceof TridentItem && duration2 < 10) {
             // quick charge enchantment for bows and tridents
-            int quickChargeLevel = EnchantmentHelper.getItemEnchantmentLevel(Enchantments.QUICK_CHARGE, item);
-            return OptionalInt.of(duration - quickChargeLevel);
+            int quickChargeLevel = EnchantmentHelper.getItemEnchantmentLevel(Enchantments.QUICK_CHARGE, useItem);
+            useItemRemaining.mapInt(duration -> duration - quickChargeLevel);
         }
-        return OptionalInt.empty();
+        return EventResult.PASS;
     }
 
-    public OptionalInt onLootingLevel(LivingEntity entity, @Nullable DamageSource damageSource, int lootingLevel) {
-        if (damageSource == null) return OptionalInt.empty();
+    public static void onLootingLevel(LivingEntity entity, @Nullable DamageSource damageSource, MutableInt lootingLevel) {
+        if (damageSource == null) return;
         Entity source = damageSource.getDirectEntity();
         if (source instanceof AbstractArrow) {
             // the whole trident stack is saved anyway, so use it
             if (source instanceof ThrownTrident) {
                 ItemStack stack = ((AbstractArrowAccessor) source).callGetPickupItem();
                 int level = EnchantmentHelper.getItemEnchantmentLevel(Enchantments.MOB_LOOTING, stack);
-                if (level > 0) return OptionalInt.of(level);
+                if (level > 0) {
+                    lootingLevel.accept(level);
+                }
             } else {
                 // overwrite anything set by vanilla, even when enchantment is not present (since the whole holding a looting sword and getting looting applied to ranged kills doesn't make a lot of sense)
-                return OptionalInt.of(ModRegistry.ARROW_LOOTING_CAPABILITY.maybeGet(source).map(ArrowLootingCapability::getLevel).orElse((byte) 0));
+                lootingLevel.accept(ModRegistry.ARROW_LOOTING_CAPABILITY.maybeGet(source).map(ArrowLootingCapability::getLevel).orElse((byte) 0));
             }
         }
-        return OptionalInt.empty();
     }
 
     public static Optional<Unit> onShieldBlock(LivingEntity blocker, DamageSource source, float amount) {

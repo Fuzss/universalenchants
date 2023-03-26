@@ -20,7 +20,6 @@ public class ModMixinConfigPlugin implements IMixinConfigPlugin {
         return null;
     }
 
-    @SuppressWarnings("UnstableApiUsage")
     @Override
     public boolean shouldApplyMixin(String targetClassName, String mixinClassName) {
         return FMLLoader.getLoadingModList().getModFileById("puzzleslib") != null;

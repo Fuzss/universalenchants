@@ -1,9 +1,9 @@
 package fuzs.universalenchants.world.item.enchantment.data;
 
 import com.google.common.collect.*;
-import fuzs.universalenchants.core.ModServices;
+import fuzs.universalenchants.core.CommonAbstractions;
 import fuzs.universalenchants.mixin.accessor.EnchantmentAccessor;
-import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.item.Item;
@@ -35,7 +35,7 @@ public class BuiltInEnchantmentDataManager {
         EnchantmentCategory category = enchantment.category;
         if (this.testVanillaCategory(category)) return category;
         category = this.defaultEnchantmentCategories.get(enchantment);
-        Objects.requireNonNull(category, "vanilla category for enchantment %s is missing".formatted(Registry.ENCHANTMENT.getKey(enchantment)));
+        Objects.requireNonNull(category, "vanilla category for enchantment %s is missing".formatted(BuiltInRegistries.ENCHANTMENT.getKey(enchantment)));
         return category;
     }
 
@@ -65,11 +65,11 @@ public class BuiltInEnchantmentDataManager {
     }
 
     public EnchantmentCategory getOrBuildCustomCategory(Enchantment enchantment, Predicate<Item> canApplyTo) {
-        return this.customEnchantmentCategories.computeIfAbsent(enchantment, enchantment1 -> ModServices.ABSTRACTIONS.createEnchantmentCategory(createCategoryName(enchantment1), canApplyTo));
+        return this.customEnchantmentCategories.computeIfAbsent(enchantment, enchantment1 -> CommonAbstractions.INSTANCE.createEnchantmentCategory(createCategoryName(enchantment1), canApplyTo));
     }
 
     private static String createCategoryName(Enchantment enchantment) {
-        ResourceLocation id = Registry.ENCHANTMENT.getKey(enchantment);
+        ResourceLocation id = BuiltInRegistries.ENCHANTMENT.getKey(enchantment);
         return AdditionalEnchantmentDataProvider.ENCHANTMENT_CATEGORY_PREFIX + "%s_%s".formatted(id.getNamespace(), id.getPath()).toUpperCase(Locale.ROOT);
     }
 

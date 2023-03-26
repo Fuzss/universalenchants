@@ -6,7 +6,7 @@ import fuzs.universalenchants.world.item.enchantment.data.BuiltInEnchantmentData
 import fuzs.universalenchants.world.item.enchantment.serialize.entry.DataEntry;
 import fuzs.universalenchants.world.item.enchantment.serialize.entry.IncompatibleEntry;
 import fuzs.universalenchants.world.item.enchantment.serialize.entry.TypeEntry;
-import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.enchantment.Enchantment;
@@ -31,7 +31,7 @@ public class EnchantmentHolder {
         this.enchantment = enchantment;
         this.vanillaCategory = BuiltInEnchantmentDataManager.INSTANCE.getVanillaCategory(enchantment);
         this.category = BuiltInEnchantmentDataManager.INSTANCE.getOrBuildCustomCategory(enchantment, this::canEnchant);
-        this.id = Registry.ENCHANTMENT.getKey(enchantment);
+        this.id = BuiltInRegistries.ENCHANTMENT.getKey(enchantment);
     }
 
     public ResourceLocation id() {
@@ -70,12 +70,12 @@ public class EnchantmentHolder {
     }
 
     public void submit(TypeEntry entry) {
-        Objects.requireNonNull(this.categoryEntries, "category entries for enchantment %s is null".formatted(Registry.ENCHANTMENT.getKey(this.enchantment)));
+        Objects.requireNonNull(this.categoryEntries, "category entries for enchantment %s is null".formatted(BuiltInRegistries.ENCHANTMENT.getKey(this.enchantment)));
         if (!entry.isEmpty()) this.categoryEntries.add(entry);
     }
 
     public void submit(IncompatibleEntry entry) {
-        if (this.incompatibleEntry != null) throw new IllegalStateException("Incompatible entry on enchantment data holder for %s already set".formatted(Registry.ENCHANTMENT.getKey(this.enchantment)));
+        if (this.incompatibleEntry != null) throw new IllegalStateException("Incompatible entry on enchantment data holder for %s already set".formatted(BuiltInRegistries.ENCHANTMENT.getKey(this.enchantment)));
         this.incompatibleEntry = entry;
     }
 
@@ -99,7 +99,7 @@ public class EnchantmentHolder {
         if (this.items == null) {
             Set<Item> include = Sets.newIdentityHashSet();
             Set<Item> exclude = Sets.newIdentityHashSet();
-            Objects.requireNonNull(this.categoryEntries, "Using invalid enchantment category for enchantment %s, expected vanilla category to be used".formatted(Registry.ENCHANTMENT.getKey(this.enchantment)));
+            Objects.requireNonNull(this.categoryEntries, "Using invalid enchantment category for enchantment %s, expected vanilla category to be used".formatted(BuiltInRegistries.ENCHANTMENT.getKey(this.enchantment)));
             for (TypeEntry entry : this.categoryEntries) {
                 entry.dissolve(entry.isExclude() ? exclude : include);
             }
@@ -118,7 +118,7 @@ public class EnchantmentHolder {
 
     private void dissolveIncompatibles() {
         if (this.incompatibles == null) {
-            Objects.requireNonNull(this.incompatibleEntry, "Using invalid enchantment incompatibility check for enchantment %s, expected vanilla check to be used".formatted(Registry.ENCHANTMENT.getKey(this.enchantment)));
+            Objects.requireNonNull(this.incompatibleEntry, "Using invalid enchantment incompatibility check for enchantment %s, expected vanilla check to be used".formatted(BuiltInRegistries.ENCHANTMENT.getKey(this.enchantment)));
             Set<Enchantment> incompatibles = this.incompatibleEntry.incompatibles;
             // adding this back manually as the user isn't supposed to be able to remove it
             incompatibles.add(this.enchantment);

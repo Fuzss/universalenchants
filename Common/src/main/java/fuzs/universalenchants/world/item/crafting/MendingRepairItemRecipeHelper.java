@@ -3,7 +3,7 @@ package fuzs.universalenchants.world.item.crafting;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import net.minecraft.Util;
-import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.inventory.CraftingContainer;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -159,7 +159,7 @@ public class MendingRepairItemRecipeHelper {
                     Map<Enchantment, Integer> map = Maps.newHashMap();
                     Map<Enchantment, Integer> map2 = EnchantmentHelper.getEnchantments(itemStack3);
                     Map<Enchantment, Integer> map3 = EnchantmentHelper.getEnchantments(itemStack);
-                    Registry.ENCHANTMENT.stream().filter(Enchantment::isCurse).forEach(enchantment -> {
+                    BuiltInRegistries.ENCHANTMENT.stream().filter(Enchantment::isCurse).forEach(enchantment -> {
                         int i = Math.max(map2.getOrDefault(enchantment, 0), map3.getOrDefault(enchantment, 0));
                         if (i > 0) {
                             map.put(enchantment, i);

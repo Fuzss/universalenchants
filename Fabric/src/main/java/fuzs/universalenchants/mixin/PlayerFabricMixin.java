@@ -15,12 +15,12 @@ import org.spongepowered.asm.mixin.injection.ModifyVariable;
 @Mixin(Player.class)
 abstract class PlayerFabricMixin extends LivingEntity {
 
-    protected PlayerFabricMixin(EntityType<? extends LivingEntity> p_20966_, Level p_20967_) {
-        super(p_20966_, p_20967_);
+    protected PlayerFabricMixin(EntityType<? extends LivingEntity> entityType, Level level) {
+        super(entityType, level);
     }
 
     @ModifyVariable(method = "attack", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/player/Player;getItemInHand(Lnet/minecraft/world/InteractionHand;)Lnet/minecraft/world/item/ItemStack;"), ordinal = 3)
-    public boolean attack$modifyVariable$invoke(boolean canPerformSweepAction) {
+    public boolean attack(boolean canPerformSweepAction) {
         // the injection we use on Forge would only be called when sweeping is allowed (which doesn't work for us since we want to enable additional items),
         // so we need this alternative mixin
         // this will only be called when sweeping is allowed to happen and only the check for SwordItem is missing, since that's the behavior we want to change

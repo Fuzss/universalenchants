@@ -4,7 +4,7 @@ import com.google.common.collect.Sets;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonSyntaxException;
 import fuzs.universalenchants.UniversalEnchants;
-import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.enchantment.Enchantment;
 
@@ -21,7 +21,7 @@ public class IncompatibleEntry extends DataEntry<Enchantment> {
     @Override
     public void serialize(JsonArray jsonArray) {
         for (Enchantment enchantment : this.incompatibles) {
-            jsonArray.add(Registry.ENCHANTMENT.getKey(enchantment).toString());
+            jsonArray.add(BuiltInRegistries.ENCHANTMENT.getKey(enchantment).toString());
         }
     }
 
@@ -29,12 +29,12 @@ public class IncompatibleEntry extends DataEntry<Enchantment> {
         IncompatibleEntry entry = new IncompatibleEntry();
         for (String item : items) {
             ResourceLocation id = new ResourceLocation(item);
-            if (!Registry.ENCHANTMENT.containsKey(id)) {
+            if (!BuiltInRegistries.ENCHANTMENT.containsKey(id)) {
                 JsonSyntaxException e = new JsonSyntaxException("No enchantment with name %s found".formatted(id));
                 UniversalEnchants.LOGGER.warn("Failed to deserialize {} enchantment config entry {}: {}", enchantment, item, e);
                 continue;
             }
-            entry.incompatibles.add(Registry.ENCHANTMENT.get(id));
+            entry.incompatibles.add(BuiltInRegistries.ENCHANTMENT.get(id));
         }
         return entry;
     }

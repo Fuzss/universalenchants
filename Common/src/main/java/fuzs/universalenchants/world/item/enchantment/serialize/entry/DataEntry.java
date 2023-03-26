@@ -5,7 +5,7 @@ import com.google.common.collect.Lists;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonSyntaxException;
 import fuzs.universalenchants.world.item.enchantment.data.BuiltInEnchantmentDataManager;
-import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.enchantment.Enchantment;
@@ -26,7 +26,7 @@ public abstract class DataEntry<T> {
         Builder builder = new Builder(enchantment).add(BuiltInEnchantmentDataManager.INSTANCE.getVanillaCategory(enchantment));
         // don't add the enchantment itself, the user is not supposed to remove it
         // we still need this, it will be manually added back later
-        Registry.ENCHANTMENT.stream().filter(Predicate.not(enchantment::isCompatibleWith)).filter(other -> enchantment != other).forEach(builder::add);
+        BuiltInRegistries.ENCHANTMENT.stream().filter(Predicate.not(enchantment::isCompatibleWith)).filter(other -> enchantment != other).forEach(builder::add);
         return builder;
     }
 
@@ -45,7 +45,7 @@ public abstract class DataEntry<T> {
         }
 
         public Builder add(Item item, boolean exclude) {
-            Objects.requireNonNull(item, "item for enchantment %s is null".formatted(Registry.ENCHANTMENT.getKey(this.enchantment)));
+            Objects.requireNonNull(item, "item for enchantment %s is null".formatted(BuiltInRegistries.ENCHANTMENT.getKey(this.enchantment)));
             TypeEntry.ItemEntry entry = new TypeEntry.ItemEntry(item);
             entry.setExclude(exclude);
             this.entries.add(entry);
@@ -57,8 +57,8 @@ public abstract class DataEntry<T> {
         }
 
         public Builder add(EnchantmentCategory category, boolean exclude) {
-            Objects.requireNonNull(category, "category for enchantment %s is null".formatted(Registry.ENCHANTMENT.getKey(this.enchantment)));
-            if (!BuiltInEnchantmentDataManager.INSTANCE.testVanillaCategory(category)) throw new IllegalArgumentException("Cannot add custom category %s to enchantment data entry builder for %s".formatted(category, Registry.ENCHANTMENT.getKey(this.enchantment)));
+            Objects.requireNonNull(category, "category for enchantment %s is null".formatted(BuiltInRegistries.ENCHANTMENT.getKey(this.enchantment)));
+            if (!BuiltInEnchantmentDataManager.INSTANCE.testVanillaCategory(category)) throw new IllegalArgumentException("Cannot add custom category %s to enchantment data entry builder for %s".formatted(category, BuiltInRegistries.ENCHANTMENT.getKey(this.enchantment)));
             TypeEntry.CategoryEntry entry = new TypeEntry.CategoryEntry(category);
             entry.setExclude(exclude);
             this.entries.add(entry);
@@ -70,7 +70,7 @@ public abstract class DataEntry<T> {
         }
 
         public Builder add(TagKey<Item> tag, boolean exclude) {
-            Objects.requireNonNull(tag, "tag for enchantment %s is null".formatted(Registry.ENCHANTMENT.getKey(this.enchantment)));
+            Objects.requireNonNull(tag, "tag for enchantment %s is null".formatted(BuiltInRegistries.ENCHANTMENT.getKey(this.enchantment)));
             TypeEntry.TagEntry entry = new TypeEntry.TagEntry(tag);
             entry.setExclude(exclude);
             this.entries.add(entry);
@@ -78,13 +78,13 @@ public abstract class DataEntry<T> {
         }
 
         public Builder add(Enchantment incompatible) {
-            Objects.requireNonNull(incompatible, "incompatible enchantment for %s is null".formatted(Registry.ENCHANTMENT.getKey(this.enchantment)));
+            Objects.requireNonNull(incompatible, "incompatible enchantment for %s is null".formatted(BuiltInRegistries.ENCHANTMENT.getKey(this.enchantment)));
             this.incompatibleEntry.incompatibles.add(incompatible);
             return this;
         }
 
         public Builder remove(Enchantment incompatible) {
-            Objects.requireNonNull(incompatible, "incompatible enchantment for %s is null".formatted(Registry.ENCHANTMENT.getKey(this.enchantment)));
+            Objects.requireNonNull(incompatible, "incompatible enchantment for %s is null".formatted(BuiltInRegistries.ENCHANTMENT.getKey(this.enchantment)));
             this.incompatibleEntry.incompatibles.remove(incompatible);
             return this;
         }

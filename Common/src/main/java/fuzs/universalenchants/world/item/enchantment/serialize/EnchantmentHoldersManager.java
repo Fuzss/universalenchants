@@ -5,14 +5,14 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonSyntaxException;
-import fuzs.puzzleslib.core.CoreServices;
-import fuzs.puzzleslib.json.JsonConfigFileUtil;
+import fuzs.puzzleslib.api.config.v3.json.JsonConfigFileUtil;
+import fuzs.puzzleslib.api.core.v1.ModLoaderEnvironment;
 import fuzs.universalenchants.UniversalEnchants;
 import fuzs.universalenchants.world.item.enchantment.data.AdditionalEnchantmentDataProvider;
 import fuzs.universalenchants.world.item.enchantment.serialize.entry.DataEntry;
 import fuzs.universalenchants.world.item.enchantment.serialize.entry.IncompatibleEntry;
 import fuzs.universalenchants.world.item.enchantment.serialize.entry.TypeEntry;
-import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.world.item.enchantment.Enchantment;
@@ -37,10 +37,10 @@ public class EnchantmentHoldersManager {
 
     public static void loadAll() {
         ENCHANTMENT_DATA_HOLDERS.values().forEach(EnchantmentHolder::invalidate);
-        Path modConfigPath = CoreServices.ENVIRONMENT.getConfigDir().resolve(UniversalEnchants.MOD_ID);
+        Path modConfigPath = ModLoaderEnvironment.INSTANCE.getConfigDir().resolve(UniversalEnchants.MOD_ID);
         JsonConfigFileUtil.mkdirs(modConfigPath.toFile());
         for (Map.Entry<Enchantment, List<DataEntry<?>>> entry : AdditionalEnchantmentDataProvider.INSTANCE.getEnchantmentDataEntries().entrySet()) {
-            ResourceLocation id = Registry.ENCHANTMENT.getKey(entry.getKey());
+            ResourceLocation id = BuiltInRegistries.ENCHANTMENT.getKey(entry.getKey());
             Path configRootPath = modConfigPath.resolve(id.getNamespace());
             JsonConfigFileUtil.mkdirs(configRootPath.toFile());
             String fileName = id.getPath() + ".json";

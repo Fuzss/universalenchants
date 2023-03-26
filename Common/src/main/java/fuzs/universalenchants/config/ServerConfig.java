@@ -1,10 +1,10 @@
 package fuzs.universalenchants.config;
 
-import fuzs.puzzleslib.config.ConfigCore;
-import fuzs.puzzleslib.config.ValueCallback;
-import fuzs.puzzleslib.config.annotation.Config;
-import fuzs.puzzleslib.config.core.AbstractConfigBuilder;
-import fuzs.puzzleslib.core.CoreServices;
+import fuzs.puzzleslib.api.config.v3.Config;
+import fuzs.puzzleslib.api.config.v3.ConfigCore;
+import fuzs.puzzleslib.api.config.v3.ValueCallback;
+import fuzs.puzzleslib.api.core.v1.ModLoaderEnvironment;
+import net.minecraftforge.common.ForgeConfigSpec;
 
 public class ServerConfig implements ConfigCore {
     private static final String NEWLY_ENCHANTABLE_NOTICE = "Disabling this will still allow for applying enchantments in an anvil, that needs to be disabled per enchantment in the custom .json configs.";
@@ -22,13 +22,11 @@ public class ServerConfig implements ConfigCore {
     public boolean enchantableHorseArmor = true;
     @Config(description = {"Allow shields to be enchanted directly in the enchanting table.", NEWLY_ENCHANTABLE_NOTICE})
     public boolean enchantableShields = true;
-    @Config(description = {"Prevent the fire aspect enchantment from working as usually on digging tools: It will not set hit mobs on fire, but will only be usable to instantly smelt harvested blocks.", "The behavior of fire aspect on weapons including axes is unchanged."})
-    public boolean nerfFireAspectOnTools = true;
     public boolean allowModItemSupport;
 
     @Override
-    public void addToBuilder(AbstractConfigBuilder builder, ValueCallback callback) {
-        if (CoreServices.ENVIRONMENT.getModLoader().isForge()) {
+    public void addToBuilder(ForgeConfigSpec.Builder builder, ValueCallback callback) {
+        if (ModLoaderEnvironment.INSTANCE.getModLoader().isForge()) {
             callback.accept(builder.comment("Enchanting a few modded items (e.g. Farmer's Delight's skillet) is broken by the changes this mod makes to how enchantments may be applied to items. This option enables a patch for Forge itself to help better support such items.").define("allow_mod_item_support", true), v -> this.allowModItemSupport = v);
         }
     }

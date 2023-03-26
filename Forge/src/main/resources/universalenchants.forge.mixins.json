@@ -6,9 +6,9 @@
   "refmap": "universalenchants.refmap.json",
   "plugin": "fuzs.universalenchants.mixin.ModMixinConfigPlugin",
   "mixins": [
-    "ForgeBowItemMixin",
-    "ForgeEnchantmentMixin",
-    "ForgePlayerMixin"
+    "BowItemForgeMixin",
+    "EnchantmentForgeMixin",
+    "PlayerMixinForge"
   ],
   "client": [
   ],
