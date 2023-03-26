@@ -42,6 +42,7 @@
     "fabricloader": ">=${minFabricVersion}",
     "fabric-api": ">=${minFabricApiVersion}",
     "puzzleslib": ">=${minPuzzlesVersion}",
+    "extensibleenums": "*",
     "cardinal-components-base": "*",
     "cardinal-components-entity": "*",
     "minecraft": "${minecraftVersion}",
