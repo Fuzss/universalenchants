@@ -49,34 +49,50 @@ public class ModEnchantCommand {
 
 	public static void register(CommandDispatcher<CommandSourceStack> commandDispatcher, CommandBuildContext context) {
 		commandDispatcher.register(
-			Commands.literal("enchant")
+			(Commands.literal("enchant")
 				.requires(commandSourceStack -> commandSourceStack.hasPermission(2))
 				.then(
-					Commands.argument("targets", EntityArgument.entities())
-						.then(
-							Commands.argument("enchantment", ResourceArgument.resource(context, Registries.ENCHANTMENT))
-								.executes(
-									commandContext -> enchant(
-											commandContext.getSource(),
-											EntityArgument.getEntities(commandContext, "targets"),
-											ResourceArgument.getEnchantment(commandContext, "enchantment")
-										)
-								)
+						Commands.literal("remove").then(
+								Commands.argument("targets", EntityArgument.entities())
 								.then(
-										// restrict this to 255, enchantment levels above 255 are not supported in vanilla and will be reset to that anyway
-										// min of 0 wouldn't do anything in vanilla, but now we use it to remove enchantments
-									Commands.argument("level", IntegerArgumentType.integer(0, 255))
-										.executes(
-											commandContext -> enchant(
-													commandContext.getSource(),
-													EntityArgument.getEntities(commandContext, "targets"),
-													ResourceArgument.getEnchantment(commandContext, "enchantment"),
-													IntegerArgumentType.getInteger(commandContext, "level")
+										Commands.argument("enchantment", ResourceArgument.resource(context, Registries.ENCHANTMENT))
+												.executes(
+														commandContext -> enchant(
+																commandContext.getSource(),
+																EntityArgument.getEntities(commandContext, "targets"),
+																ResourceArgument.getEnchantment(commandContext, "enchantment"),
+																0
+														)
 												)
-										)
-								)
-						)
-				)
+								))
+				)).then(
+					Commands.literal("add").then(
+							Commands.argument("targets", EntityArgument.entities())
+									.then(
+											Commands.argument("enchantment", ResourceArgument.resource(context, Registries.ENCHANTMENT))
+													.executes(
+															commandContext -> enchant(
+																	commandContext.getSource(),
+																	EntityArgument.getEntities(commandContext, "targets"),
+																	ResourceArgument.getEnchantment(commandContext, "enchantment")
+															)
+													)
+													.then(
+															// restrict this to 255, enchantment levels above 255 are not supported in vanilla and will be reset to that anyway
+															// min of 0 wouldn't do anything in vanilla, but now we use it to remove enchantments
+															Commands.argument("level", IntegerArgumentType.integer(1, 255))
+																	.executes(
+																			commandContext -> enchant(
+																					commandContext.getSource(),
+																					EntityArgument.getEntities(commandContext, "targets"),
+																					ResourceArgument.getEnchantment(commandContext, "enchantment"),
+																					IntegerArgumentType.getInteger(commandContext, "level")
+																			)
+																	)
+													)
+									)
+					)
+			)
 		);
 	}
 

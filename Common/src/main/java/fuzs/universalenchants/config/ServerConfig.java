@@ -8,6 +8,7 @@ import net.minecraftforge.common.ForgeConfigSpec;
 
 public class ServerConfig implements ConfigCore {
     private static final String NEWLY_ENCHANTABLE_NOTICE = "Disabling this will still allow for applying enchantments in an anvil, that needs to be disabled per enchantment in the custom .json configs.";
+
     @Config(description = "Infinity enchantment no longer requires a single arrow to be present in the player inventory.")
     public boolean trueInfinity = true;
     @Config(description = "Disables damage immunity when hit by a projectile. Makes it possible for entities to be hit by multiple projectiles at once (mainly useful for the multishot enchantment).")
