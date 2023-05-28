@@ -14,7 +14,6 @@ import org.jetbrains.annotations.Nullable;
 import java.util.function.Predicate;
 
 public interface CommonAbstractions {
-
     CommonAbstractions INSTANCE = ServiceProviderHelper.load(CommonAbstractions.class);
 
     boolean isArrowInfinite(LivingEntity entity, ItemStack rangedStack, ItemStack arrowStack);

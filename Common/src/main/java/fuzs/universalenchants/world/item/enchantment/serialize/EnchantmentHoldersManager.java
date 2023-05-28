@@ -37,7 +37,7 @@ public class EnchantmentHoldersManager {
 
     public static void loadAll() {
         ENCHANTMENT_DATA_HOLDERS.values().forEach(EnchantmentHolder::invalidate);
-        Path modConfigPath = ModLoaderEnvironment.INSTANCE.getConfigDir().resolve(UniversalEnchants.MOD_ID);
+        Path modConfigPath = ModLoaderEnvironment.INSTANCE.getConfigDirectory().resolve(UniversalEnchants.MOD_ID);
         JsonConfigFileUtil.mkdirs(modConfigPath.toFile());
         for (Map.Entry<Enchantment, List<DataEntry<?>>> entry : AdditionalEnchantmentDataProvider.INSTANCE.getEnchantmentDataEntries().entrySet()) {
             ResourceLocation id = BuiltInRegistries.ENCHANTMENT.getKey(entry.getKey());

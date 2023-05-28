@@ -7,6 +7,7 @@ import fuzs.universalenchants.init.ModRegistry;
 import fuzs.universalenchants.mixin.accessor.AbstractArrowAccessor;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.util.RandomSource;
 import net.minecraft.util.Unit;
 import net.minecraft.world.damagesource.DamageSource;
@@ -90,7 +91,7 @@ public class ItemCompatHandler {
     }
 
     public static Optional<Unit> onShieldBlock(LivingEntity blocker, DamageSource source, float amount) {
-        if (!source.isProjectile() && source.getDirectEntity() instanceof LivingEntity attacker) {
+        if (!source.is(DamageTypeTags.IS_PROJECTILE) && source.getDirectEntity() instanceof LivingEntity attacker) {
             int level = EnchantmentHelper.getItemEnchantmentLevel(Enchantments.THORNS, blocker.getUseItem());
             Enchantments.THORNS.doPostHurt(blocker, attacker, level);
         }

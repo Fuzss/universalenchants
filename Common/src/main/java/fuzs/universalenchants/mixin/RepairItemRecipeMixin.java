@@ -3,6 +3,7 @@ package fuzs.universalenchants.mixin;
 import fuzs.universalenchants.UniversalEnchants;
 import fuzs.universalenchants.config.ServerConfig;
 import fuzs.universalenchants.world.item.crafting.MendingRepairItemRecipeHelper;
+import net.minecraft.core.RegistryAccess;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.inventory.CraftingContainer;
 import net.minecraft.world.item.ItemStack;
@@ -16,14 +17,14 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(RepairItemRecipe.class)
-public abstract class RepairItemRecipeMixin extends CustomRecipe {
+abstract class RepairItemRecipeMixin extends CustomRecipe {
 
     public RepairItemRecipeMixin(ResourceLocation resourceLocation, CraftingBookCategory craftingBookCategory) {
         super(resourceLocation, craftingBookCategory);
     }
 
     @Inject(method = "matches", at = @At("RETURN"), cancellable = true)
-    public void matches$inject$head(CraftingContainer craftingContainer, Level level, CallbackInfoReturnable<Boolean> callback) {
+    public void matches(CraftingContainer craftingContainer, Level level, CallbackInfoReturnable<Boolean> callback) {
         if (!UniversalEnchants.CONFIG.get(ServerConfig.class).mendingCraftingRepair) return;
         if (!callback.getReturnValue()) {
             if (MendingRepairItemRecipeHelper.matches(craftingContainer, level)) {
@@ -33,7 +34,7 @@ public abstract class RepairItemRecipeMixin extends CustomRecipe {
     }
 
     @Inject(method = "assemble", at = @At("HEAD"), cancellable = true)
-    public void assemble$inject$head(CraftingContainer craftingContainer, CallbackInfoReturnable<ItemStack> callback) {
+    public void assemble(CraftingContainer craftingContainer, RegistryAccess registryAccess, CallbackInfoReturnable<ItemStack> callback) {
         if (!UniversalEnchants.CONFIG.get(ServerConfig.class).mendingCraftingRepair) return;
         callback.setReturnValue(MendingRepairItemRecipeHelper.assemble(craftingContainer));
     }

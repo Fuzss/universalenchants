@@ -8,8 +8,8 @@ import org.spongepowered.asm.mixin.gen.Invoker;
 @Mixin(I18n.class)
 public interface I18nAccessor {
 
-    @Invoker
-    static void callSetLanguage(Language language) {
-        throw new IllegalStateException();
+    @Invoker("setLanguage")
+    static void universalenchants$callSetLanguage(Language language) {
+        throw new RuntimeException();
     }
 }

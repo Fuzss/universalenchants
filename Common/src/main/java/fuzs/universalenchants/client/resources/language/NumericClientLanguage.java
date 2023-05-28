@@ -11,6 +11,7 @@ import net.minecraft.network.chat.FormattedText;
 import net.minecraft.util.FormattedCharSequence;
 
 import java.util.Map;
+import java.util.Objects;
 import java.util.TreeMap;
 
 /**
@@ -50,17 +51,19 @@ public class NumericClientLanguage extends Language {
         // prevents us wrapping ourselves accidentally, also prevents wrapping custom language implementations from other mods
         // which might result in an infinite loop (an issue with Server Translation API on Fabric)
         if (numericLanguage.language instanceof ClientLanguage) {
-            I18nAccessor.callSetLanguage(numericLanguage);
+            I18nAccessor.universalenchants$callSetLanguage(numericLanguage);
             Language.inject(numericLanguage);
         }
     }
 
     @Override
-    public String getOrDefault(String string) {
-        if (this.isNumeral(string)) {
-            return this.numeralsCache.computeIfAbsent(string, this::computeLanguageNumeral);
+    public String getOrDefault(String string, String fallback) {
+        if (fallback == null || Objects.equals(string, fallback)) {
+            if (this.isNumeral(string)) {
+                return this.numeralsCache.computeIfAbsent(string, this::computeLanguageNumeral);
+            }
         }
-        return this.language.getOrDefault(string);
+        return this.language.getOrDefault(string, fallback);
     }
 
     private boolean isNumeral(String string) {

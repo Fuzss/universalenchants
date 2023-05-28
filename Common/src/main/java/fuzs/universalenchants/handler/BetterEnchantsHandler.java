@@ -9,6 +9,7 @@ import fuzs.universalenchants.config.ServerConfig;
 import fuzs.universalenchants.core.CommonAbstractions;
 import fuzs.universalenchants.mixin.accessor.ExperienceOrbAccessor;
 import net.minecraft.core.BlockPos;
+import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.damagesource.DamageSource;
@@ -45,7 +46,7 @@ public class BetterEnchantsHandler {
     public static EventResult onLivingHurt(LivingEntity entity, DamageSource source, MutableFloat amount) {
         if (!UniversalEnchants.CONFIG.get(ServerConfig.class).noProjectileImmunity) return EventResult.PASS;
         // immediately reset damage immunity after being hit by any projectile, fixes multishot
-        if (!(entity instanceof Player) && source.isProjectile()) {
+        if (!(entity instanceof Player) && source.is(DamageTypeTags.IS_PROJECTILE)) {
             entity.invulnerableTime = 0;
         }
         return EventResult.PASS;
@@ -67,7 +68,7 @@ public class BetterEnchantsHandler {
         // e.g. our code for looting on ranged weapons will not trigger as the damage source is not correct
         // (it will still trigger though when they ranged weapon is still in the main hand, since vanilla checks the main hand enchantments)
         // unfortunately the original damage source is not obtainable in this context
-        int level = CommonAbstractions.INSTANCE.getMobLootingLevel(entity, attackingPlayer, attackingPlayer != null ? DamageSource.playerAttack(attackingPlayer) : null);
+        int level = CommonAbstractions.INSTANCE.getMobLootingLevel(entity, attackingPlayer, attackingPlayer != null ? entity.level.damageSources().playerAttack(attackingPlayer) : null);
         if (level > 0) {
             droppedExperience.mapDefaultInt(experience -> getDroppedXp(experience, level));
         }
