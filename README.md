@@ -2,7 +2,7 @@
 
 A Minecraft mod. Downloads can be found on [CurseForge](https://www.curseforge.com/members/fuzs_/projects) and [Modrinth](https://modrinth.com/user/Fuzs).
 
-![](https://i.imgur.com/MynoO6R.png)
+![](https://raw.githubusercontent.com/Fuzss/modresources/main/pages/data/universalenchants/banner.png)
 
 ## Configuring the mod
 Universal Enchants allows you to define what enchantments can be applied to what items, and which enchantments are compatible with each other (meaning can be applied on a single item at the same time). This is done via individual `.json` config files (one per enchantment) found in `.minecraft/config/universalenchants`.

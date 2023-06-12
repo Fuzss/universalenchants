@@ -174,13 +174,13 @@ public class ModEnchantCommand {
 			throw ERROR_NOTHING_HAPPENED.create();
 		} else {
 			if (collection.size() == 1) {
-				commandSourceStack.sendSuccess(
+				commandSourceStack.sendSuccess(() ->
 						level > 0 || !UniversalEnchants.CONFIG.get(CommonConfig.class).enchantCommand.fixEnchantCommand
 								? Component.translatable("commands.enchant.success.single", enchantment.getFullname(level), collection.iterator().next().getDisplayName())
 								: Component.translatable("commands.enchant.remove.success.single", getEnchantmentName(enchantment), collection.iterator().next().getDisplayName()), true
 				);
 			} else {
-				commandSourceStack.sendSuccess(
+				commandSourceStack.sendSuccess(() ->
 						level > 0 || !UniversalEnchants.CONFIG.get(CommonConfig.class).enchantCommand.fixEnchantCommand
 							? Component.translatable("commands.enchant.success.multiple", enchantment.getFullname(level), collection.size())
 							: Component.translatable("commands.enchant.remove.success.multiple", getEnchantmentName(enchantment), collection.size()), true);

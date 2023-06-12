@@ -68,7 +68,7 @@ public class BetterEnchantsHandler {
         // e.g. our code for looting on ranged weapons will not trigger as the damage source is not correct
         // (it will still trigger though when they ranged weapon is still in the main hand, since vanilla checks the main hand enchantments)
         // unfortunately the original damage source is not obtainable in this context
-        int level = CommonAbstractions.INSTANCE.getMobLootingLevel(entity, attackingPlayer, attackingPlayer != null ? entity.level.damageSources().playerAttack(attackingPlayer) : null);
+        int level = CommonAbstractions.INSTANCE.getMobLootingLevel(entity, attackingPlayer, attackingPlayer != null ? entity.level().damageSources().playerAttack(attackingPlayer) : null);
         if (level > 0) {
             droppedExperience.mapDefaultInt(experience -> getDroppedXp(experience, level));
         }

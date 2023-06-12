@@ -1,6 +1,6 @@
 package fuzs.universalenchants.core;
 
-import fuzs.extensibleenums.core.EnumFactories;
+import fuzs.extensibleenums.api.extensibleenums.v1.BuiltInEnumFactories;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
@@ -22,7 +22,7 @@ public class FabricAbstractions implements CommonAbstractions{
 
     @Override
     public EnchantmentCategory createEnchantmentCategory(String enumConstantName, Predicate<Item> predicate) {
-        return EnumFactories.createEnchantmentCategory(enumConstantName, predicate);
+        return BuiltInEnumFactories.createEnchantmentCategory(enumConstantName, predicate);
     }
 
     @Override
