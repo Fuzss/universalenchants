@@ -9,7 +9,7 @@
   "authors": [
     "${modAuthor}"
   ],
-  
+
   "contact": {
     "homepage": "${modPageUrl}",
     "issues": "${modIssueUrl}",
@@ -27,6 +27,9 @@
     ],
     "client": [
       "${clientEntryPoint}"
+    ],
+    "cardinal-components": [
+      "fuzs.puzzleslib.api.capability.v2.initializer.EntityComponentInitializerImpl"
     ]
   },
 
@@ -39,7 +42,16 @@
     "fabricloader": ">=${minFabricVersion}",
     "fabric-api": ">=${minFabricApiVersion}",
     "puzzleslib": ">=${minPuzzlesVersion}",
+    "extensibleenums": "*",
+    "cardinal-components-base": "*",
+    "cardinal-components-entity": "*",
     "minecraft": "${minecraftVersion}",
     "java": ">=17"
+  },
+
+  "custom": {
+    "cardinal-components": [
+      "${modId}:arrow_looting"
+    ]
   }
 }
