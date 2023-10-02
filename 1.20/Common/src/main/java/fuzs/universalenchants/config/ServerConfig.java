@@ -15,14 +15,18 @@ public class ServerConfig implements ConfigCore {
     public boolean noProjectileImmunity = true;
     @Config(description = "Any level of feather falling prevents farmland being trampled.")
     public boolean noFarmlandTrample = true;
-    @Config(description = "Looting also affects dropped experience points.")
-    public boolean lootingBoostsXp = true;
+    @Config(description = "Looting and fortune also affect dropped experience points.")
+    public boolean lootBonusBoostsXp = true;
     @Config(description = {"Mending no longer repairs items using xp.", "Instead mending allows the item to be repaired in the crafting menu in the same way as in an anvil without any experience cost: combining a tool with another one or the appropriate repair item is possible, all enchantments will be preserved (but no new ones from the item repaired with will be added as an anvil would do).", "Additionally, repairing items enchanted with mending (only repairing, no renaming or adding more enchantments) in an anvil doesn't increase the items repair cost any further."})
     public boolean mendingCraftingRepair = false;
     @Config(description = {"Allow all kinds of horse armor to be enchanted directly in the enchanting table.", NEWLY_ENCHANTABLE_NOTICE})
     public boolean enchantableHorseArmor = true;
     @Config(description = {"Allow shields to be enchanted directly in the enchanting table.", NEWLY_ENCHANTABLE_NOTICE})
     public boolean enchantableShields = true;
+    @Config(description = {"Allow shears to be enchanted directly in the enchanting table.", NEWLY_ENCHANTABLE_NOTICE})
+    public boolean enchantableShears = true;
+    @Config(description = "Apply configurations for enchantments usable in an anvil as well as enchanting table enchantments.")
+    public boolean adjustAnvilEnchantments = true;
     public boolean allowModItemSupport;
 
     @Override

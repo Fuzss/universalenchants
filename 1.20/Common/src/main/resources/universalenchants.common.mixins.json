@@ -15,6 +15,7 @@
     "HorseInventoryMenu$SlotMixin",
     "LivingEntityMixin",
     "RepairItemRecipeMixin",
+    "ShearsItemMixin",
     "ShieldItemMixin",
     "ThrownTridentMixin",
     "TridentItemMixin",

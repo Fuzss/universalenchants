@@ -35,7 +35,7 @@ public class EnchantmentHolder {
     public EnchantmentHolder(Enchantment enchantment) {
         this.enchantment = enchantment;
         this.vanillaCategory = BuiltInEnchantmentDataManager.INSTANCE.getVanillaCategory(enchantment);
-        this.category = BuiltInEnchantmentDataManager.INSTANCE.getOrBuildCustomCategory(enchantment, this::canEnchant);
+        this.category = BuiltInEnchantmentDataManager.INSTANCE.getCustomCategory(enchantment, this::canEnchant);
         this.id = BuiltInRegistries.ENCHANTMENT.getKey(enchantment);
     }
 
@@ -69,7 +69,7 @@ public class EnchantmentHolder {
     public void submitAll(Collection<DataEntry<?>> dataEntries) {
         for (DataEntry<?> entry : dataEntries) {
             if (entry instanceof TypeEntry typeEntry) {
-                this.submit(typeEntry);
+                this.submit(typeEntry, typeEntry.anvil);
             } else if (entry instanceof IncompatibleEntry incompatibleEntry1) {
                 this.submit(incompatibleEntry1);
             } else {
@@ -78,8 +78,8 @@ public class EnchantmentHolder {
         }
     }
 
-    public void submit(TypeEntry entry) {
-        List<TypeEntry> entries = entry.anvil ? this.anvilEntries : this.categoryEntries;
+    public void submit(TypeEntry entry, boolean anvil) {
+        List<TypeEntry> entries = anvil ? this.anvilEntries : this.categoryEntries;
         Objects.requireNonNull(entries, "entries for enchantment %s is null".formatted(BuiltInRegistries.ENCHANTMENT.getKey(this.enchantment)));
         if (!entry.isEmpty()) entries.add(entry);
     }

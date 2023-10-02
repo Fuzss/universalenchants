@@ -13,24 +13,21 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.EnchantmentCategory;
 import net.minecraft.world.item.enchantment.Enchantments;
+import org.jetbrains.annotations.Nullable;
 
-import java.util.Locale;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 import java.util.function.Predicate;
 
 public class BuiltInEnchantmentDataManager {
     private static final EquipmentSlot[] ARMOR_SLOTS = {EquipmentSlot.HEAD, EquipmentSlot.CHEST, EquipmentSlot.LEGS, EquipmentSlot.FEET};
-    private static final Set<EnchantmentCategory> SPECIALIZED_ARMOR_CATEGORIES = ImmutableSet.of(EnchantmentCategory.ARMOR_FEET, EnchantmentCategory.ARMOR_LEGS, EnchantmentCategory.ARMOR_CHEST, EnchantmentCategory.ARMOR_HEAD);
+    private static final Set<EnchantmentCategory> SPECIALIZED_ARMOR_CATEGORIES = Set.of(EnchantmentCategory.ARMOR_FEET, EnchantmentCategory.ARMOR_LEGS, EnchantmentCategory.ARMOR_CHEST, EnchantmentCategory.ARMOR_HEAD);
     public static final BuiltInEnchantmentDataManager INSTANCE = new BuiltInEnchantmentDataManager();
 
-    private final BiMap<Enchantment, EnchantmentCategory> customEnchantmentCategories = HashBiMap.create();
-    private final Map<Enchantment, EnchantmentCategory> defaultEnchantmentCategories = Maps.newIdentityHashMap();
-    private Map<EnchantmentCategory, ResourceLocation> toIdMap;
+    private final BiMap<Enchantment, EnchantmentCategory> customCategories = HashBiMap.create();
+    private final Map<Enchantment, EnchantmentCategory> vanillaCategories = Maps.newIdentityHashMap();
+    private final Map<EnchantmentCategory, Collection<Item>> toItemMap = Maps.newIdentityHashMap();
     private Map<ResourceLocation, EnchantmentCategory> toCategoryMap;
-    private Map<EnchantmentCategory, TagKey<Item>> toTagKeyMap;
-    private int lastEnchantmentCategoriesSize;
+    private int categoriesLastSize;
 
     private BuiltInEnchantmentDataManager() {
 
@@ -38,19 +35,19 @@ public class BuiltInEnchantmentDataManager {
 
     public EnchantmentCategory getVanillaCategory(Enchantment enchantment) {
         EnchantmentCategory category = enchantment.category;
-        if (this.requireVanillaCategory(category)) return category;
-        category = this.defaultEnchantmentCategories.get(enchantment);
+        if (requireVanillaCategory(category)) return category;
+        category = this.vanillaCategories.get(enchantment);
         Objects.requireNonNull(category, "vanilla category for enchantment %s is missing".formatted(BuiltInRegistries.ENCHANTMENT.getKey(enchantment)));
         return category;
     }
 
     public void setEnchantmentCategory(Enchantment enchantment, EnchantmentCategory category) {
         EnchantmentCategory currentCategory = enchantment.category;
-        if (this.requireVanillaCategory(currentCategory)) {
-            this.defaultEnchantmentCategories.put(enchantment, currentCategory);
+        if (requireVanillaCategory(currentCategory)) {
+            this.vanillaCategories.put(enchantment, currentCategory);
         }
         ((EnchantmentAccessor) enchantment).universalenchants$setCategory(category);
-        if (!this.requireVanillaCategory(category)) {
+        if (!requireVanillaCategory(category)) {
             this.tryUnlockEnchantmentSlots(enchantment);
         }
     }
@@ -59,7 +56,7 @@ public class BuiltInEnchantmentDataManager {
         // need this to make horse armor work for frost walker and soul speed (kinda breaks soul speed as horse armor is equipped in chest slot, but soul speed attempts to damage boots slot, but since horse armor has no durability anyway and there's nothing equipped in the boots slot that's fine)
         // all other armor enchantments already set all slots (even the specialized ones such as respiration or feather falling)
         // do this here dynamically to better support modded enchantments
-        EnchantmentCategory vanillaCategory = this.defaultEnchantmentCategories.get(enchantment);
+        EnchantmentCategory vanillaCategory = this.vanillaCategories.get(enchantment);
         if (SPECIALIZED_ARMOR_CATEGORIES.contains(vanillaCategory)) {
             ((EnchantmentAccessor) enchantment).universalenchants$setSlots(ARMOR_SLOTS.clone());
         }
@@ -69,23 +66,27 @@ public class BuiltInEnchantmentDataManager {
         }
     }
 
-    public EnchantmentCategory getOrBuildCustomCategory(Enchantment enchantment, Predicate<Item> canApplyTo) {
-        return this.customEnchantmentCategories.computeIfAbsent(enchantment, enchantment1 -> CommonAbstractions.INSTANCE.createEnchantmentCategory(createCategoryName(enchantment1), canApplyTo));
+    public EnchantmentCategory getCustomCategory(Enchantment enchantment, Predicate<Item> canApplyTo) {
+        return this.customCategories.computeIfAbsent(enchantment, $ -> {
+            String categoryName = getCategoryName(enchantment);
+            return CommonAbstractions.INSTANCE.createEnchantmentCategory(categoryName, canApplyTo);
+        });
     }
 
-    private static String createCategoryName(Enchantment enchantment) {
+    private static String getCategoryName(Enchantment enchantment) {
         ResourceLocation id = BuiltInRegistries.ENCHANTMENT.getKey(enchantment);
-        return AdditionalEnchantmentDataProvider.ENCHANTMENT_CATEGORY_PREFIX + "%s_%s".formatted(id.getNamespace(), id.getPath()).toUpperCase(Locale.ROOT);
+        String s = AdditionalEnchantmentDataProvider.ENCHANTMENT_CATEGORY_PREFIX + id.toDebugFileName();
+        return s.toUpperCase(Locale.ROOT);
     }
 
-    public boolean requireVanillaCategory(EnchantmentCategory category) {
-        return !this.customEnchantmentCategories.containsValue(category);
+    public static boolean requireVanillaCategory(EnchantmentCategory category) {
+        return !INSTANCE.customCategories.containsValue(category);
     }
 
     public EnchantmentCategory convertToVanillaCategory(EnchantmentCategory customCategory) {
-        Enchantment enchantment = this.customEnchantmentCategories.inverse().get(customCategory);
+        Enchantment enchantment = this.customCategories.inverse().get(customCategory);
         if (enchantment != null) {
-            EnchantmentCategory vanillaCategory = this.defaultEnchantmentCategories.get(enchantment);
+            EnchantmentCategory vanillaCategory = this.vanillaCategories.get(enchantment);
             if (vanillaCategory != null) {
                 return vanillaCategory;
             }
@@ -93,48 +94,47 @@ public class BuiltInEnchantmentDataManager {
         return customCategory;
     }
 
-    public Map<EnchantmentCategory, ResourceLocation> getToIdMap() {
-        this.tryRebuildCategoriesIdMap();
-        return this.toIdMap;
-    }
-
     public Map<ResourceLocation, EnchantmentCategory> getToCategoryMap() {
         this.tryRebuildCategoriesIdMap();
         return this.toCategoryMap;
     }
 
-    public Map<EnchantmentCategory, TagKey<Item>> getToTagKeyMap() {
-        this.tryRebuildCategoriesIdMap();
-        return this.toTagKeyMap;
-    }
-
     private void tryRebuildCategoriesIdMap() {
-        AdditionalEnchantmentDataProvider.INSTANCE.initialize();
         EnchantmentCategory[] values = EnchantmentCategory.values();
-        if (this.toIdMap == null || this.toCategoryMap == null || this.toTagKeyMap == null || this.lastEnchantmentCategoriesSize != values.length) {
-            ImmutableMap.Builder<EnchantmentCategory, ResourceLocation> toId = ImmutableMap.builder();
+        if (this.toCategoryMap == null || this.categoriesLastSize != values.length) {
             ImmutableMap.Builder<ResourceLocation, EnchantmentCategory> toCategory = ImmutableMap.builder();
-            ImmutableMap.Builder<EnchantmentCategory, TagKey<Item>> toTagKey = ImmutableMap.builder();
             for (EnchantmentCategory category : values) {
-                if (this.requireVanillaCategory(category)) {
+                if (requireVanillaCategory(category)) {
                     ResourceLocation resourceLocation = getResourceLocationFromCategory(category);
-                    toId.put(category, resourceLocation);
                     toCategory.put(resourceLocation, category);
-                    toTagKey.put(category, getTagKeyFromCategory(resourceLocation));
                     if (resourceLocation.getNamespace().equals(UniversalEnchants.MOD_ID)) {
                         // for legacy compat, remove this in the future
-                        toCategory.put(new ResourceLocation(resourceLocation.getPath()), category);
+                        String s = category.name().replaceAll("\\W", "_").toLowerCase(Locale.ROOT);
+                        toCategory.put(new ResourceLocation(s), category);
                     }
                 }
             }
-            this.toIdMap = toId.build();
             this.toCategoryMap = toCategory.build();
-            this.toTagKeyMap = toTagKey.build();
-            this.lastEnchantmentCategoriesSize = values.length;
+            this.categoriesLastSize = values.length;
         }
     }
 
+    public Collection<Item> getItems(EnchantmentCategory category) {
+        return this.toItemMap.computeIfAbsent(category, $ -> {
+            if (requireVanillaCategory(category)) {
+                Set<Item> items = Sets.newIdentityHashSet();
+                for (Item item : BuiltInRegistries.ITEM) {
+                    if (category.canEnchant(item)) items.add(item);
+                }
+                return Collections.unmodifiableSet(items);
+            }
+            return Collections.emptySet();
+        });
+    }
+
+    @Nullable
     public static ResourceLocation getResourceLocationFromCategory(EnchantmentCategory category) {
+        if (!requireVanillaCategory(category)) return null;
         String s = category.name().replaceAll("\\W", "_").toLowerCase(Locale.ROOT);
         if (s.startsWith(AdditionalEnchantmentDataProvider.LOWERCASE_ENCHANTMENT_CATEGORY_PREFIX)) {
             s = s.substring(AdditionalEnchantmentDataProvider.LOWERCASE_ENCHANTMENT_CATEGORY_PREFIX.length());
@@ -144,11 +144,13 @@ public class BuiltInEnchantmentDataManager {
         }
     }
 
+    @Nullable
     public static TagKey<Item> getTagKeyFromCategory(EnchantmentCategory category) {
+        if (!requireVanillaCategory(category)) return null;
         return getTagKeyFromCategory(getResourceLocationFromCategory(category));
     }
 
-    private static TagKey<Item> getTagKeyFromCategory(ResourceLocation resourceLocation) {
+    public static TagKey<Item> getTagKeyFromCategory(ResourceLocation resourceLocation) {
         return TagKey.create(Registries.ITEM, resourceLocation.withPrefix("enchantment_target/"));
     }
 }

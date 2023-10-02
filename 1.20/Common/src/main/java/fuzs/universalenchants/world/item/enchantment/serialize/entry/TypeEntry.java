@@ -65,8 +65,7 @@ public abstract class TypeEntry implements DataEntry<Item> {
                 entry = ItemEntry.deserialize(enchantment, item);
             }
             entry.exclude = exclude;
-            entry.anvil = anvil;
-            holder.submit(entry);
+            holder.submit(entry, anvil);
         } catch (Exception e) {
             UniversalEnchants.LOGGER.warn("Failed to deserialize {} enchantment config entry {}: {}", enchantment, item, e);
         }
@@ -117,6 +116,7 @@ public abstract class TypeEntry implements DataEntry<Item> {
         }
     }
 
+    @Deprecated(forRemoval = true)
     public static class CategoryEntry extends TypeEntry {
         private final EnchantmentCategory category;
 
@@ -126,21 +126,18 @@ public abstract class TypeEntry implements DataEntry<Item> {
 
         @Override
         public void dissolve(Set<Item> items) throws JsonSyntaxException {
-            for (Item item : BuiltInRegistries.ITEM) {
-                if (this.category.canEnchant(item)) {
-                    items.add(item);
-                }
-            }
+            items.addAll(BuiltInEnchantmentDataManager.INSTANCE.getItems(this.category));
         }
 
         @Override
         String serialize() {
             Objects.requireNonNull(this.category, "category is null");
-            ResourceLocation identifier = BuiltInEnchantmentDataManager.INSTANCE.getToIdMap().get(this.category);
+            ResourceLocation identifier = BuiltInEnchantmentDataManager.getResourceLocationFromCategory(this.category);
             Objects.requireNonNull(identifier, "identifier for category %s is null".formatted(this.category));
             return "$" + identifier;
         }
 
+        @Deprecated(forRemoval = true)
         public static TypeEntry deserialize(ResourceLocation enchantment, String s) throws JsonSyntaxException {
             if (s.startsWith("$")) {
                 s = s.substring(1);
@@ -158,6 +155,10 @@ public abstract class TypeEntry implements DataEntry<Item> {
 
     public static class TagEntry extends TypeEntry {
         private final TagKey<Item> tag;
+
+        TagEntry(EnchantmentCategory category) {
+            this(Objects.requireNonNull(BuiltInEnchantmentDataManager.getTagKeyFromCategory(category), "tag is null"));
+        }
 
         TagEntry(TagKey<Item> tag) {
             this.tag = tag;

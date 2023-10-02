@@ -1,17 +1,19 @@
 package fuzs.universalenchants.handler;
 
+import fuzs.puzzleslib.api.core.v1.CommonAbstractions;
 import fuzs.puzzleslib.api.event.v1.core.EventResult;
 import fuzs.puzzleslib.api.event.v1.core.EventResultHolder;
 import fuzs.puzzleslib.api.event.v1.data.DefaultedInt;
 import fuzs.puzzleslib.api.event.v1.data.MutableFloat;
+import fuzs.puzzleslib.api.event.v1.data.MutableInt;
 import fuzs.universalenchants.UniversalEnchants;
 import fuzs.universalenchants.config.ServerConfig;
-import fuzs.universalenchants.core.CommonAbstractions;
 import fuzs.universalenchants.mixin.accessor.ExperienceOrbAccessor;
 import net.minecraft.core.BlockPos;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.world.InteractionHand;
-import net.minecraft.world.InteractionResultHolder;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.ExperienceOrb;
@@ -28,7 +30,7 @@ import org.jetbrains.annotations.Nullable;
 
 public class BetterEnchantsHandler {
 
-    public static EventResultHolder<InteractionResultHolder<ItemStack>> onUseItem(Player player, Level level, InteractionHand hand) {
+    public static EventResultHolder<InteractionResult> onUseItem(Player player, Level level, InteractionHand hand) {
         if (!UniversalEnchants.CONFIG.get(ServerConfig.class).trueInfinity) return EventResultHolder.pass();
         // true infinity for bows and crossbows
         ItemStack stack = player.getItemInHand(hand);
@@ -37,7 +39,7 @@ public class BetterEnchantsHandler {
                 // resetting startSoundPlayed and midLoadSoundPlayed on crossbow is not required as they're reset in CrossbowItem#onUseTick anyways
                 player.startUsingItem(hand);
                 // important to return success even on client since this is how the fabric event works
-                return EventResultHolder.interrupt(InteractionResultHolder.success(stack));
+                return EventResultHolder.interrupt(InteractionResult.SUCCESS);
             }
         }
         return EventResultHolder.pass();
@@ -63,21 +65,29 @@ public class BetterEnchantsHandler {
     }
 
     public static EventResult onLivingExperienceDrop(LivingEntity entity, @Nullable Player attackingPlayer, DefaultedInt droppedExperience) {
-        if (!UniversalEnchants.CONFIG.get(ServerConfig.class).lootingBoostsXp) return EventResult.PASS;
+        if (!UniversalEnchants.CONFIG.get(ServerConfig.class).lootBonusBoostsXp) return EventResult.PASS;
         // very basic hack for multiplying xp by looting level
         // e.g. our code for looting on ranged weapons will not trigger as the damage source is not correct
         // (it will still trigger though when they ranged weapon is still in the main hand, since vanilla checks the main hand enchantments)
         // unfortunately the original damage source is not obtainable in this context
-        int level = CommonAbstractions.INSTANCE.getMobLootingLevel(entity, attackingPlayer, attackingPlayer != null ? entity.level().damageSources().playerAttack(attackingPlayer) : null);
-        if (level > 0) {
-            droppedExperience.mapDefaultInt(experience -> getDroppedXp(experience, level));
+        int enchantmentLevel = CommonAbstractions.INSTANCE.getMobLootingLevel(entity, attackingPlayer, attackingPlayer != null ? entity.level().damageSources().playerAttack(attackingPlayer) : null);
+        if (enchantmentLevel > 0) {
+            droppedExperience.mapDefaultInt(t -> getDroppedXp(t, enchantmentLevel));
         }
         return EventResult.PASS;
     }
 
-    private static int getDroppedXp(int droppedXp, int level) {
-        float multiplier = (level * (level + 1)) / 10.0F;
-        return droppedXp + Math.min(50, (int) (droppedXp * multiplier));
+    public static void onDropExperience(ServerLevel level, BlockPos pos, BlockState state, Player player, ItemStack itemInHand, MutableInt experienceToDrop) {
+        if (!UniversalEnchants.CONFIG.get(ServerConfig.class).lootBonusBoostsXp) return;
+        int enchantmentLevel = EnchantmentHelper.getItemEnchantmentLevel(Enchantments.BLOCK_FORTUNE, itemInHand);
+        if (enchantmentLevel > 0) {
+            experienceToDrop.mapInt(t -> getDroppedXp(t, enchantmentLevel));
+        }
+    }
+
+    private static int getDroppedXp(int originalExperience, int enchantmentLevel) {
+        float multiplier = (enchantmentLevel * (enchantmentLevel + 1)) / 10.0F;
+        return originalExperience + Math.min(50, (int) Math.floor(originalExperience * multiplier));
     }
 
     public static EventResult onPickupXp(Player player, ExperienceOrb orb) {

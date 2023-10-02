@@ -48,6 +48,7 @@ abstract class AnvilMenuMixin extends ItemCombinerMenu {
 
     @ModifyVariable(method = "createResult", at = @At(value = "STORE", ordinal = 0), ordinal = 3)
     public boolean createResult$1(boolean canEnchant) {
+        if (!UniversalEnchants.CONFIG.get(ServerConfig.class).adjustAnvilEnchantments) return canEnchant;
         ItemStack leftInput = this.inputSlots.getItem(0);
         ItemStack rightInput = this.inputSlots.getItem(1);
         Set<Enchantment> enchantments = EnchantmentHelper.getEnchantments(rightInput).keySet();

@@ -4,11 +4,13 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Sets;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonSyntaxException;
+import fuzs.universalenchants.core.CommonAbstractions;
 import fuzs.universalenchants.world.item.enchantment.data.BuiltInEnchantmentDataManager;
 import net.minecraft.Util;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.EnchantmentCategory;
 import org.apache.commons.compress.utils.Lists;
@@ -24,11 +26,23 @@ public interface DataEntry<T> {
 
     void serialize(JsonArray jsonArray);
 
-    static BuilderHolder getDefaultBuilder(Enchantment enchantment) {
+    static BuilderHolder getDefaultEnchantmentDataBuilder(Enchantment enchantment) {
         BuilderHolder holder = new BuilderHolder(enchantment);
         holder.add(BuiltInEnchantmentDataManager.INSTANCE.getVanillaCategory(enchantment));
         // don't add the enchantment itself, the user is not supposed to remove it, this will be manually added back later
         BuiltInRegistries.ENCHANTMENT.stream().filter(Predicate.not(enchantment::isCompatibleWith)).filter(other -> enchantment != other).forEach(holder::addIncompatible);
+        for (Item item : BuiltInRegistries.ITEM) {
+            ItemStack itemStack = new ItemStack(item);
+            if (enchantment.canEnchant(itemStack)) {
+                holder.anvilBuilder().add(item);
+            }
+            // Forge has IForgeItemStack::canApplyAtEnchantingTable method for making an item compatible with enchantments outside the Enchantment#category
+            // to honor this we need to find all those additional enchantments and add them manually (this means configs will have to be recreated when such mods are added)
+            // example: Farmer's Delight's skillet item and various items from Twilight Forest
+            if (CommonAbstractions.INSTANCE.canApplyAtEnchantingTable(itemStack, enchantment)) {
+                holder.categoryBuilder().add(item);
+            }
+        }
         return holder;
     }
 
@@ -112,7 +126,7 @@ public interface DataEntry<T> {
             });
             List<TypeEntry> entries = Lists.newArrayList();
             this.items.stream().map(TypeEntry.ItemEntry::new).forEach(entries::add);
-            this.categories.stream().map(TypeEntry.CategoryEntry::new).forEach(entries::add);
+            this.categories.stream().map(TypeEntry.TagEntry::new).forEach(entries::add);
             this.tags.stream().map(TypeEntry.TagEntry::new).forEach(entries::add);
             return entries;
         }

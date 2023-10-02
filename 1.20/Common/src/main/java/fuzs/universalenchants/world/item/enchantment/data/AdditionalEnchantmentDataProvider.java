@@ -20,11 +20,11 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 public class AdditionalEnchantmentDataProvider {
-    static final String ENCHANTMENT_CATEGORY_PREFIX = UniversalEnchants.MOD_NAME.toUpperCase(Locale.ROOT).replace(" ", "_") + "_";
-    static final String LOWERCASE_ENCHANTMENT_CATEGORY_PREFIX = ENCHANTMENT_CATEGORY_PREFIX.toLowerCase(Locale.ROOT);
-    public static final EnchantmentCategory AXE_ENCHANTMENT_CATEGORY = CommonAbstractions.INSTANCE.createEnchantmentCategory(ENCHANTMENT_CATEGORY_PREFIX + "AXE", item -> item instanceof AxeItem);
-    public static final EnchantmentCategory HORSE_ARMOR_ENCHANTMENT_CATEGORY = CommonAbstractions.INSTANCE.createEnchantmentCategory(ENCHANTMENT_CATEGORY_PREFIX + "HORSE_ARMOR", item -> item instanceof HorseArmorItem);
+    public static final String ENCHANTMENT_CATEGORY_PREFIX = UniversalEnchants.MOD_NAME.toUpperCase(Locale.ROOT).replace(" ", "_") + "_";
     public static final EnchantmentCategory SHIELD_ENCHANTMENT_CATEGORY = CommonAbstractions.INSTANCE.createEnchantmentCategory(ENCHANTMENT_CATEGORY_PREFIX + "SHIELD", item -> item instanceof ShieldItem);
+    public static final EnchantmentCategory HORSE_ARMOR_ENCHANTMENT_CATEGORY = CommonAbstractions.INSTANCE.createEnchantmentCategory(ENCHANTMENT_CATEGORY_PREFIX + "HORSE_ARMOR", item -> item instanceof HorseArmorItem);
+    public static final EnchantmentCategory AXE_ENCHANTMENT_CATEGORY = CommonAbstractions.INSTANCE.createEnchantmentCategory(ENCHANTMENT_CATEGORY_PREFIX + "AXE", item -> item instanceof AxeItem);
+    static final String LOWERCASE_ENCHANTMENT_CATEGORY_PREFIX = ENCHANTMENT_CATEGORY_PREFIX.toLowerCase(Locale.ROOT);
     public static final AdditionalEnchantmentDataProvider INSTANCE = new AdditionalEnchantmentDataProvider();
 
     private final List<AdditionalEnchantmentsData> additionalEnchantmentsData = ImmutableList.of(
@@ -34,7 +34,8 @@ public class AdditionalEnchantmentDataProvider {
             new AdditionalEnchantmentsData(EnchantmentCategory.BOW, Enchantments.PIERCING, Enchantments.MULTISHOT, Enchantments.QUICK_CHARGE, Enchantments.MOB_LOOTING),
             new AdditionalEnchantmentsData(EnchantmentCategory.CROSSBOW, Enchantments.FLAMING_ARROWS, Enchantments.PUNCH_ARROWS, Enchantments.POWER_ARROWS, Enchantments.INFINITY_ARROWS, Enchantments.MOB_LOOTING),
             new AdditionalEnchantmentsData(HORSE_ARMOR_ENCHANTMENT_CATEGORY, Enchantments.ALL_DAMAGE_PROTECTION, Enchantments.FIRE_PROTECTION, Enchantments.FALL_PROTECTION, Enchantments.BLAST_PROTECTION, Enchantments.PROJECTILE_PROTECTION, Enchantments.RESPIRATION, Enchantments.THORNS, Enchantments.DEPTH_STRIDER, Enchantments.FROST_WALKER, Enchantments.BINDING_CURSE, Enchantments.SOUL_SPEED, Enchantments.VANISHING_CURSE),
-            new AdditionalEnchantmentsData(SHIELD_ENCHANTMENT_CATEGORY, Enchantments.THORNS, Enchantments.KNOCKBACK)
+            new AdditionalEnchantmentsData(SHIELD_ENCHANTMENT_CATEGORY, Enchantments.THORNS, Enchantments.KNOCKBACK),
+            new AdditionalEnchantmentsData(EnchantmentCategory.ARMOR, Enchantments.THORNS)
     );
     private Map<Enchantment, List<DataEntry<?>>> defaultCategoryEntries;
 
@@ -42,17 +43,17 @@ public class AdditionalEnchantmentDataProvider {
 
     }
 
-    public void initialize() {
+    public static void initialize() {
         // make sure enum values are created
     }
 
     public Map<Enchantment, List<DataEntry<?>>> getEnchantmentDataEntries() {
         if (this.defaultCategoryEntries == null) {
             // constructing default builders on Forge is quite expensive, so only do this when necessary
-            Map<Enchantment, DataEntry.BuilderHolder> builders = BuiltInRegistries.ENCHANTMENT.stream().collect(Collectors.toMap(Function.identity(), CommonAbstractions.INSTANCE::getDefaultEnchantmentDataBuilder));
+            Map<Enchantment, DataEntry.BuilderHolder> builders = BuiltInRegistries.ENCHANTMENT.stream().collect(Collectors.toMap(Function.identity(), DataEntry::getDefaultEnchantmentDataBuilder));
             this.additionalEnchantmentsData.forEach(data -> data.addToBuilder(builders));
             setupAdditionalCompatibility(builders);
-            cleanThornsEnchantment(builders);
+//            cleanThornsEnchantment(builders);
             this.defaultCategoryEntries = builders.entrySet().stream().collect(ImmutableMap.toImmutableMap(Map.Entry::getKey, entry -> entry.getValue().build()));
         }
         return this.defaultCategoryEntries;
@@ -76,7 +77,6 @@ public class AdditionalEnchantmentDataProvider {
     private static void cleanThornsEnchantment(Map<Enchantment, DataEntry.BuilderHolder> builders) {
         DataEntry.Builder thornsBuilder = builders.get(Enchantments.THORNS).anvilBuilder();
         thornsBuilder.items.removeIf(item -> item instanceof ArmorItem);
-        thornsBuilder.categories.remove(EnchantmentCategory.ARMOR_CHEST);
         thornsBuilder.add(EnchantmentCategory.ARMOR);
     }
 

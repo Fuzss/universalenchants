@@ -54,7 +54,7 @@ public class EnchantmentHoldersManager {
             EnchantmentHolder holder = getEnchantmentHolder(entry.getKey());
             holder.ensureInvalidated();
             if (!loadFromFile(holder, configFilePath, configFile)) {
-                if (JsonConfigFileUtil.saveToFile(configFile, serializeDataEntry(entry.getValue()))) {
+                if (JsonConfigFileUtil.saveToFile(configFile, serializeAllEntries(entry.getValue()))) {
                     UniversalEnchants.LOGGER.info("Created new enchantment config file for {}", holder.id());
                 }
                 holder.initializeCategoryEntries();
@@ -72,7 +72,7 @@ public class EnchantmentHoldersManager {
     private static boolean loadFromFile(EnchantmentHolder holder, Path configFilePath, File configFile) {
         if (configFile.exists()) {
             try (FileReader reader = new FileReader(configFile)) {
-                deserializeDataEntry(holder, reader);
+                deserializeAllEntries(holder, reader);
                 UniversalEnchants.LOGGER.debug("Read enchantment config file for {} in config directory", holder.id());
                 return true;
             } catch (IOException | JsonSyntaxException e) {
@@ -87,7 +87,7 @@ public class EnchantmentHoldersManager {
         return false;
     }
 
-    private static void deserializeDataEntry(EnchantmentHolder holder, FileReader reader) throws JsonSyntaxException {
+    private static void deserializeAllEntries(EnchantmentHolder holder, FileReader reader) throws JsonSyntaxException {
         JsonElement jsonElement = JsonConfigFileUtil.GSON.fromJson(reader, JsonElement.class);
         JsonObject jsonObject = GsonHelper.convertToJsonObject(jsonElement, "enchantment config");
         int schemaVersion = GsonHelper.getAsInt(jsonObject, "schemaVersion");
@@ -113,7 +113,7 @@ public class EnchantmentHoldersManager {
         }
     }
 
-    private static JsonElement serializeDataEntry(Collection<DataEntry<?>> entries) {
+    private static JsonElement serializeAllEntries(Collection<DataEntry<?>> entries) {
         JsonObject jsonObject = new JsonObject();
         jsonObject.addProperty("schemaVersion", SCHEMA_VERSION);
         JsonArray items = new JsonArray();
