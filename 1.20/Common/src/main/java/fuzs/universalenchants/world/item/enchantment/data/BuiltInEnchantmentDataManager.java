@@ -1,10 +1,13 @@
 package fuzs.universalenchants.world.item.enchantment.data;
 
 import com.google.common.collect.*;
+import fuzs.universalenchants.UniversalEnchants;
 import fuzs.universalenchants.core.CommonAbstractions;
 import fuzs.universalenchants.mixin.accessor.EnchantmentAccessor;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.tags.TagKey;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.enchantment.Enchantment;
@@ -24,7 +27,9 @@ public class BuiltInEnchantmentDataManager {
 
     private final BiMap<Enchantment, EnchantmentCategory> customEnchantmentCategories = HashBiMap.create();
     private final Map<Enchantment, EnchantmentCategory> defaultEnchantmentCategories = Maps.newIdentityHashMap();
-    private BiMap<EnchantmentCategory, ResourceLocation> enchantmentCategoriesIdMap;
+    private Map<EnchantmentCategory, ResourceLocation> toIdMap;
+    private Map<ResourceLocation, EnchantmentCategory> toCategoryMap;
+    private Map<EnchantmentCategory, TagKey<Item>> toTagKeyMap;
     private int lastEnchantmentCategoriesSize;
 
     private BuiltInEnchantmentDataManager() {
@@ -33,7 +38,7 @@ public class BuiltInEnchantmentDataManager {
 
     public EnchantmentCategory getVanillaCategory(Enchantment enchantment) {
         EnchantmentCategory category = enchantment.category;
-        if (this.testVanillaCategory(category)) return category;
+        if (this.requireVanillaCategory(category)) return category;
         category = this.defaultEnchantmentCategories.get(enchantment);
         Objects.requireNonNull(category, "vanilla category for enchantment %s is missing".formatted(BuiltInRegistries.ENCHANTMENT.getKey(enchantment)));
         return category;
@@ -41,11 +46,11 @@ public class BuiltInEnchantmentDataManager {
 
     public void setEnchantmentCategory(Enchantment enchantment, EnchantmentCategory category) {
         EnchantmentCategory currentCategory = enchantment.category;
-        if (this.testVanillaCategory(currentCategory)) {
+        if (this.requireVanillaCategory(currentCategory)) {
             this.defaultEnchantmentCategories.put(enchantment, currentCategory);
         }
         ((EnchantmentAccessor) enchantment).universalenchants$setCategory(category);
-        if (!this.testVanillaCategory(category)) {
+        if (!this.requireVanillaCategory(category)) {
             this.tryUnlockEnchantmentSlots(enchantment);
         }
     }
@@ -73,7 +78,7 @@ public class BuiltInEnchantmentDataManager {
         return AdditionalEnchantmentDataProvider.ENCHANTMENT_CATEGORY_PREFIX + "%s_%s".formatted(id.getNamespace(), id.getPath()).toUpperCase(Locale.ROOT);
     }
 
-    public boolean testVanillaCategory(EnchantmentCategory category) {
+    public boolean requireVanillaCategory(EnchantmentCategory category) {
         return !this.customEnchantmentCategories.containsValue(category);
     }
 
@@ -88,24 +93,62 @@ public class BuiltInEnchantmentDataManager {
         return customCategory;
     }
 
-    public BiMap<EnchantmentCategory, ResourceLocation> getEnchantmentCategoriesIdMap() {
+    public Map<EnchantmentCategory, ResourceLocation> getToIdMap() {
         this.tryRebuildCategoriesIdMap();
-        return this.enchantmentCategoriesIdMap;
+        return this.toIdMap;
+    }
+
+    public Map<ResourceLocation, EnchantmentCategory> getToCategoryMap() {
+        this.tryRebuildCategoriesIdMap();
+        return this.toCategoryMap;
+    }
+
+    public Map<EnchantmentCategory, TagKey<Item>> getToTagKeyMap() {
+        this.tryRebuildCategoriesIdMap();
+        return this.toTagKeyMap;
     }
 
     private void tryRebuildCategoriesIdMap() {
         AdditionalEnchantmentDataProvider.INSTANCE.initialize();
         EnchantmentCategory[] values = EnchantmentCategory.values();
-        if (this.enchantmentCategoriesIdMap == null || this.lastEnchantmentCategoriesSize != values.length) {
-            ImmutableBiMap.Builder<EnchantmentCategory, ResourceLocation> builder = ImmutableBiMap.builder();
+        if (this.toIdMap == null || this.toCategoryMap == null || this.toTagKeyMap == null || this.lastEnchantmentCategoriesSize != values.length) {
+            ImmutableMap.Builder<EnchantmentCategory, ResourceLocation> toId = ImmutableMap.builder();
+            ImmutableMap.Builder<ResourceLocation, EnchantmentCategory> toCategory = ImmutableMap.builder();
+            ImmutableMap.Builder<EnchantmentCategory, TagKey<Item>> toTagKey = ImmutableMap.builder();
             for (EnchantmentCategory category : values) {
-                if (this.testVanillaCategory(category)) {
-                    String identifier = category.name().replaceAll("\\W", "_").toLowerCase(Locale.ROOT);
-                    builder.put(category, new ResourceLocation(identifier));
+                if (this.requireVanillaCategory(category)) {
+                    ResourceLocation resourceLocation = getResourceLocationFromCategory(category);
+                    toId.put(category, resourceLocation);
+                    toCategory.put(resourceLocation, category);
+                    toTagKey.put(category, getTagKeyFromCategory(resourceLocation));
+                    if (resourceLocation.getNamespace().equals(UniversalEnchants.MOD_ID)) {
+                        // for legacy compat, remove this in the future
+                        toCategory.put(new ResourceLocation(resourceLocation.getPath()), category);
+                    }
                 }
             }
-            this.enchantmentCategoriesIdMap = builder.build();
+            this.toIdMap = toId.build();
+            this.toCategoryMap = toCategory.build();
+            this.toTagKeyMap = toTagKey.build();
             this.lastEnchantmentCategoriesSize = values.length;
         }
+    }
+
+    public static ResourceLocation getResourceLocationFromCategory(EnchantmentCategory category) {
+        String s = category.name().replaceAll("\\W", "_").toLowerCase(Locale.ROOT);
+        if (s.startsWith(AdditionalEnchantmentDataProvider.LOWERCASE_ENCHANTMENT_CATEGORY_PREFIX)) {
+            s = s.substring(AdditionalEnchantmentDataProvider.LOWERCASE_ENCHANTMENT_CATEGORY_PREFIX.length());
+            return UniversalEnchants.id(s);
+        } else {
+            return new ResourceLocation(s);
+        }
+    }
+
+    public static TagKey<Item> getTagKeyFromCategory(EnchantmentCategory category) {
+        return getTagKeyFromCategory(getResourceLocationFromCategory(category));
+    }
+
+    private static TagKey<Item> getTagKeyFromCategory(ResourceLocation resourceLocation) {
+        return TagKey.create(Registries.ITEM, resourceLocation.withPrefix("enchantment_target/"));
     }
 }

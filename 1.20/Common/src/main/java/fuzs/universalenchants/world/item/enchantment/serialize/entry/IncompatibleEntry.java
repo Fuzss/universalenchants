@@ -10,19 +10,15 @@ import net.minecraft.world.item.enchantment.Enchantment;
 
 import java.util.Set;
 
-public class IncompatibleEntry extends DataEntry<Enchantment> {
-    public final Set<Enchantment> incompatibles = Sets.newHashSet();
+public class IncompatibleEntry implements DataEntry<Enchantment> {
+    private final Set<Enchantment> incompatibles;
 
-    @Override
-    public void dissolve(Set<Enchantment> items) throws JsonSyntaxException {
-        items.addAll(this.incompatibles);
+    public IncompatibleEntry() {
+        this(Sets.newLinkedHashSet());
     }
 
-    @Override
-    public void serialize(JsonArray jsonArray) {
-        for (Enchantment enchantment : this.incompatibles) {
-            jsonArray.add(BuiltInRegistries.ENCHANTMENT.getKey(enchantment).toString());
-        }
+    public IncompatibleEntry(Set<Enchantment> incompatibles) {
+        this.incompatibles = incompatibles;
     }
 
     public static IncompatibleEntry deserialize(ResourceLocation enchantment, String... items) throws JsonSyntaxException {
@@ -37,5 +33,21 @@ public class IncompatibleEntry extends DataEntry<Enchantment> {
             entry.incompatibles.add(BuiltInRegistries.ENCHANTMENT.get(id));
         }
         return entry;
+    }
+
+    public Set<Enchantment> getIncompatibles() {
+        return this.incompatibles;
+    }
+
+    @Override
+    public void dissolve(Set<Enchantment> items) throws JsonSyntaxException {
+        items.addAll(this.incompatibles);
+    }
+
+    @Override
+    public void serialize(JsonArray jsonArray) {
+        for (Enchantment enchantment : this.incompatibles) {
+            jsonArray.add(BuiltInRegistries.ENCHANTMENT.getKey(enchantment).toString());
+        }
     }
 }

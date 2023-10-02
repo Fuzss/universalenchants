@@ -15,6 +15,7 @@ import fuzs.universalenchants.world.item.enchantment.serialize.entry.TypeEntry;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.GsonHelper;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.enchantment.Enchantment;
 
 import java.io.File;
@@ -35,6 +36,10 @@ public class EnchantmentHoldersManager {
         return getEnchantmentHolder(enchantment).isCompatibleWith(other, fallback) && getEnchantmentHolder(other).isCompatibleWith(enchantment, fallback);
     }
 
+    public static boolean canApplyAtAnvil(Enchantment enchantment, ItemStack itemStack) {
+        return getEnchantmentHolder(enchantment).canApplyAtAnvil(itemStack);
+    }
+
     public static void loadAll() {
         ENCHANTMENT_DATA_HOLDERS.values().forEach(EnchantmentHolder::invalidate);
         Path modConfigPath = ModLoaderEnvironment.INSTANCE.getConfigDirectory().resolve(UniversalEnchants.MOD_ID);
@@ -50,9 +55,10 @@ public class EnchantmentHoldersManager {
             holder.ensureInvalidated();
             if (!loadFromFile(holder, configFilePath, configFile)) {
                 if (JsonConfigFileUtil.saveToFile(configFile, serializeDataEntry(entry.getValue()))) {
-                    UniversalEnchants.LOGGER.info("Created new enchantment config file for {} in config directory", holder.id());
+                    UniversalEnchants.LOGGER.info("Created new enchantment config file for {}", holder.id());
                 }
                 holder.initializeCategoryEntries();
+                holder.initializeAnvilEntries();
                 holder.submitAll(entry.getValue());
             }
         }
@@ -90,7 +96,14 @@ public class EnchantmentHoldersManager {
             holder.initializeCategoryEntries();
             JsonArray items = GsonHelper.getAsJsonArray(jsonObject, "items");
             for (JsonElement itemElement : items) {
-                TypeEntry.deserializeCategoryEntry(holder.id(), holder, itemElement);
+                TypeEntry.deserializeCategoryEntry(holder.id(), holder, itemElement, false);
+            }
+        }
+        if (jsonObject.has("anvil_items")) {
+            holder.initializeAnvilEntries();
+            JsonArray items = GsonHelper.getAsJsonArray(jsonObject, "anvil_items");
+            for (JsonElement itemElement : items) {
+                TypeEntry.deserializeCategoryEntry(holder.id(), holder, itemElement, true);
             }
         }
         if (jsonObject.has("incompatible")) {
@@ -103,17 +116,19 @@ public class EnchantmentHoldersManager {
     private static JsonElement serializeDataEntry(Collection<DataEntry<?>> entries) {
         JsonObject jsonObject = new JsonObject();
         jsonObject.addProperty("schemaVersion", SCHEMA_VERSION);
-        JsonArray jsonArray = new JsonArray();
-        JsonArray jsonArray1 = new JsonArray();
+        JsonArray items = new JsonArray();
+        JsonArray anvilItems = new JsonArray();
+        JsonArray incompatible = new JsonArray();
         for (DataEntry<?> entry : entries) {
-            if (entry instanceof TypeEntry) {
-                entry.serialize(jsonArray);
+            if (entry instanceof TypeEntry typeEntry) {
+                entry.serialize(typeEntry.anvil ? anvilItems : items);
             } else if (entry instanceof IncompatibleEntry) {
-                entry.serialize(jsonArray1);
+                entry.serialize(incompatible);
             }
         }
-        jsonObject.add("items", jsonArray);
-        jsonObject.add("incompatible", jsonArray1);
+        jsonObject.add("items", items);
+        jsonObject.add("anvil_items", anvilItems);
+        jsonObject.add("incompatible", incompatible);
         return jsonObject;
     }
 }

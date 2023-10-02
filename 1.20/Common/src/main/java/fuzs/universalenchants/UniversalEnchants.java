@@ -22,6 +22,7 @@ import fuzs.universalenchants.init.ModRegistry;
 import fuzs.universalenchants.server.commands.ModEnchantCommand;
 import fuzs.universalenchants.world.item.enchantment.serialize.EnchantmentHoldersManager;
 import net.minecraft.core.RegistryAccess;
+import net.minecraft.resources.ResourceLocation;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -56,5 +57,9 @@ public class UniversalEnchants implements ModConstructor {
         // run after other mods had a chance to change looting level
         LivingExperienceDropCallback.EVENT.register(EventPhase.AFTER, BetterEnchantsHandler::onLivingExperienceDrop);
         PlayerXpEvents.PICKUP_XP.register(BetterEnchantsHandler::onPickupXp);
+    }
+
+    public static ResourceLocation id(String path) {
+        return new ResourceLocation(MOD_ID, path);
     }
 }

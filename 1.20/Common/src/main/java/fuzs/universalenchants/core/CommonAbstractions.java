@@ -22,7 +22,5 @@ public interface CommonAbstractions {
 
     int getMobLootingLevel(Entity target, @Nullable Entity killer, @Nullable DamageSource cause);
 
-    default DataEntry.Builder defaultEnchantmentDataBuilder(Enchantment enchantment) {
-        return DataEntry.defaultBuilder(enchantment);
-    }
+    DataEntry.BuilderHolder getDefaultEnchantmentDataBuilder(Enchantment enchantment);
 }

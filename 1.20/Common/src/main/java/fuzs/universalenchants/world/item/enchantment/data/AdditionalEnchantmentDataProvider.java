@@ -6,6 +6,7 @@ import fuzs.universalenchants.UniversalEnchants;
 import fuzs.universalenchants.core.CommonAbstractions;
 import fuzs.universalenchants.world.item.enchantment.serialize.entry.DataEntry;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.world.item.ArmorItem;
 import net.minecraft.world.item.AxeItem;
 import net.minecraft.world.item.HorseArmorItem;
 import net.minecraft.world.item.ShieldItem;
@@ -20,6 +21,7 @@ import java.util.stream.Collectors;
 
 public class AdditionalEnchantmentDataProvider {
     static final String ENCHANTMENT_CATEGORY_PREFIX = UniversalEnchants.MOD_NAME.toUpperCase(Locale.ROOT).replace(" ", "_") + "_";
+    static final String LOWERCASE_ENCHANTMENT_CATEGORY_PREFIX = ENCHANTMENT_CATEGORY_PREFIX.toLowerCase(Locale.ROOT);
     public static final EnchantmentCategory AXE_ENCHANTMENT_CATEGORY = CommonAbstractions.INSTANCE.createEnchantmentCategory(ENCHANTMENT_CATEGORY_PREFIX + "AXE", item -> item instanceof AxeItem);
     public static final EnchantmentCategory HORSE_ARMOR_ENCHANTMENT_CATEGORY = CommonAbstractions.INSTANCE.createEnchantmentCategory(ENCHANTMENT_CATEGORY_PREFIX + "HORSE_ARMOR", item -> item instanceof HorseArmorItem);
     public static final EnchantmentCategory SHIELD_ENCHANTMENT_CATEGORY = CommonAbstractions.INSTANCE.createEnchantmentCategory(ENCHANTMENT_CATEGORY_PREFIX + "SHIELD", item -> item instanceof ShieldItem);
@@ -47,15 +49,16 @@ public class AdditionalEnchantmentDataProvider {
     public Map<Enchantment, List<DataEntry<?>>> getEnchantmentDataEntries() {
         if (this.defaultCategoryEntries == null) {
             // constructing default builders on Forge is quite expensive, so only do this when necessary
-            Map<Enchantment, DataEntry.Builder> builders = BuiltInRegistries.ENCHANTMENT.stream().collect(Collectors.toMap(Function.identity(), CommonAbstractions.INSTANCE::defaultEnchantmentDataBuilder));
+            Map<Enchantment, DataEntry.BuilderHolder> builders = BuiltInRegistries.ENCHANTMENT.stream().collect(Collectors.toMap(Function.identity(), CommonAbstractions.INSTANCE::getDefaultEnchantmentDataBuilder));
             this.additionalEnchantmentsData.forEach(data -> data.addToBuilder(builders));
             setupAdditionalCompatibility(builders);
-            this.defaultCategoryEntries = builders.entrySet().stream().collect(ImmutableMap.toImmutableMap(Map.Entry::getKey, e -> e.getValue().build()));
+            cleanThornsEnchantment(builders);
+            this.defaultCategoryEntries = builders.entrySet().stream().collect(ImmutableMap.toImmutableMap(Map.Entry::getKey, entry -> entry.getValue().build()));
         }
         return this.defaultCategoryEntries;
     }
 
-    private static void setupAdditionalCompatibility(Map<Enchantment, DataEntry.Builder> builders) {
+    private static void setupAdditionalCompatibility(Map<Enchantment, DataEntry.BuilderHolder> builders) {
         applyIncompatibilityToBoth(builders, Enchantments.INFINITY_ARROWS, Enchantments.MENDING, false);
         applyIncompatibilityToBoth(builders, Enchantments.MULTISHOT, Enchantments.PIERCING, false);
         for (Enchantment enchantment : BuiltInRegistries.ENCHANTMENT) {
@@ -70,16 +73,24 @@ public class AdditionalEnchantmentDataProvider {
         }
     }
 
-    private static void applyIncompatibilityToBoth(Map<Enchantment, DataEntry.Builder> builders, Enchantment enchantment, Enchantment other, boolean add) {
+    private static void cleanThornsEnchantment(Map<Enchantment, DataEntry.BuilderHolder> builders) {
+        DataEntry.Builder thornsBuilder = builders.get(Enchantments.THORNS).anvilBuilder();
+        thornsBuilder.items.removeIf(item -> item instanceof ArmorItem);
+        thornsBuilder.categories.remove(EnchantmentCategory.ARMOR_CHEST);
+        thornsBuilder.add(EnchantmentCategory.ARMOR);
+    }
+
+    private static void applyIncompatibilityToBoth(Map<Enchantment, DataEntry.BuilderHolder> builders, Enchantment enchantment, Enchantment other, boolean add) {
         BiConsumer<Enchantment, Enchantment> operation = (e1, e2) -> {
-            DataEntry.Builder builder = builders.get(e1);
+            DataEntry.BuilderHolder builder = builders.get(e1);
             // this might be called for non-vanilla enchantments (currently possible through DamageEnchantment and ProtectionEnchantment instanceof checks)
             // they won't have a builder, so be careful
-            if (builder == null) return;
-            if (add) {
-                builder.add(e2);
-            } else {
-                builder.remove(e2);
+            if (builder != null) {
+                if (add) {
+                    builder.addIncompatible(e2);
+                } else {
+                    builder.removeIncompatible(e2);
+                }
             }
         };
         operation.accept(enchantment, other);
@@ -92,7 +103,7 @@ public class AdditionalEnchantmentDataProvider {
             this(category, ImmutableList.copyOf(enchantments));
         }
 
-        public void addToBuilder(Map<Enchantment, DataEntry.Builder> builders) {
+        public void addToBuilder(Map<Enchantment, DataEntry.BuilderHolder> builders) {
             for (Enchantment enchantment : this.enchantments) {
                 if (builders.containsKey(enchantment)) {
                     builders.get(enchantment).add(this.category);

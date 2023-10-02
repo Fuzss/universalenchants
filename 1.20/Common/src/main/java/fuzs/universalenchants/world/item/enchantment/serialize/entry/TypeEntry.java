@@ -19,7 +19,7 @@ import net.minecraft.world.item.enchantment.EnchantmentCategory;
 import java.util.Objects;
 import java.util.Set;
 
-public abstract class TypeEntry extends DataEntry<Item> {
+public abstract class TypeEntry implements DataEntry<Item> {
     private static final TypeEntry EMPTY = new TypeEntry() {
 
         @Override
@@ -38,9 +38,10 @@ public abstract class TypeEntry extends DataEntry<Item> {
         }
     };
 
-    private boolean exclude;
+    public boolean exclude;
+    public boolean anvil;
 
-    public static void deserializeCategoryEntry(ResourceLocation enchantment, EnchantmentHolder holder, JsonElement jsonElement) throws JsonSyntaxException {
+    public static void deserializeCategoryEntry(ResourceLocation enchantment, EnchantmentHolder holder, JsonElement jsonElement, boolean anvil) throws JsonSyntaxException {
         String item;
         boolean exclude = false;
         if (jsonElement.isJsonObject()) {
@@ -49,6 +50,10 @@ public abstract class TypeEntry extends DataEntry<Item> {
             exclude = GsonHelper.getAsBoolean(jsonObject1, "exclude");
         } else {
             item = GsonHelper.convertToString(jsonElement, "item");
+            if (item.startsWith("!")) {
+                exclude = true;
+                item = item.substring(1);
+            }
         }
         try {
             TypeEntry entry;
@@ -59,7 +64,8 @@ public abstract class TypeEntry extends DataEntry<Item> {
             } else {
                 entry = ItemEntry.deserialize(enchantment, item);
             }
-            entry.setExclude(exclude);
+            entry.exclude = exclude;
+            entry.anvil = anvil;
             holder.submit(entry);
         } catch (Exception e) {
             UniversalEnchants.LOGGER.warn("Failed to deserialize {} enchantment config entry {}: {}", enchantment, item, e);
@@ -81,14 +87,6 @@ public abstract class TypeEntry extends DataEntry<Item> {
 
     public boolean isEmpty() {
         return false;
-    }
-
-    public boolean isExclude() {
-        return this.exclude;
-    }
-
-    public void setExclude(boolean exclude) {
-        this.exclude = exclude;
     }
 
     public static class ItemEntry extends TypeEntry {
@@ -138,7 +136,7 @@ public abstract class TypeEntry extends DataEntry<Item> {
         @Override
         String serialize() {
             Objects.requireNonNull(this.category, "category is null");
-            ResourceLocation identifier = BuiltInEnchantmentDataManager.INSTANCE.getEnchantmentCategoriesIdMap().get(this.category);
+            ResourceLocation identifier = BuiltInEnchantmentDataManager.INSTANCE.getToIdMap().get(this.category);
             Objects.requireNonNull(identifier, "identifier for category %s is null".formatted(this.category));
             return "$" + identifier;
         }
@@ -148,7 +146,7 @@ public abstract class TypeEntry extends DataEntry<Item> {
                 s = s.substring(1);
             }
             ResourceLocation id = new ResourceLocation(s);
-            EnchantmentCategory category = BuiltInEnchantmentDataManager.INSTANCE.getEnchantmentCategoriesIdMap().inverse().get(id);
+            EnchantmentCategory category = BuiltInEnchantmentDataManager.INSTANCE.getToCategoryMap().get(id);
             if (category == null) {
                 JsonSyntaxException e = new JsonSyntaxException("No category with name %s found".formatted(id));
                 UniversalEnchants.LOGGER.warn("Failed to deserialize {} enchantment config entry {}: {}", enchantment, id, e);
