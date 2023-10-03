@@ -127,7 +127,7 @@ public class ModEnchantCommand {
 							}
 						}
 						// allow overriding existing enchantment level
-						if ((stack.is(Items.ENCHANTED_BOOK) || EnchantmentHoldersManager.canApplyAtAnvil(enchantment, stack)) && EnchantmentHelper.isEnchantmentCompatible(EnchantmentHelper.getEnchantments(stack).keySet().stream().filter(e -> e != enchantment).toList(), enchantment)) {
+						if (level == 0 || (stack.is(Items.ENCHANTED_BOOK) || EnchantmentHoldersManager.canApplyAtAnvil(enchantment, stack)) && EnchantmentHelper.isEnchantmentCompatible(EnchantmentHelper.getEnchantments(stack).keySet().stream().filter(e -> e != enchantment).toList(), enchantment)) {
 							Map<Enchantment, Integer> enchantments = EnchantmentHelper.getEnchantments(stack);
 							// when attempting to override existing enchantment level, vanilla will just add it as a duplicate
 							// this ensures the old entry is overridden instead, this method also supports removing enchantments

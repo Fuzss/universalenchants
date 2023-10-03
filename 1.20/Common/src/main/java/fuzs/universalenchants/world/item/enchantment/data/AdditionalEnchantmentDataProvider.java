@@ -6,7 +6,6 @@ import fuzs.universalenchants.UniversalEnchants;
 import fuzs.universalenchants.core.CommonAbstractions;
 import fuzs.universalenchants.world.item.enchantment.serialize.entry.DataEntry;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.world.item.ArmorItem;
 import net.minecraft.world.item.AxeItem;
 import net.minecraft.world.item.HorseArmorItem;
 import net.minecraft.world.item.ShieldItem;
@@ -50,10 +49,9 @@ public class AdditionalEnchantmentDataProvider {
     public Map<Enchantment, List<DataEntry<?>>> getEnchantmentDataEntries() {
         if (this.defaultCategoryEntries == null) {
             // constructing default builders on Forge is quite expensive, so only do this when necessary
-            Map<Enchantment, DataEntry.BuilderHolder> builders = BuiltInRegistries.ENCHANTMENT.stream().collect(Collectors.toMap(Function.identity(), DataEntry::getDefaultEnchantmentDataBuilder));
+            Map<Enchantment, DataEntry.BuilderHolder> builders = BuiltInRegistries.ENCHANTMENT.stream().collect(Collectors.toMap(Function.identity(), DataEntry::getEnchantmentDataBuilder));
             this.additionalEnchantmentsData.forEach(data -> data.addToBuilder(builders));
             setupAdditionalCompatibility(builders);
-//            cleanThornsEnchantment(builders);
             this.defaultCategoryEntries = builders.entrySet().stream().collect(ImmutableMap.toImmutableMap(Map.Entry::getKey, entry -> entry.getValue().build()));
         }
         return this.defaultCategoryEntries;
@@ -74,12 +72,6 @@ public class AdditionalEnchantmentDataProvider {
         }
     }
 
-    private static void cleanThornsEnchantment(Map<Enchantment, DataEntry.BuilderHolder> builders) {
-        DataEntry.Builder thornsBuilder = builders.get(Enchantments.THORNS).anvilBuilder();
-        thornsBuilder.items.removeIf(item -> item instanceof ArmorItem);
-        thornsBuilder.add(EnchantmentCategory.ARMOR);
-    }
-
     private static void applyIncompatibilityToBoth(Map<Enchantment, DataEntry.BuilderHolder> builders, Enchantment enchantment, Enchantment other, boolean add) {
         BiConsumer<Enchantment, Enchantment> operation = (e1, e2) -> {
             DataEntry.BuilderHolder builder = builders.get(e1);
@@ -87,9 +79,9 @@ public class AdditionalEnchantmentDataProvider {
             // they won't have a builder, so be careful
             if (builder != null) {
                 if (add) {
-                    builder.addIncompatible(e2);
+                    builder.incompatibleBuilder().add(e2);
                 } else {
-                    builder.removeIncompatible(e2);
+                    builder.incompatibleBuilder().remove(e2);
                 }
             }
         };
@@ -106,7 +98,9 @@ public class AdditionalEnchantmentDataProvider {
         public void addToBuilder(Map<Enchantment, DataEntry.BuilderHolder> builders) {
             for (Enchantment enchantment : this.enchantments) {
                 if (builders.containsKey(enchantment)) {
-                    builders.get(enchantment).add(this.category);
+                    DataEntry.BuilderHolder holder = builders.get(enchantment);
+                    holder.categoryBuilder().add(this.category);
+                    holder.anvilBuilder().add(this.category);
                 }
             }
         }

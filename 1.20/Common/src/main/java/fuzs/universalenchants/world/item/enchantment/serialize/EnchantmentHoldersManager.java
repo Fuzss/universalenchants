@@ -10,8 +10,7 @@ import fuzs.puzzleslib.api.core.v1.ModLoaderEnvironment;
 import fuzs.universalenchants.UniversalEnchants;
 import fuzs.universalenchants.world.item.enchantment.data.AdditionalEnchantmentDataProvider;
 import fuzs.universalenchants.world.item.enchantment.serialize.entry.DataEntry;
-import fuzs.universalenchants.world.item.enchantment.serialize.entry.IncompatibleEntry;
-import fuzs.universalenchants.world.item.enchantment.serialize.entry.TypeEntry;
+import fuzs.universalenchants.world.item.enchantment.serialize.entry.EnchantmentDataKey;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.GsonHelper;
@@ -27,21 +26,22 @@ import java.nio.file.StandardCopyOption;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 public class EnchantmentHoldersManager {
     private static final int SCHEMA_VERSION = 2;
     private static final Map<Enchantment, EnchantmentHolder> ENCHANTMENT_DATA_HOLDERS = Maps.newIdentityHashMap();
 
     public static boolean isCompatibleWith(Enchantment enchantment, Enchantment other, boolean fallback) {
-        return getEnchantmentHolder(enchantment).isCompatibleWith(other, fallback) && getEnchantmentHolder(other).isCompatibleWith(enchantment, fallback);
+        return getHolder(enchantment).isCompatibleWith(other, fallback) && getHolder(other).isCompatibleWith(enchantment, fallback);
     }
 
     public static boolean canApplyAtAnvil(Enchantment enchantment, ItemStack itemStack) {
-        return getEnchantmentHolder(enchantment).canApplyAtAnvil(itemStack);
+        return getHolder(enchantment).canApplyAtAnvil(itemStack);
     }
 
     public static void loadAll() {
-        ENCHANTMENT_DATA_HOLDERS.values().forEach(EnchantmentHolder::invalidate);
+        ENCHANTMENT_DATA_HOLDERS.values().forEach(EnchantmentHolder::clear);
         Path modConfigPath = ModLoaderEnvironment.INSTANCE.getConfigDirectory().resolve(UniversalEnchants.MOD_ID);
         JsonConfigFileUtil.mkdirs(modConfigPath.toFile());
         for (Map.Entry<Enchantment, List<DataEntry<?>>> entry : AdditionalEnchantmentDataProvider.INSTANCE.getEnchantmentDataEntries().entrySet()) {
@@ -51,21 +51,19 @@ public class EnchantmentHoldersManager {
             String fileName = id.getPath() + ".json";
             Path configFilePath = configRootPath.resolve(fileName);
             File configFile = configFilePath.toFile();
-            EnchantmentHolder holder = getEnchantmentHolder(entry.getKey());
-            holder.ensureInvalidated();
+            EnchantmentHolder holder = getHolder(entry.getKey());
+            holder.requireEmpty();
             if (!loadFromFile(holder, configFilePath, configFile)) {
                 if (JsonConfigFileUtil.saveToFile(configFile, serializeAllEntries(entry.getValue()))) {
                     UniversalEnchants.LOGGER.info("Created new enchantment config file for {}", holder.id());
                 }
-                holder.initializeCategoryEntries();
-                holder.initializeAnvilEntries();
-                holder.submitAll(entry.getValue());
+                entry.getValue().forEach(holder::submit);
             }
         }
         ENCHANTMENT_DATA_HOLDERS.values().forEach(EnchantmentHolder::applyEnchantmentCategory);
     }
 
-    private static EnchantmentHolder getEnchantmentHolder(Enchantment enchantment) {
+    private static EnchantmentHolder getHolder(Enchantment enchantment) {
         return ENCHANTMENT_DATA_HOLDERS.computeIfAbsent(enchantment, EnchantmentHolder::new);
     }
 
@@ -92,43 +90,27 @@ public class EnchantmentHoldersManager {
         JsonObject jsonObject = GsonHelper.convertToJsonObject(jsonElement, "enchantment config");
         int schemaVersion = GsonHelper.getAsInt(jsonObject, "schemaVersion");
         if (schemaVersion != SCHEMA_VERSION) throw new JsonSyntaxException("Invalid config file schema %s (current format is %s) for enchantment %s".formatted(schemaVersion, SCHEMA_VERSION, holder.id()));
-        if (jsonObject.has("items")) {
-            holder.initializeCategoryEntries();
-            JsonArray items = GsonHelper.getAsJsonArray(jsonObject, "items");
-            for (JsonElement itemElement : items) {
-                TypeEntry.deserializeCategoryEntry(holder.id(), holder, itemElement, false);
+        for (EnchantmentDataKey dataType : EnchantmentDataKey.values()) {
+            if (jsonObject.has(dataType.getName())) {
+                JsonArray jsonArray = GsonHelper.getAsJsonArray(jsonObject, dataType.getName());
+                for (JsonElement itemElement : jsonArray) {
+                    DataEntry.deserialize(dataType, holder, itemElement);
+                }
             }
-        }
-        if (jsonObject.has("anvil_items")) {
-            holder.initializeAnvilEntries();
-            JsonArray items = GsonHelper.getAsJsonArray(jsonObject, "anvil_items");
-            for (JsonElement itemElement : items) {
-                TypeEntry.deserializeCategoryEntry(holder.id(), holder, itemElement, true);
-            }
-        }
-        if (jsonObject.has("incompatible")) {
-            JsonArray jsonArray = GsonHelper.getAsJsonArray(jsonObject, "incompatible");
-            String[] incompatibles = JsonConfigFileUtil.GSON.fromJson(jsonArray, String[].class);
-            holder.submit(IncompatibleEntry.deserialize(holder.id(), incompatibles));
         }
     }
 
     private static JsonElement serializeAllEntries(Collection<DataEntry<?>> entries) {
         JsonObject jsonObject = new JsonObject();
         jsonObject.addProperty("schemaVersion", SCHEMA_VERSION);
-        JsonArray items = new JsonArray();
-        JsonArray anvilItems = new JsonArray();
-        JsonArray incompatible = new JsonArray();
-        for (DataEntry<?> entry : entries) {
-            if (entry instanceof TypeEntry typeEntry) {
-                entry.serialize(typeEntry.anvil ? anvilItems : items);
-            } else if (entry instanceof IncompatibleEntry) {
-                entry.serialize(incompatible);
+        Map<EnchantmentDataKey, List<DataEntry<?>>> groupedEntries = entries.stream().collect(Collectors.groupingBy(DataEntry::getDataType, () -> Maps.newEnumMap(EnchantmentDataKey.class), Collectors.toList()));
+        for (Map.Entry<EnchantmentDataKey, List<DataEntry<?>>> entry : groupedEntries.entrySet()) {
+            JsonArray jsonArray = new JsonArray();
+            for (DataEntry<?> dataEntry : entry.getValue()) {
+                dataEntry.serialize(jsonArray);
             }
+            jsonObject.add(entry.getKey().getName(), jsonArray);
         }
-        jsonObject.add("items", items);
-        jsonObject.add("anvil_items", anvilItems);
-        jsonObject.add("incompatible", incompatible);
         return jsonObject;
     }
 }

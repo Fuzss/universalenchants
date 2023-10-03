@@ -34,7 +34,7 @@ The internal implementation of individual enchantments is rather complex and rel
 }
 ```
 
-- `items`: The items this enchantment can be applied to in an enchanting table. This entry supports both single enchantments and enchantment tags (prefixed using `#`). Each kind of entry can be set as an inverse, to force it to be excluded instead of included (see [below](#excluding-entries-from-items)). When this list is empty, the enchantment cannot be applied to any item. If the list entry is missing though, vanilla compatibility rules for accepted items will be used.
+- `items`: The items this enchantment can be applied to in an enchanting table. This entry supports both single items and item tags (prefixed using `#`). Each kind of entry can be set as an inverse, to force it to be excluded instead of included (see [below](#excluding-entries-from-items-and-anvilitems)). When this list is empty, the enchantment cannot be applied to any item. If the list entry is missing though, vanilla compatibility rules for accepted items will be used.
 - `anvil_items`: The items this enchantment can be applied to in an anvil. This will only rarely be different from `items`, an example is `minecraft:efficiency`. The exact same rules as for `items` apply.
 - `incompatible`: Other enchantments that are incompatible with this enchantment (they cannot be applied together on a single item at the same time). An enchantment is always incompatible with itself, there is no setting for that. Setting an incompatibility for one of the two enchantments is enough for it to apply, meaning in reverse when removing an incompatibility it must be removed from the configs of both relevant enchantments.
 
