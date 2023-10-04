@@ -3,6 +3,7 @@ package fuzs.universalenchants;
 import fuzs.puzzleslib.api.config.v3.ConfigHolder;
 import fuzs.puzzleslib.api.core.v1.ModConstructor;
 import fuzs.puzzleslib.api.core.v1.context.PackRepositorySourcesContext;
+import fuzs.puzzleslib.api.event.v1.LoadCompleteCallback;
 import fuzs.puzzleslib.api.event.v1.core.EventPhase;
 import fuzs.puzzleslib.api.event.v1.entity.living.LivingExperienceDropCallback;
 import fuzs.puzzleslib.api.event.v1.entity.living.LivingHurtCallback;
@@ -24,7 +25,7 @@ import fuzs.universalenchants.handler.BetterEnchantsHandler;
 import fuzs.universalenchants.handler.ItemCompatHandler;
 import fuzs.universalenchants.init.ModRegistry;
 import fuzs.universalenchants.server.commands.ModEnchantCommand;
-import fuzs.universalenchants.world.item.enchantment.data.AdditionalEnchantmentDataProvider;
+import fuzs.universalenchants.world.item.enchantment.data.EnchantmentDataProvider;
 import fuzs.universalenchants.world.item.enchantment.serialize.EnchantmentHoldersManager;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.resources.ResourceLocation;
@@ -41,18 +42,16 @@ public class UniversalEnchants implements ModConstructor {
     @Override
     public void onConstructMod() {
         ModRegistry.touch();
-        AdditionalEnchantmentDataProvider.initialize();
-        registerHandlers();
     }
 
     private static void registerHandlers() {
+        LoadCompleteCallback.EVENT.register(() -> {
+
+        });
         RegisterCommandsCallback.EVENT.register((dispatcher, context, environment) -> {
             if (CONFIG.get(CommonConfig.class).enchantCommand.replaceVanillaCommand()) {
                 ModEnchantCommand.register(dispatcher, context);
             }
-        });
-        TagsUpdatedCallback.EVENT.register((RegistryAccess registries, boolean client) -> {
-            if (!client) EnchantmentHoldersManager.loadAll();
         });
         ArrowLooseCallback.EVENT.register(ItemCompatHandler::onArrowLoose);
         UseItemEvents.TICK.register(ItemCompatHandler::onUseItemTick);

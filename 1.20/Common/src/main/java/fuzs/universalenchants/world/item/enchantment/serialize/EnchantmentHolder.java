@@ -1,8 +1,9 @@
 package fuzs.universalenchants.world.item.enchantment.serialize;
 
 import com.google.common.collect.Maps;
-import fuzs.universalenchants.world.item.enchantment.data.BuiltInEnchantmentDataManager;
-import fuzs.universalenchants.world.item.enchantment.serialize.entry.DataEntry;
+import fuzs.universalenchants.world.item.enchantment.data.EnchantmentDataManager;
+import fuzs.universalenchants.world.item.enchantment.data.EnchantmentDataTags;
+import fuzs.universalenchants.world.item.enchantment.serialize.entry.EnchantmentData2;
 import fuzs.universalenchants.world.item.enchantment.serialize.entry.EnchantmentDataKey;
 import fuzs.universalenchants.world.item.enchantment.serialize.entry.EntryCollection;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -24,8 +25,8 @@ public class EnchantmentHolder {
 
     public EnchantmentHolder(Enchantment enchantment) {
         this.enchantment = enchantment;
-        this.vanillaCategory = BuiltInEnchantmentDataManager.INSTANCE.getVanillaCategory(enchantment);
-        this.category = BuiltInEnchantmentDataManager.INSTANCE.getCustomCategory(enchantment, this::canEnchant);
+        this.vanillaCategory = EnchantmentDataManager.INSTANCE.getVanillaCategory(enchantment);
+        this.category = EnchantmentDataManager.INSTANCE.getCustomCategory(enchantment, this::canEnchant);
         this.id = BuiltInRegistries.ENCHANTMENT.getKey(enchantment);
     }
 
@@ -42,25 +43,28 @@ public class EnchantmentHolder {
     public void clear() {
         this.entries.clear();
         // reset to vanilla enchantment category for now just in case something goes wrong during rebuilding
-        BuiltInEnchantmentDataManager.INSTANCE.setEnchantmentCategory(this.enchantment, this.vanillaCategory);
+        EnchantmentDataManager.INSTANCE.setEnchantmentCategory(this.enchantment, this.vanillaCategory);
     }
 
-    public void submit(DataEntry<?> entry) {
+    public void submit(EnchantmentData2<?> entry) {
         this.entries.computeIfAbsent(entry.getDataType(), $ -> new EntryCollection<>()).submit(entry);
     }
 
     public void applyEnchantmentCategory() {
         if (this.entries.containsKey(EnchantmentDataKey.ITEMS)) {
-            BuiltInEnchantmentDataManager.INSTANCE.setEnchantmentCategory(this.enchantment, this.category);
+            EnchantmentDataManager.INSTANCE.setEnchantmentCategory(this.enchantment, this.category);
         }
     }
 
     private boolean canEnchant(Item item) {
-        return this.testForType(EnchantmentDataKey.ITEMS, item).orElseGet(() -> this.vanillaCategory.canEnchant(item));
+        ItemStack itemStack = new ItemStack(item);
+        if (itemStack.is(EnchantmentDataTags.getTagKeyForDisabledItems(this.id))) return false;
+        return itemStack.is(EnchantmentDataTags.getTagKeyForItems(this.id));
     }
 
     public boolean canApplyAtAnvil(ItemStack itemStack) {
-        return this.testForType(EnchantmentDataKey.ANVIL_ITEMS, itemStack.getItem()).orElseGet(() -> this.enchantment.canEnchant(itemStack));
+        if (itemStack.is(EnchantmentDataTags.getTagKeyForDisabledAnvilItems(this.id))) return false;
+        return itemStack.is(EnchantmentDataTags.getTagKeyForAnvilItems(this.id));
     }
 
     public boolean isCompatibleWith(Enchantment other, boolean fallback) {
