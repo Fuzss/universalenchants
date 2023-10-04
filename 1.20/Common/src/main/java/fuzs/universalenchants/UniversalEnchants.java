@@ -14,20 +14,21 @@ import fuzs.puzzleslib.api.event.v1.entity.player.PlayerInteractEvents;
 import fuzs.puzzleslib.api.event.v1.entity.player.PlayerXpEvents;
 import fuzs.puzzleslib.api.event.v1.level.BlockEvents;
 import fuzs.puzzleslib.api.event.v1.server.RegisterCommandsCallback;
-import fuzs.puzzleslib.api.event.v1.server.TagsUpdatedCallback;
 import fuzs.puzzleslib.api.resources.v1.DynamicPackResources;
 import fuzs.puzzleslib.api.resources.v1.PackResourcesHelper;
 import fuzs.universalenchants.config.ClientConfig;
 import fuzs.universalenchants.config.CommonConfig;
 import fuzs.universalenchants.config.ServerConfig;
-import fuzs.universalenchants.data.DynamicItemTagProvider;
+import fuzs.universalenchants.data.ModEnchantmentTagProvider;
+import fuzs.universalenchants.data.ModItemTagProvider;
 import fuzs.universalenchants.handler.BetterEnchantsHandler;
+import fuzs.universalenchants.handler.EnchantmentDataHandler;
 import fuzs.universalenchants.handler.ItemCompatHandler;
 import fuzs.universalenchants.init.ModRegistry;
 import fuzs.universalenchants.server.commands.ModEnchantCommand;
+import fuzs.universalenchants.world.item.enchantment.data.EnchantmentData;
 import fuzs.universalenchants.world.item.enchantment.data.EnchantmentDataProvider;
-import fuzs.universalenchants.world.item.enchantment.serialize.EnchantmentHoldersManager;
-import net.minecraft.core.RegistryAccess;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -42,12 +43,11 @@ public class UniversalEnchants implements ModConstructor {
     @Override
     public void onConstructMod() {
         ModRegistry.touch();
+        registerHandlers();
     }
 
     private static void registerHandlers() {
-        LoadCompleteCallback.EVENT.register(() -> {
-
-        });
+        LoadCompleteCallback.EVENT.register(EnchantmentDataHandler::onLoadComplete);
         RegisterCommandsCallback.EVENT.register((dispatcher, context, environment) -> {
             if (CONFIG.get(CommonConfig.class).enchantCommand.replaceVanillaCommand()) {
                 ModEnchantCommand.register(dispatcher, context);
@@ -67,7 +67,16 @@ public class UniversalEnchants implements ModConstructor {
 
     @Override
     public void onAddDataPackFinders(PackRepositorySourcesContext context) {
-        context.addRepositorySource(PackResourcesHelper.buildServerPack(id("enchantment_target_tags"), DynamicPackResources.create(DynamicItemTagProvider::new), true));
+        context.addRepositorySource(PackResourcesHelper.buildServerPack(id("dynamic_enchantment_tags"), DynamicPackResources.create(data -> {
+            return new ModItemTagProvider(data, EnchantmentData.DEFAULT_ENCHANTMENT_DATA.get());
+        }, data -> {
+            return new ModEnchantmentTagProvider(data, EnchantmentData.DEFAULT_ENCHANTMENT_DATA.get());
+        }), true));
+        context.addRepositorySource(PackResourcesHelper.buildServerPack(id("default_configuration"), DynamicPackResources.create(data -> {
+            return new ModItemTagProvider(data, EnchantmentDataProvider.ADDITIONAL_ENCHANTMENT_DATA.get());
+        }, data -> {
+            return new ModEnchantmentTagProvider(data, EnchantmentDataProvider.ADDITIONAL_ENCHANTMENT_DATA.get());
+        }), Component.literal(MOD_NAME + " Pack"), Component.literal("Default enchantment compatibility configuration."), false, false, false));
     }
 
     public static ResourceLocation id(String path) {

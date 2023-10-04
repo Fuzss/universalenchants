@@ -8,6 +8,7 @@ import fuzs.universalenchants.init.ModRegistry;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.item.enchantment.*;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.function.BiConsumer;
@@ -20,10 +21,10 @@ public final class EnchantmentDataProvider {
     static {
         registerAll();
         ADDITIONAL_ENCHANTMENT_DATA = Suppliers.memoize(() -> {
-            Map<Enchantment, EnchantmentData> builders = Maps.toMap(BuiltInRegistries.ENCHANTMENT, $ -> new EnchantmentData());
-            ADDITIONAL_ENCHANTMENTS_DATA.forEach(data -> data.addToBuilder(builders));
-            setupAdditionalCompatibility(builders);
-            return builders;
+            Map<Enchantment, EnchantmentData> data = Maps.newIdentityHashMap();
+            ADDITIONAL_ENCHANTMENTS_DATA.forEach(datum -> datum.addToBuilder(data));
+            setupAdditionalCompatibility(data);
+            return Collections.unmodifiableMap(data);
         });
     }
 
@@ -64,15 +65,11 @@ public final class EnchantmentDataProvider {
 
     private static void applyIncompatibilityToBoth(Map<Enchantment, EnchantmentData> data, Enchantment enchantment, Enchantment other, boolean add) {
         BiConsumer<Enchantment, Enchantment> operation = (e1, e2) -> {
-            EnchantmentData builder = data.get(e1);
-            // this might be called for non-vanilla enchantments (currently possible through DamageEnchantment and ProtectionEnchantment instanceof checks)
-            // they won't have a builder, so be careful
-            if (builder != null) {
-                if (add) {
-                    builder.incompatible().left().add(e2);
-                } else {
-                    builder.incompatible().right().add(e2);
-                }
+            EnchantmentData datum = data.computeIfAbsent(e1, $ -> new EnchantmentData());
+            if (add) {
+                datum.incompatible().left().add(e2);
+            } else {
+                datum.incompatible().right().add(e2);
             }
         };
         operation.accept(enchantment, other);
@@ -83,11 +80,9 @@ public final class EnchantmentDataProvider {
 
         public void addToBuilder(Map<Enchantment, EnchantmentData> data) {
             for (Enchantment enchantment : this.enchantments) {
-                if (data.containsKey(enchantment)) {
-                    EnchantmentData holder = data.get(enchantment);
-                    holder.items().left().add(this.category);
-                    holder.anvilItems().right().add(this.category);
-                }
+                EnchantmentData datum = data.computeIfAbsent(enchantment, $ -> new EnchantmentData());
+                datum.items().left().add(this.category);
+                datum.anvilItems().left().add(this.category);
             }
         }
     }

@@ -2,7 +2,7 @@ package fuzs.universalenchants.mixin;
 
 import fuzs.universalenchants.UniversalEnchants;
 import fuzs.universalenchants.config.ServerConfig;
-import fuzs.universalenchants.world.item.enchantment.serialize.EnchantmentHoldersManager;
+import fuzs.universalenchants.handler.EnchantmentDataHandler;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.AnvilMenu;
 import net.minecraft.world.inventory.ContainerLevelAccess;
@@ -58,7 +58,7 @@ abstract class AnvilMenuMixin extends ItemCombinerMenu {
                 .skip(index)
                 .findFirst()
                 .filter(t -> t.canEnchant(leftInput) == canEnchant)
-                .map(t -> EnchantmentHoldersManager.canApplyAtAnvil(t, leftInput))
+                .map(t -> EnchantmentDataHandler.canApplyAtAnvil(t, leftInput))
                 .orElse(canEnchant);
     }
 }

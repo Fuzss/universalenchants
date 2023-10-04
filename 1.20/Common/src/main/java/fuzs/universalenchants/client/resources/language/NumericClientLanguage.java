@@ -47,7 +47,6 @@ public class NumericClientLanguage extends Language {
 
     public static void injectLanguage(NumericClientLanguage numericLanguage) {
         if (UniversalEnchants.CONFIG.get(ClientConfig.class).fixRomanNumerals == ClientConfig.NumeralLanguage.NONE) return;
-        // ClientLanguage cannot be extended, so this must be vanilla
         // prevents us wrapping ourselves accidentally, also prevents wrapping custom language implementations from other mods
         // which might result in an infinite loop (an issue with Server Translation API on Fabric)
         if (numericLanguage.language instanceof ClientLanguage) {

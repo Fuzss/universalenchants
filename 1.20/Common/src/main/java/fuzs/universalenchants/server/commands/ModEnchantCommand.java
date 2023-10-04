@@ -8,7 +8,7 @@ import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import fuzs.universalenchants.UniversalEnchants;
 import fuzs.universalenchants.config.CommonConfig;
-import fuzs.universalenchants.world.item.enchantment.serialize.EnchantmentHoldersManager;
+import fuzs.universalenchants.handler.EnchantmentDataHandler;
 import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.commands.CommandSourceStack;
@@ -127,7 +127,7 @@ public class ModEnchantCommand {
 							}
 						}
 						// allow overriding existing enchantment level
-						if (level == 0 || (stack.is(Items.ENCHANTED_BOOK) || EnchantmentHoldersManager.canApplyAtAnvil(enchantment, stack)) && EnchantmentHelper.isEnchantmentCompatible(EnchantmentHelper.getEnchantments(stack).keySet().stream().filter(e -> e != enchantment).toList(), enchantment)) {
+						if (level == 0 || (stack.is(Items.ENCHANTED_BOOK) || EnchantmentDataHandler.canApplyAtAnvil(enchantment, stack)) && EnchantmentHelper.isEnchantmentCompatible(EnchantmentHelper.getEnchantments(stack).keySet().stream().filter(e -> e != enchantment).toList(), enchantment)) {
 							Map<Enchantment, Integer> enchantments = EnchantmentHelper.getEnchantments(stack);
 							// when attempting to override existing enchantment level, vanilla will just add it as a duplicate
 							// this ensures the old entry is overridden instead, this method also supports removing enchantments
@@ -157,7 +157,7 @@ public class ModEnchantCommand {
 							throw ERROR_INCOMPATIBLE.create(itemStack.getItem().getName(itemStack).getString());
 						}
 					} else {
-						if (EnchantmentHoldersManager.canApplyAtAnvil(enchantment, itemStack) && EnchantmentHelper.isEnchantmentCompatible(EnchantmentHelper.getEnchantments(itemStack).keySet(), enchantment)) {
+						if (EnchantmentDataHandler.canApplyAtAnvil(enchantment, itemStack) && EnchantmentHelper.isEnchantmentCompatible(EnchantmentHelper.getEnchantments(itemStack).keySet(), enchantment)) {
 							itemStack.enchant(enchantment, level);
 							++successes;
 						} else if (collection.size() == 1) {
