@@ -3,7 +3,6 @@ package fuzs.universalenchants.handler;
 import fuzs.puzzleslib.api.init.v3.RegistryHelper;
 import fuzs.universalenchants.UniversalEnchants;
 import fuzs.universalenchants.config.ServerConfig;
-import fuzs.universalenchants.world.item.enchantment.data.EnchantmentData;
 import fuzs.universalenchants.world.item.enchantment.EnchantmentCategoryManager;
 import fuzs.universalenchants.world.item.enchantment.data.EnchantmentDataTags;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -18,7 +17,7 @@ import java.util.Objects;
 public class EnchantmentDataHandler {
 
     public static void onLoadComplete() {
-        for (Enchantment enchantment : EnchantmentData.DEFAULT_ENCHANTMENT_DATA.get().keySet()) {
+        for (Enchantment enchantment : BuiltInRegistries.ENCHANTMENT) {
             EnchantmentCategory enchantmentCategory = EnchantmentCategoryManager.createEnchantmentCategory(enchantment, item -> canApplyAtEnchantingTable(enchantment, item));
             EnchantmentCategoryManager.setEnchantmentCategory(enchantment, enchantmentCategory);
         }
@@ -27,7 +26,7 @@ public class EnchantmentDataHandler {
     public static boolean canApplyAtEnchantingTable(Enchantment enchantment, Item item) {
         Objects.requireNonNull(enchantment, "enchantment is null");
         Objects.requireNonNull(item, "item is null");
-        if (!UniversalEnchants.CONFIG.get(ServerConfig.class).adjustEnchantingTableEnchantments) {
+        if (!UniversalEnchants.CONFIG.getHolder(ServerConfig.class).isAvailable() || !UniversalEnchants.CONFIG.get(ServerConfig.class).adjustEnchantingTableEnchantments) {
             return EnchantmentCategoryManager.getVanillaCategory(enchantment).canEnchant(item);
         }
         ResourceLocation resourceLocation = BuiltInRegistries.ENCHANTMENT.getKey(enchantment);

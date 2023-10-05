@@ -28,6 +28,7 @@ import fuzs.universalenchants.init.ModRegistry;
 import fuzs.universalenchants.server.commands.ModEnchantCommand;
 import fuzs.universalenchants.world.item.enchantment.data.EnchantmentData;
 import fuzs.universalenchants.world.item.enchantment.data.EnchantmentDataProvider;
+import fuzs.universalenchants.world.item.enchantment.data.MaxLevelManager;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import org.apache.logging.log4j.LogManager;
@@ -48,6 +49,7 @@ public class UniversalEnchants implements ModConstructor {
 
     private static void registerHandlers() {
         LoadCompleteCallback.EVENT.register(EnchantmentDataHandler::onLoadComplete);
+        LoadCompleteCallback.EVENT.register(MaxLevelManager::onLoadComplete);
         RegisterCommandsCallback.EVENT.register((dispatcher, context, environment) -> {
             if (CONFIG.get(CommonConfig.class).enchantCommand.replaceVanillaCommand()) {
                 ModEnchantCommand.register(dispatcher, context);

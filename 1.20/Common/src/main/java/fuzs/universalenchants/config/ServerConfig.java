@@ -2,6 +2,11 @@ package fuzs.universalenchants.config;
 
 import fuzs.puzzleslib.api.config.v3.Config;
 import fuzs.puzzleslib.api.config.v3.ConfigCore;
+import fuzs.puzzleslib.api.config.v3.serialization.ConfigDataSet;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.world.item.enchantment.Enchantment;
+
+import java.util.List;
 
 public class ServerConfig implements ConfigCore {
     private static final String NEWLY_ENCHANTABLE_NOTICE = "Disabling this will still allow for applying enchantments in an anvil, that needs to be disabled per enchantment in the custom .json configs.";
@@ -28,4 +33,13 @@ public class ServerConfig implements ConfigCore {
     public boolean adjustAnvilEnchantments = true;
     @Config(description = "Apply configurations for compatibility between individual enchantments.")
     public boolean adjustEnchantmentCompatibilities = true;
+    @Config(name = "max_level_overrides", description = "Provides overrides for maximum enchantment levels.")
+    List<String> rawMaxLevelOverrides = List.of("minecraft:efficiency,10");
+
+    public ConfigDataSet<Enchantment> maxLevelOverrides;
+
+    @Override
+    public void afterConfigReload() {
+        this.maxLevelOverrides = ConfigDataSet.from(Registries.ENCHANTMENT, this.rawMaxLevelOverrides, (integer, o) -> integer != 1 || ((int) o) > 0, int.class);
+    }
 }

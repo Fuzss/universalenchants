@@ -5,13 +5,21 @@ A Minecraft mod. Downloads can be found on [CurseForge](https://www.curseforge.c
 ![](https://raw.githubusercontent.com/Fuzss/modresources/main/pages/data/universalenchants/banner.png)
 
 ## Configuring the mod
-Universal Enchants allows you to define what enchantments can be applied to what items, and which enchantments are compatible with each other (meaning can be applied on a single item at the same time). This is done via individual `.json` config files (one per enchantment) found in `.minecraft/config/universalenchants`, sorted into sub-folders by namespace.
+Universal Enchants allows you to define which enchantments can be applied to what items in enchanting tables and anvils. You can also control which enchantments are compatible with each other, meaning which enchantments can be applied on a single item at the same time. 
 
-The configuration files are applied similar to a data pack, meaning they are loaded whenever a new world is, and can be reloaded while playing by running `/reload`.
+All functionality is configured via simple `item` and `enchantment` tags in a data pack. Default configuration files for all vanilla enchantments are found in the Universal Enchants mod jar at `data/minecraft/tags/enchantments` and `data/minecraft/tags/items`.
 
-The internal implementation of individual enchantments is rather complex and relies on a bunch of hard-coded special cases. All items present by default in the `items` and `anvil_items` fields are guaranteed to work, everything beyond that is untested and has a good chance of not working, especially modded enchantments.
+Please note that default configuration files in the mod jar exist only as a template for users and as an internal fallback. Actual configuration files are generated dynamically at runtime via an in-memory data pack to allow the inclusion of modded items and enchantments without having to manually provide any tags.
 
-### Config file structure
+Please keep in mind that the internal implementation of individual enchantments is rather complex and relies on a bunch of hard-coded special cases. This means making enchantments compatible with new items has a good chance to not have any actual effect besides making the enchantment applicable to the item.
+
+Universal Enchants makes a huge effort to make as many vanilla enchantments compatible with more items wherever it feels logical, but especially modded enchantments are uncharted territory and will likely not work with additional enchantments.
+
+### Item tags
+- `data/minecraft/tags/items/allow_at_enchanting_table/<enchantment>.json`
+- `data/minecraft/tags/items/disallow_at_enchanting_table/<enchantment>.json`
+- `data/minecraft/tags/items/allow_at_anvil/<enchantment>.json`
+- `data/minecraft/tags/items/disallow_at_anvil/<enchantment>.json`
 ```
 .minecraft/config/universalenchants/minecraft/smite.json
 ```
