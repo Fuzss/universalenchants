@@ -14,6 +14,7 @@
     "HorseArmorItemMixin",
     "HorseInventoryMenu$SlotMixin",
     "LivingEntityMixin",
+    "LootTableMixin",
     "RepairItemRecipeMixin",
     "ShearsItemMixin",
     "ShieldItemMixin",
@@ -22,6 +23,7 @@
     "accessor.AbstractArrowAccessor",
     "accessor.EnchantmentAccessor",
     "accessor.ExperienceOrbAccessor",
+    "accessor.FeatureFlagAccessor",
     "accessor.LivingEntityAccessor"
   ],
   "client": [

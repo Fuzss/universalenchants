@@ -2,6 +2,7 @@ package fuzs.universalenchants;
 
 import fuzs.puzzleslib.api.config.v3.ConfigHolder;
 import fuzs.puzzleslib.api.core.v1.ModConstructor;
+import fuzs.puzzleslib.api.core.v1.context.BuildCreativeModeTabContentsContext;
 import fuzs.puzzleslib.api.core.v1.context.PackRepositorySourcesContext;
 import fuzs.puzzleslib.api.event.v1.LoadCompleteCallback;
 import fuzs.puzzleslib.api.event.v1.core.EventPhase;
@@ -79,6 +80,11 @@ public class UniversalEnchants implements ModConstructor {
         }, data -> {
             return new ModEnchantmentTagProvider(data, EnchantmentDataProvider.ADDITIONAL_ENCHANTMENT_DATA.get());
         }), Component.literal(MOD_NAME + " Pack"), Component.literal("Default enchantment compatibility configuration."), false, false, false));
+    }
+
+    @Override
+    public void onBuildCreativeModeTabContents(BuildCreativeModeTabContentsContext context) {
+//        context.
     }
 
     public static ResourceLocation id(String path) {

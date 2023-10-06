@@ -51,16 +51,15 @@ public final class EnchantmentCategoryManager {
         }
         ((EnchantmentAccessor) enchantment).universalenchants$setCategory(newCategory);
         if (isVanillaCategory(currentCategory) && !isVanillaCategory(newCategory)) {
-            tryUnlockEnchantmentSlots(enchantment);
+            tryUnlockEnchantmentSlots(enchantment, currentCategory);
         }
     }
 
-    private static void tryUnlockEnchantmentSlots(Enchantment enchantment) {
+    private static void tryUnlockEnchantmentSlots(Enchantment enchantment, EnchantmentCategory category) {
         // need this to make horse armor work for frost walker and soul speed (kinda breaks soul speed as horse armor is equipped in chest slot, but soul speed attempts to damage boots slot, but since horse armor has no durability anyway and there's nothing equipped in the boots slot that's fine)
         // all other armor enchantments already set all slots (even the specialized ones such as respiration or feather falling)
         // do this here dynamically to better support modded enchantments
-        EnchantmentCategory vanillaCategory = VANILLA_CATEGORIES.get(enchantment);
-        if (SPECIALIZED_ARMOR_CATEGORIES.contains(vanillaCategory)) {
+        if (SPECIALIZED_ARMOR_CATEGORIES.contains(category)) {
             ((EnchantmentAccessor) enchantment).universalenchants$setSlots(ARMOR_SLOTS.clone());
         }
         // need this for thorns to work on shields
