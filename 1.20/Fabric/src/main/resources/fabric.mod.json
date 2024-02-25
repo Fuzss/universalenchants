@@ -30,6 +30,9 @@
     ],
     "cardinal-components": [
       "fuzs.puzzleslib.api.capability.v2.initializer.EntityComponentInitializerImpl"
+    ],
+    "mm:early_risers": [
+      "fuzs.universalenchants.EarlyRiserEntryPoint"
     ]
   },
 

@@ -40,6 +40,7 @@ public class ModRegistry {
     public static final CapabilityKey<ArrowLootingCapability> ARROW_LOOTING_CAPABILITY = CAPABILITIES.registerEntityCapability("arrow_looting", ArrowLootingCapability.class, entity -> new ArrowLootingCapabilityImpl(), AbstractArrow.class);
 
     public static void touch() {
+        if (true) return;
         Unsafe unsafe;
         try {
             Field theUnsafe = null;
@@ -55,7 +56,7 @@ public class ModRegistry {
         unsafe.putObject(filteredRegistriesBase, filteredRegistriesOffset, Sets.newHashSet(FeatureElement.FILTERED_REGISTRIES));
         FeatureElement.FILTERED_REGISTRIES.add((ResourceKey<? extends Registry<? extends FeatureElement>>) (ResourceKey<?>) Registries.ENCHANTMENT);
         for (Enchantment enchantment : BuiltInRegistries.ENCHANTMENT) {
-            if (enchantment.getMaxLevel() > 2) {
+            if (enchantment.getMaxLevel() == 1) {
                 ((EnchantmentFeature) enchantment).universalenchants$setRequiredFeatures(ModRegistry.DISABLED_FEATURE_FLAG_SET);
             }
         }

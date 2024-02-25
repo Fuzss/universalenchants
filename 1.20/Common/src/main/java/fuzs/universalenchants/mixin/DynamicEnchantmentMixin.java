@@ -1,4 +1,4 @@
-package fuzs.universalenchants.mixin.injected;
+package fuzs.universalenchants.mixin;
 
 import fuzs.universalenchants.world.item.enchantment.EnchantmentFeature;
 import fuzs.universalenchants.world.item.enchantment.data.MaxLevelManager;
@@ -15,7 +15,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(Enchantment.class)
-abstract class EnchantmentMixin implements EnchantmentFeature {
+abstract class DynamicEnchantmentMixin implements EnchantmentFeature {
 
     @Inject(method = "getMaxLevel", at = @At("HEAD"), cancellable = true, require = 0)
     public void getMaxLevel(CallbackInfoReturnable<Integer> callback) {

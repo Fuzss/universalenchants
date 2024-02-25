@@ -52,6 +52,8 @@ public class ModMixinConfigPlugin implements IMixinConfigPlugin {
     @Override
     public void onLoad(String mixinPackage) {
 
+        if (true) return;
+
         mixinPackage = mixinPackage.replace('.', '/');
         Map<String, byte[]> classGenerators = Maps.newHashMap();
 
@@ -157,6 +159,7 @@ public class ModMixinConfigPlugin implements IMixinConfigPlugin {
 
     @Override
     public List<String> getMixins() {
+        if (true) return null;
         return DYNAMIC_MIXINS.stream().map(Pair::left).map(t -> t.replace("/", ".") + "$$1").collect(Collectors.toList());
     }
 

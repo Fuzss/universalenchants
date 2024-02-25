@@ -13,8 +13,6 @@ import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.tree.ClassNode;
 import org.spongepowered.asm.mixin.extensibility.IMixinConfigPlugin;
 import org.spongepowered.asm.mixin.extensibility.IMixinInfo;
-import org.spongepowered.asm.mixin.refmap.IReferenceMapper;
-import org.spongepowered.tools.obfuscation.interfaces.IReferenceManager;
 import sun.misc.Unsafe;
 
 import java.io.ByteArrayInputStream;
@@ -26,7 +24,6 @@ import java.lang.invoke.MethodHandles;
 import java.lang.module.ResolvedModule;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-import java.lang.reflect.Type;
 import java.net.*;
 import java.nio.file.Path;
 import java.security.Permission;
@@ -37,8 +34,10 @@ import java.util.stream.Collectors;
 public class ModMixinConfigPlugin implements IMixinConfigPlugin {
     private static final List<Pair<String, Path>> DYNAMIC_MIXINS = Lists.newArrayList();
 
+    private final Map<String, byte[]> additionalUrls;
+
     static {
-        register("EnchantmentMixin", ".universalenchantscache");
+        register("DynamicEnchantmentMixin", ".universalenchantscache");
     }
 
     private static void register(String mixinClassName, String targetsFile) {
@@ -46,7 +45,7 @@ public class ModMixinConfigPlugin implements IMixinConfigPlugin {
     }
 
     private static void register(String mixinClassName, Path targetsFile) {
-        DYNAMIC_MIXINS.add(Pair.of("injected/" + mixinClassName.replace('.', '/'), targetsFile));
+        DYNAMIC_MIXINS.add(Pair.of(mixinClassName.replace('.', '/'), targetsFile));
     }
 
 
@@ -75,13 +74,13 @@ public class ModMixinConfigPlugin implements IMixinConfigPlugin {
             }
 
             if (targets == null || targets.length == 0) {
-                iterator.remove();
                 continue;
             }
 
             InputStream inputStream = this.getClass().getResourceAsStream(mixinClassName + ".class");
             Objects.requireNonNull(inputStream, "input stream is null");
             try {
+                mixinClassName += "$$1";
 
                 ClassReader classReader = new ClassReader(inputStream);
                 inputStream.close();
@@ -89,6 +88,7 @@ public class ModMixinConfigPlugin implements IMixinConfigPlugin {
                 ClassNode classNode = new ClassNode();
                 classReader.accept(classNode, 0);
 
+                classNode.name = mixinClassName;
                 classNode.invisibleAnnotations.removeIf(annotationNode -> annotationNode.desc.equals("Lorg/spongepowered/asm/mixin/Mixin;"));
                 AnnotationVisitor mixinAnnotation = classNode.visitAnnotation("Lorg/spongepowered/asm/mixin/Mixin;", false);
                 AnnotationVisitor targetAnnotation = mixinAnnotation.visitArray("targets");
@@ -102,7 +102,7 @@ public class ModMixinConfigPlugin implements IMixinConfigPlugin {
                 classNode.accept(classWriter);
                 byte[] byteArray = classWriter.toByteArray();
 
-                classGenerators.put('/' + mixinPackage + "/$/" + mixinClassName + ".class", byteArray);
+                classGenerators.put('/' + mixinPackage + "/dyno" + "/" + mixinClassName + ".class", byteArray);
 
             } catch (IOException e) {
                 throw new RuntimeException(e);
@@ -156,34 +156,12 @@ public class ModMixinConfigPlugin implements IMixinConfigPlugin {
 
     @Override
     public List<String> getMixins() {
-        return DYNAMIC_MIXINS.stream().map(Pair::left).map(t -> "$." + t.replace("/", ".")).collect(Collectors.toList());
+        return DYNAMIC_MIXINS.stream().map(Pair::left).map(t -> "dyno/" + t.replace("/", ".") + "$$1").collect(Collectors.toList());
     }
 
     @Override
     public void preApply(String targetClassName, ClassNode targetClass, String mixinClassName, IMixinInfo mixinInfo) {
-        mixinInfo.getConfig();
-        Class<?> clazz = null;
-        try {
-            clazz = Class.forName("org.spongepowered.asm.mixin.transformer.MixinConfig");
-        } catch (ClassNotFoundException e) {
-            throw new RuntimeException(e);
-        }
-        Method method = null;
-        for (Method cmethod : clazz.getMethods()) {
-            if (cmethod.getReturnType() == IReferenceMapper.class && cmethod.getParameterTypes().length == 0) {
-                method = cmethod;
-                break;
-            }
-        }
-        if (method != null) {
-            method.setAccessible(true);
-            try {
-                IReferenceMapper referenceMapper = (IReferenceMapper) MethodHandles.publicLookup().unreflect(method).invoke(mixinInfo.getConfig());
-                System.out.println(referenceMapper);
-            } catch (Throwable e) {
-                throw new RuntimeException(e);
-            }
-        }
+
     }
 
     @Override
@@ -203,12 +181,10 @@ public class ModMixinConfigPlugin implements IMixinConfigPlugin {
             long packageLookupOffset = unsafe.objectFieldOffset(packageLookupField);
             Map<String, ResolvedModule> packageLookup = (Map<String, ResolvedModule>) unsafe.getObject(classLoader, packageLookupOffset);
             Field parentLoadersField = clazz.getDeclaredField("parentLoaders");
-            Type genericType = parentLoadersField.getGenericType();
-            Class<?> type = parentLoadersField.getType();
             long parentLoadersOffset = unsafe.objectFieldOffset(parentLoadersField);
             Map<String, ClassLoader> parentLoaders = (Map<String, ClassLoader>) unsafe.getObject(classLoader, parentLoadersOffset);
             return url -> {
-                String s = "fuzs.universalenchants.mixin.$.injected";
+                String s = "fuzs.universalenchants.mixin.dyno";
                 ClassLoader remove = parentLoaders.remove(s);
 //                packageLookup.remove(s);
                 if (remove != null) {
@@ -252,9 +228,11 @@ public class ModMixinConfigPlugin implements IMixinConfigPlugin {
     }
 
     private static final class DynamicURLClassLoader extends URLClassLoader {
+
         private DynamicURLClassLoader(URL[] urls, ClassLoader classLoader) {
             super(urls, classLoader);
         }
+
         private DynamicURLClassLoader(URL[] urls) {
             super(urls, new DummyClassLoader());
         }
