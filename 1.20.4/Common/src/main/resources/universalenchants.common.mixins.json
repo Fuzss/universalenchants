@@ -1,0 +1,36 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "compatibilityLevel": "JAVA_17",
+  "package": "fuzs.universalenchants.mixin",
+  "refmap": "universalenchants.refmap.json",
+  "plugin": "fuzs.universalenchants.mixin.ModMixinConfigPlugin",
+  "mixins": [
+    "AnvilMenuMixin",
+    "CrossbowItemMixin",
+    "EnchantCommandMixin",
+    "EnchantmentHelperMixin",
+    "EnchantmentMixin",
+    "HorseArmorItemMixin",
+    "HorseInventoryMenu$SlotMixin",
+    "LivingEntityMixin",
+    "LootTableMixin",
+    "RepairItemRecipeMixin",
+    "ShearsItemMixin",
+    "ShieldItemMixin",
+    "ThrownTridentMixin",
+    "TridentItemMixin",
+    "accessor.AbstractArrowAccessor",
+    "accessor.EnchantmentAccessor",
+    "accessor.ExperienceOrbAccessor",
+    "accessor.FeatureFlagAccessor",
+    "accessor.LivingEntityAccessor"
+  ],
+  "client": [
+    "client.HorseArmorLayerMixin",
+    "client.accessor.I18nAccessor"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}
