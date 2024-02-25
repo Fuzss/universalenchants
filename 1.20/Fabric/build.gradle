@@ -19,8 +19,6 @@ dependencies {
     // Extensible Enums
     modApi(include(libs.extensibleenums.fabric.get()))
 
-    modApi 'com.github.Chocohead:Fabric-ASM:v2.3'
-
     // Quality of Life Mods
     versionCatalog.findLibrary("modmenu.fabric").ifPresent {
         modLocalRuntime(it)

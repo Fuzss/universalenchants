@@ -20,4 +20,19 @@ pluginManagement {
     }
 }
 
-apply from: 'https://raw.githubusercontent.com/Fuzss/modresources/main/gradle/settings.gradle'
+dependencyResolutionManagement {
+    repositories {
+        maven {
+            name = "Fuzs Mod Resources"
+            url = "https://raw.githubusercontent.com/Fuzss/modresources/main/maven/"
+        }
+    }
+    versionCatalogs {
+        libs {
+            from("fuzs.sharedcatalogs:sharedcatalogs:${dependenciesVersionCatalog}")
+        }
+    }
+}
+
+rootProject.name = "${modName.replaceAll("[^a-zA-Z]", "")}-${dependenciesVersionCatalog.replaceAll("-v\\d+", "")}"
+include("Common", "Fabric", "Forge")
