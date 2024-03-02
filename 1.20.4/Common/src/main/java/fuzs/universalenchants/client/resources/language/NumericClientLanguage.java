@@ -1,6 +1,7 @@
 package fuzs.universalenchants.client.resources.language;
 
 import com.google.common.collect.Maps;
+import fuzs.universalenchants.ClientAbstractions;
 import fuzs.universalenchants.UniversalEnchants;
 import fuzs.universalenchants.config.ClientConfig;
 import fuzs.universalenchants.mixin.client.accessor.I18nAccessor;
@@ -8,6 +9,7 @@ import net.minecraft.Util;
 import net.minecraft.client.resources.language.ClientLanguage;
 import net.minecraft.locale.Language;
 import net.minecraft.network.chat.FormattedText;
+import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.util.FormattedCharSequence;
 
 import java.util.Map;
@@ -45,10 +47,11 @@ public class NumericClientLanguage extends Language {
         this.language = language;
     }
 
-    public static void injectLanguage(NumericClientLanguage numericLanguage) {
+    public static void injectLanguage(ResourceManager resourceManager) {
         if (UniversalEnchants.CONFIG.get(ClientConfig.class).fixRomanNumerals == ClientConfig.NumeralLanguage.NONE) return;
         // prevents us wrapping ourselves accidentally, also prevents wrapping custom language implementations from other mods
         // which might result in an infinite loop (an issue with Server Translation API on Fabric)
+        NumericClientLanguage numericLanguage = ClientAbstractions.getNumericClientLanguage();
         if (numericLanguage.language instanceof ClientLanguage) {
             I18nAccessor.universalenchants$callSetLanguage(numericLanguage);
             Language.inject(numericLanguage);

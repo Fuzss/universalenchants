@@ -1,21 +1,19 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
-The format is based on [Keep a Changelog].
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
+and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [v8.1.0-1.20.1] - 2023-10-02
-Please note that all previous configuration files will still work with this update, there is no need to adjust existing setups at the moment.
+## [v20.4.0-1.20.4] - 2024-02-25
+- All functionality for controlling enchantments (like defining item compatibility, and enchantment compatibility) has been moved to the new [Enchantment Control](https://github.com/Fuzss/enchantmentcontrol) mod
+- That mod is now a required dependency, and Universal Enchants uses it to provide some default implementations for additional enchantment compatibility
+- Port to Minecraft 1.20.4
+- Port to NeoForge
 ### Added
-- Added item tags for all entries in vanilla's `EnchantmentCategory` enum, those tags are dynamically created and populated at runtime to guarantee mod compatibility
-- Added `anvil_items` field to enchantment configs for controlling applying enchantments at an anvil
+- New improvements for frost walker
+  - Works when jumping and falling
+  - Refreshes the ice below the wearer while standing still
+  - Is able to replace waterlogged blocks such as kelp and seagrass
 ### Changed
-- Individual entries can now be excluded by prefixing the entry with `!` in addition to the previous method
-- Shears can now be directly enchanted in an enchanting table
-- Fortune now affects the experience points dropped from mining certain blocks such as ores
-### Removed
-- Removed `$` syntax for entries, it has been replaced by the new item tags
-
-## [v8.0.0-1.20.1] - 2023-06-27
-- Ported to Minecraft 1.20.1
-
-[Keep a Changelog]: https://keepachangelog.com/en/1.0.0/
+- Arrows shot from bows enchanted with multishot are now spread out vertically
+- Simplified `/enchant` command syntax a little for vanilla parity

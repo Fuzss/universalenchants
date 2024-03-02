@@ -1,0 +1,12 @@
+{
+  "values": [
+    {
+      "id": "#enchantmentcontrol:enchantable/axe",
+      "required": false
+    },
+    {
+      "id": "#minecraft:enchantable/trident",
+      "required": false
+    }
+  ]
+}

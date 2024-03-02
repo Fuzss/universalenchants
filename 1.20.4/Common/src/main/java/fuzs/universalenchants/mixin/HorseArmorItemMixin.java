@@ -9,7 +9,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 
 @Mixin(HorseArmorItem.class)
-public abstract class HorseArmorItemMixin extends Item {
+abstract class HorseArmorItemMixin extends Item {
 
     public HorseArmorItemMixin(Properties properties) {
         super(properties);
@@ -24,7 +24,9 @@ public abstract class HorseArmorItemMixin extends Item {
     @Override
     public int getEnchantmentValue() {
         // just use this value, it's similar enough to other item's enchantment value
-        return UniversalEnchants.CONFIG.get(ServerConfig.class).enchantableHorseArmor ? this.getProtection() : 0;
+        return UniversalEnchants.CONFIG.get(ServerConfig.class).enchantableHorseArmor ?
+                this.getProtection() :
+                super.getEnchantmentValue();
     }
 
     @Shadow

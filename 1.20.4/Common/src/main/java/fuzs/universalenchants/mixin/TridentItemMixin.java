@@ -12,17 +12,17 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.ModifyVariable;
 
 @Mixin(TridentItem.class)
-public abstract class TridentItemMixin extends Item {
+abstract class TridentItemMixin extends Item {
 
-    public TridentItemMixin(Properties p_41383_) {
-        super(p_41383_);
+    public TridentItemMixin(Properties properties) {
+        super(properties);
     }
 
     @ModifyVariable(method = "releaseUsing", at = @At("STORE"), ordinal = 0)
-    public ThrownTrident releaseUsing$storeThrownTrident(ThrownTrident trident, ItemStack stack) {
+    public ThrownTrident releaseUsing(ThrownTrident trident, ItemStack itemStack) {
         // add bow and crossbow enchantments
-        ItemCompatHandler.applyPiercingEnchantment(trident, stack);
-        int knockbackLevel = EnchantmentHelper.getItemEnchantmentLevel(Enchantments.KNOCKBACK, stack);
+        ItemCompatHandler.applyPiercingEnchantment(trident, itemStack);
+        int knockbackLevel = EnchantmentHelper.getItemEnchantmentLevel(Enchantments.KNOCKBACK, itemStack);
         if (knockbackLevel > 0) {
             trident.setKnockback(knockbackLevel);
         }

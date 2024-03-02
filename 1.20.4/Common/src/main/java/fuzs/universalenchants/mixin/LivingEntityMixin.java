@@ -21,6 +21,7 @@ abstract class LivingEntityMixin extends Entity {
     @Inject(method = "blockedByShield", at = @At("HEAD"), cancellable = true)
     protected void blockedByShield(LivingEntity defender, CallbackInfo callback) {
         int level = EnchantmentHelper.getItemEnchantmentLevel(Enchantments.KNOCKBACK, defender.getUseItem());
-        LivingEntity.class.cast(this).knockback(0.5 * (level + 1), defender.getX() - this.getX(), defender.getZ() - this.getZ());
+        LivingEntity.class.cast(this)
+                .knockback(0.5 * (level + 1), defender.getX() - this.getX(), defender.getZ() - this.getZ());
     }
 }

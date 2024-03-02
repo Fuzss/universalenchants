@@ -7,6 +7,7 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.projectile.AbstractArrow;
 import net.minecraft.world.entity.projectile.ThrownTrident;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.Vec3;
@@ -18,22 +19,25 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(ThrownTrident.class)
-public abstract class ThrownTridentMixin extends AbstractArrow {
+abstract class ThrownTridentMixin extends AbstractArrow {
     @Shadow
     private boolean dealtDamage;
 
-    protected ThrownTridentMixin(EntityType<? extends AbstractArrow> p_36721_, Level p_36722_) {
-        super(p_36721_, p_36722_);
+    protected ThrownTridentMixin(EntityType<? extends AbstractArrow> entityType, Level level, ItemStack pickupItemStack) {
+        super(entityType, level, pickupItemStack);
     }
 
     @Inject(method = "onHitEntity", at = @At("TAIL"))
-    protected void onHitEntity$tail(EntityHitResult rayTraceResult, CallbackInfo callback) {
-        Entity entity = rayTraceResult.getEntity();
+    protected void onHitEntity(EntityHitResult hitResult, CallbackInfo callback) {
+        Entity entity = hitResult.getEntity();
         if (entity instanceof LivingEntity) {
-            int knockbackStrength = ((AbstractArrowAccessor) this).getKnockback();
+            int knockbackStrength = ((AbstractArrowAccessor) this).universalenchants$getKnockback();
             if (knockbackStrength > 0) {
                 // copied from punch behavior, motion multiplier is adjusted since trident is already stopped by vanilla code running before this
-                Vec3 vector3d = this.getDeltaMovement().multiply(-100.0, 0.0, -100.0).normalize().scale(knockbackStrength * 0.6);
+                Vec3 vector3d = this.getDeltaMovement()
+                        .multiply(-100.0, 0.0, -100.0)
+                        .normalize()
+                        .scale(knockbackStrength * 0.6);
                 if (vector3d.lengthSqr() > 0.0) {
                     entity.push(vector3d.x, 0.1, vector3d.z);
                 }
@@ -46,10 +50,10 @@ public abstract class ThrownTridentMixin extends AbstractArrow {
     private void applyPiercing(Entity entity) {
         int pierceLevel = this.getPierceLevel();
         if (pierceLevel > 0) {
-            IntOpenHashSet piercedEntities = ((AbstractArrowAccessor) this).getPiercingIgnoreEntityIds();
+            IntOpenHashSet piercedEntities = ((AbstractArrowAccessor) this).universalenchants$getPiercingIgnoreEntityIds();
             if (piercedEntities == null) {
                 piercedEntities = new IntOpenHashSet(5);
-                ((AbstractArrowAccessor) this).setPiercingIgnoreEntityIds(piercedEntities);
+                ((AbstractArrowAccessor) this).universalenchants$setPiercingIgnoreEntityIds(piercedEntities);
             }
             piercedEntities.add(entity.getId());
             // reverting previous motion change

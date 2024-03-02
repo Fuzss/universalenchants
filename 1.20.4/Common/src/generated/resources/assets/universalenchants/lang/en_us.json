@@ -1,0 +1,5 @@
+{
+  "commands.enchant.remove.failed.missing": "%s does not have that enchantment",
+  "commands.enchant.remove.success.multiple": "Removed enchantment %s from %s entities",
+  "commands.enchant.remove.success.single": "Removed enchantment %s from %s's item"
+}

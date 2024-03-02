@@ -18,16 +18,20 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.ModifyVariable;
 
 @Mixin(HorseArmorLayer.class)
-public abstract class HorseArmorLayerMixin extends RenderLayer<Horse, HorseModel<Horse>> {
+abstract class HorseArmorLayerMixin extends RenderLayer<Horse, HorseModel<Horse>> {
 
     public HorseArmorLayerMixin(RenderLayerParent<Horse, HorseModel<Horse>> renderLayerParent) {
         super(renderLayerParent);
     }
 
     @ModifyVariable(method = "render", at = @At("STORE"), ordinal = 0)
-    public VertexConsumer render$modifyVariable$store(VertexConsumer vertexconsumer, PoseStack poseStack, MultiBufferSource multiBufferSource, int combinedLight, Horse horse) {
+    public VertexConsumer render(VertexConsumer vertexConsumer, PoseStack poseStack, MultiBufferSource multiBufferSource, int combinedLight, Horse horse) {
         ItemStack stack = horse.getArmor();
         ResourceLocation texture = ((HorseArmorItem) stack.getItem()).getTexture();
-        return ItemRenderer.getArmorFoilBuffer(multiBufferSource, RenderType.armorCutoutNoCull(texture), false, stack.hasFoil());
+        return ItemRenderer.getArmorFoilBuffer(multiBufferSource,
+                RenderType.armorCutoutNoCull(texture),
+                false,
+                stack.hasFoil()
+        );
     }
 }

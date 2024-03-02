@@ -1,0 +1,7 @@
+{
+  "remove": [
+    "minecraft:smite",
+    "minecraft:bane_of_arthropods"
+  ],
+  "values": []
+}

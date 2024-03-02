@@ -16,8 +16,11 @@ abstract class EnchantCommandMixin {
 
     @Inject(method = "register", at = @At("HEAD"), cancellable = true)
     private static void register(CommandDispatcher<CommandSourceStack> dispatcher, CommandBuildContext context, CallbackInfo callback) {
-        // we provide our own version of the command which is generally possible and will just override vanilla as it'll be registered afterwards
+        // we provide our own version of the command which is generally possible and will just override vanilla as it'll be registered afterward
         // just to make sure really everything is replaced and vanilla doesn't interfere we also disable vanilla's command
-        if (UniversalEnchants.CONFIG.get(CommonConfig.class).enchantCommand.replaceVanillaCommand()) callback.cancel();
+        if (!UniversalEnchants.CONFIG.getHolder(CommonConfig.class).isAvailable() ||
+                UniversalEnchants.CONFIG.get(CommonConfig.class).enchantCommand.replaceVanillaCommand()) {
+            callback.cancel();
+        }
     }
 }

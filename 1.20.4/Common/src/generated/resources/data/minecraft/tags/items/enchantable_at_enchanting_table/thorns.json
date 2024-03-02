@@ -1,0 +1,16 @@
+{
+  "values": [
+    {
+      "id": "#enchantmentcontrol:enchantable/horse_armor",
+      "required": false
+    },
+    {
+      "id": "#enchantmentcontrol:enchantable/shield",
+      "required": false
+    },
+    {
+      "id": "#minecraft:enchantable/armor",
+      "required": false
+    }
+  ]
+}

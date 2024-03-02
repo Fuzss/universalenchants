@@ -22,13 +22,4 @@ abstract class EnchantmentHelperMixin {
         // prevent shields from applying knockback when hitting targets
         if (player.getMainHandItem().getItem() instanceof ShieldItem) callback.setReturnValue(0);
     }
-
-    @Inject(method = "getItemEnchantmentLevel", at = @At("HEAD"), cancellable = true)
-    private static void getItemEnchantmentLevel(Enchantment enchantment, ItemStack stack, CallbackInfoReturnable<Integer> callback) {
-        MinecraftServer minecraftServer = CommonAbstractions.INSTANCE.getGameServer();
-        if (minecraftServer != null) {
-            FeatureFlagSet featureFlagSet = minecraftServer.getWorldData().enabledFeatures();
-            if (!((FeatureElement) enchantment).isEnabled(featureFlagSet)) callback.setReturnValue(0);
-        }
-    }
 }

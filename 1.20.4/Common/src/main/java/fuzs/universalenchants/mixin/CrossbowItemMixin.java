@@ -1,6 +1,6 @@
 package fuzs.universalenchants.mixin;
 
-import fuzs.universalenchants.core.CommonAbstractions;
+import fuzs.universalenchants.CommonAbstractions;
 import fuzs.universalenchants.handler.ItemCompatHandler;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.projectile.AbstractArrow;
@@ -17,17 +17,17 @@ import org.spongepowered.asm.mixin.injection.ModifyVariable;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(CrossbowItem.class)
-public abstract class CrossbowItemMixin extends ProjectileWeaponItem {
+abstract class CrossbowItemMixin extends ProjectileWeaponItem {
 
-    public CrossbowItemMixin(Properties builder) {
-        super(builder);
+    public CrossbowItemMixin(Properties properties) {
+        super(properties);
     }
 
     @ModifyVariable(method = "tryLoadProjectiles", at = @At("STORE"), ordinal = 0)
     private static boolean tryLoadProjectiles$storeHasInfiniteAmmo(boolean hasInfiniteAmmo, LivingEntity entityIn, ItemStack stack) {
         if (hasInfiniteAmmo) return true;
         ItemStack arrowStack = entityIn.getProjectile(stack);
-        if (arrowStack.isEmpty() || CommonAbstractions.INSTANCE.isArrowInfinite(entityIn, stack, arrowStack)) {
+        if (arrowStack.isEmpty() || CommonAbstractions.isArrowInfinite(entityIn, stack, arrowStack)) {
             return EnchantmentHelper.getItemEnchantmentLevel(Enchantments.INFINITY_ARROWS, stack) > 0;
         }
         return false;
@@ -40,7 +40,8 @@ public abstract class CrossbowItemMixin extends ProjectileWeaponItem {
         ItemCompatHandler.applyPunchEnchantment(abstractarrowentity, stack);
         ItemCompatHandler.applyFlameEnchantment(abstractarrowentity, stack);
         ItemCompatHandler.applyLootingEnchantment(abstractarrowentity, stack);
-        if (EnchantmentHelper.getItemEnchantmentLevel(Enchantments.INFINITY_ARROWS, stack) > 0 && CommonAbstractions.INSTANCE.isArrowInfinite(entity, stack, arrowStack)) {
+        if (EnchantmentHelper.getItemEnchantmentLevel(Enchantments.INFINITY_ARROWS, stack) > 0 &&
+                CommonAbstractions.isArrowInfinite(entity, stack, arrowStack)) {
             abstractarrowentity.pickup = AbstractArrow.Pickup.CREATIVE_ONLY;
         }
     }

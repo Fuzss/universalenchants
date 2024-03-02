@@ -15,6 +15,6 @@ abstract class ShieldItemMixin extends Item {
 
     @Override
     public int getEnchantmentValue() {
-        return UniversalEnchants.CONFIG.get(ServerConfig.class).enchantableShields ? 1 : 0;
+        return UniversalEnchants.CONFIG.get(ServerConfig.class).enchantableShields ? 1 : super.getEnchantmentValue();
     }
 }

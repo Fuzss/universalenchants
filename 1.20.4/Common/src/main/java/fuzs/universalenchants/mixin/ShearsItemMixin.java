@@ -16,6 +16,6 @@ abstract class ShearsItemMixin extends Item {
 
     @Override
     public int getEnchantmentValue() {
-        return UniversalEnchants.CONFIG.get(ServerConfig.class).enchantableShears ? 1 : 0;
+        return UniversalEnchants.CONFIG.get(ServerConfig.class).enchantableShears ? 1 : super.getEnchantmentValue();
     }
 }
