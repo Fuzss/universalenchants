@@ -23,7 +23,6 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.BowItem;
 import net.minecraft.world.item.CrossbowItem;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.level.Level;
@@ -34,6 +33,7 @@ import net.minecraft.world.phys.shapes.CollisionContext;
 import org.jetbrains.annotations.Nullable;
 
 public class BetterEnchantsHandler {
+    private static final int MAX_EXPERIENCE_BONUS = 50;
 
     public static EventResultHolder<InteractionResult> onUseItem(Player player, Level level, InteractionHand hand) {
         if (!UniversalEnchants.CONFIG.get(ServerConfig.class).trueInfinity) return EventResultHolder.pass();
@@ -96,7 +96,7 @@ public class BetterEnchantsHandler {
 
     private static int getDroppedXp(int originalExperience, int enchantmentLevel) {
         float multiplier = (enchantmentLevel * (enchantmentLevel + 1)) / 10.0F;
-        return originalExperience + Math.min(50, (int) Math.floor(originalExperience * multiplier));
+        return originalExperience + Math.min(MAX_EXPERIENCE_BONUS, (int) Math.floor(originalExperience * multiplier));
     }
 
     public static EventResult onLivingTick(LivingEntity entity) {

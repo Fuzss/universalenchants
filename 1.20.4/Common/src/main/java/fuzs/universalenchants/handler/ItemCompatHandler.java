@@ -20,7 +20,7 @@ import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.Nullable;
 
 public class ItemCompatHandler {
-    private static final float BOW_MULTISHOT_ANGLE = 6.5F;
+    private static final float BOW_MULTISHOT_ANGLE = 6.25F;
 
     public static EventResult onArrowLoose(Player player, ItemStack stack, Level level, MutableInt charge, boolean hasAmmo) {
         // multishot enchantment for bows
