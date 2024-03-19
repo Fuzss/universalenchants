@@ -1,5 +1,9 @@
 {
   "commands.enchant.remove.failed.missing": "%s does not have that enchantment",
   "commands.enchant.remove.success.multiple": "Removed enchantment %s from %s entities",
-  "commands.enchant.remove.success.single": "Removed enchantment %s from %s's item"
+  "commands.enchant.remove.success.single": "Removed enchantment %s from %s's item",
+  "enchantments.edit": "Edit Enchantments",
+  "gui.universalenchants.tooltip.incompatible": "This enchantment is incompatible with: %s",
+  "key.categories.universalenchants": "Universal Enchants",
+  "key.edit_enchantments": "Edit Enchantments"
 }

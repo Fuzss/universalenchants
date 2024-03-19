@@ -6,7 +6,6 @@ import fuzs.universalenchants.UniversalEnchants;
 import fuzs.universalenchants.data.ModBlockTagProvider;
 import fuzs.universalenchants.data.ModEnchantmentTagProvider;
 import fuzs.universalenchants.data.ModItemTagProvider;
-import fuzs.universalenchants.data.client.ModLanguageProvider;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.event.lifecycle.FMLConstructModEvent;
@@ -21,8 +20,7 @@ public class UniversalEnchantsNeoForge {
         DataProviderHelper.registerDataProviders(UniversalEnchants.MOD_ID,
                 ModEnchantmentTagProvider::new,
                 ModItemTagProvider::new,
-                ModBlockTagProvider::new,
-                ModLanguageProvider::new
+                ModBlockTagProvider::new
         );
     }
 }

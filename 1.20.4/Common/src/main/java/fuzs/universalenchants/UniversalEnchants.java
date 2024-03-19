@@ -11,6 +11,7 @@ import fuzs.puzzleslib.api.event.v1.entity.player.ArrowLooseCallback;
 import fuzs.puzzleslib.api.event.v1.entity.player.PlayerInteractEvents;
 import fuzs.puzzleslib.api.event.v1.level.BlockEvents;
 import fuzs.puzzleslib.api.event.v1.server.RegisterCommandsCallback;
+import fuzs.puzzleslib.api.network.v3.NetworkHandlerV3;
 import fuzs.puzzleslib.api.resources.v1.DynamicPackResources;
 import fuzs.puzzleslib.api.resources.v1.PackResourcesHelper;
 import fuzs.universalenchants.config.ClientConfig;
@@ -20,6 +21,7 @@ import fuzs.universalenchants.data.DynamicEnchantmentTagProvider;
 import fuzs.universalenchants.handler.BetterEnchantsHandler;
 import fuzs.universalenchants.handler.ItemCompatHandler;
 import fuzs.universalenchants.init.ModRegistry;
+import fuzs.universalenchants.network.client.ServerboundSetEnchantmentsMessage;
 import fuzs.universalenchants.server.commands.ModEnchantCommand;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.PackType;
@@ -35,6 +37,8 @@ public class UniversalEnchants implements ModConstructor {
     public static final String MOD_NAME = "Universal Enchants";
     public static final Logger LOGGER = LogManager.getLogger(MOD_NAME);
 
+    public static final NetworkHandlerV3 NETWORK = NetworkHandlerV3.builder(MOD_ID).registerServerbound(
+            ServerboundSetEnchantmentsMessage.class);
     public static final ConfigHolder CONFIG = ConfigHolder.builder(MOD_ID)
             .client(ClientConfig.class)
             .common(CommonConfig.class)

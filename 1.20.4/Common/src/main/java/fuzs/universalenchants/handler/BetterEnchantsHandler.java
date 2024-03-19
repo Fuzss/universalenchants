@@ -145,7 +145,6 @@ public class BetterEnchantsHandler {
                 }
             }
         }
-
     }
 
     private static boolean isFrostedIceReplaceable(Level level, BlockPos blockPos, BlockState blockState) {

@@ -20,7 +20,10 @@ public class ServerConfig implements ConfigCore {
     public boolean noFarmlandTrample = true;
     @Config(category = "adjustments", description = "Looting and fortune also affect dropped experience points.")
     public boolean lootBonusBoostsXp = true;
-    @Config(category = "adjustments", description = "Frost walker regenerates ice blocks while standing still, destroys water plants, and works while jumping.")
+    @Config(
+            category = "adjustments",
+            description = "Frost walker regenerates ice blocks while standing still, destroys water plants, and works while jumping."
+    )
     public boolean betterFrostWalker = true;
     @Config(
             category = "enchantable", name = "horse_armor", description = {
@@ -40,4 +43,6 @@ public class ServerConfig implements ConfigCore {
     }
     )
     public boolean enchantableShears = true;
+    @Config(description = "Active enchantments can be toggled for individual items, allowing for switching between otherwise incompatible enchantments such as Fortune and Silk Touch on the fly.")
+    public boolean allowStoringEnchantments = true;
 }
