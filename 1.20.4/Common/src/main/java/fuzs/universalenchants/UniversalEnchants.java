@@ -70,7 +70,8 @@ public class UniversalEnchants implements ModConstructor {
         // on Fabric, we need to regenerate and replace incompatibility tags since we are unable to remove existing values from the tags
         // on Forge & NeoForge, this is not necessary, we can simply supply values to remove from the tags via the added 'remove' field
         // also makes sure this has pack position set to top to guarantee it being added above the Enchantment Control dynamic pack
-        if (ModLoaderEnvironment.INSTANCE.getModLoader().isFabricLike()) {
+        // update: we add the 'remove' field to tags on Fabric ourselves, so this is no longer necessary
+        if (false && ModLoaderEnvironment.INSTANCE.getModLoader().isFabricLike()) {
             context.addRepositorySource(PackResourcesHelper.buildServerPack(id("enchantment_compatibilities"),
                     () -> new DynamicPackResources(DynamicEnchantmentTagProvider::new) {
 
