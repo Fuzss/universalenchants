@@ -1,0 +1,8 @@
+accessWidener   v2  named
+accessible  field   net/minecraft/client/KeyMapping key Lcom/mojang/blaze3d/platform/InputConstants$Key;
+accessible  field   net/minecraft/client/gui/screens/inventory/tooltip/ClientTextTooltip    text    Lnet/minecraft/util/FormattedCharSequence;
+accessible  field   net/minecraft/client/gui/screens/inventory/CreativeModeInventoryScreen$SlotWrapper  target  Lnet/minecraft/world/inventory/Slot;
+extendable	method	net/minecraft/tags/TagEntry	<init>	(Lnet/minecraft/resources/ResourceLocation;ZZ)V
+accessible	field	net/minecraft/tags/TagEntry	id	Lnet/minecraft/resources/ResourceLocation;
+accessible	field	net/minecraft/tags/TagEntry	tag	Z
+accessible	field	net/minecraft/tags/TagEntry	required	Z
