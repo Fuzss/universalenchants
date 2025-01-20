@@ -39,7 +39,7 @@
     "fabricloader": ">=${minFabricVersion}",
     "fabric-api": ">=${minFabricApiVersion}",
     "puzzleslib": ">=${minPuzzlesVersion}",
-    "enchantmentcontrol": "*",
+    "neoforgedatapackextensions": "*",
     "minecraft": "${minecraftVersion}",
     "java": ">=17"
   }

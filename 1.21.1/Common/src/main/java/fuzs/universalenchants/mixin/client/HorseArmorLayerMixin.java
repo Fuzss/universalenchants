@@ -11,7 +11,7 @@ import net.minecraft.client.renderer.entity.layers.HorseArmorLayer;
 import net.minecraft.client.renderer.entity.layers.RenderLayer;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.animal.horse.Horse;
-import net.minecraft.world.item.HorseArmorItem;
+import net.minecraft.world.item.AnimalArmorItem;
 import net.minecraft.world.item.ItemStack;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -24,14 +24,13 @@ abstract class HorseArmorLayerMixin extends RenderLayer<Horse, HorseModel<Horse>
         super(renderLayerParent);
     }
 
+    @Deprecated(forRemoval = true)
     @ModifyVariable(method = "render", at = @At("STORE"), ordinal = 0)
     public VertexConsumer render(VertexConsumer vertexConsumer, PoseStack poseStack, MultiBufferSource multiBufferSource, int combinedLight, Horse horse) {
-        ItemStack stack = horse.getArmor();
-        ResourceLocation texture = ((HorseArmorItem) stack.getItem()).getTexture();
+        ItemStack itemStack = horse.getBodyArmorItem();
+        ResourceLocation resourceLocation = ((AnimalArmorItem) itemStack.getItem()).getTexture();
         return ItemRenderer.getArmorFoilBuffer(multiBufferSource,
-                RenderType.armorCutoutNoCull(texture),
-                false,
-                stack.hasFoil()
-        );
+                RenderType.armorCutoutNoCull(resourceLocation),
+                itemStack.hasFoil());
     }
 }

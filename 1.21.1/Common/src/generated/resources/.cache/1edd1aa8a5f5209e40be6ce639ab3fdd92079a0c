@@ -1,13 +1,5 @@
-// 1.20.4	2024-03-02T20:27:38.569002	Tags for minecraft:enchantment mod id vanilla
-947fd1440bf24d758a103626c07b91a9274b7e68 data/minecraft/tags/enchantment/incompatible/bane_of_arthropods.json
-27ca5adb6c5db77383e930973f6336bd2d558371 data/minecraft/tags/enchantment/incompatible/blast_protection.json
-27ca5adb6c5db77383e930973f6336bd2d558371 data/minecraft/tags/enchantment/incompatible/fire_protection.json
-4eef6a8e30402fd8a0f8057986e97db5c1660fb1 data/minecraft/tags/enchantment/incompatible/impaling.json
-c61768172a3e9c0da947b499ddf8e92ff262720c data/minecraft/tags/enchantment/incompatible/infinity.json
-b9702052a95d11235aab70f6f50b7f0bf7dc6057 data/minecraft/tags/enchantment/incompatible/mending.json
-672067b2b749c71fef8a0b233e3f1bce6b27848c data/minecraft/tags/enchantment/incompatible/multishot.json
-e1396923f71d69af89981c39657facee136839e3 data/minecraft/tags/enchantment/incompatible/piercing.json
-27ca5adb6c5db77383e930973f6336bd2d558371 data/minecraft/tags/enchantment/incompatible/projectile_protection.json
-1231817fa3ad1f138eeb08b49bd524b924b7c056 data/minecraft/tags/enchantment/incompatible/protection.json
-c69e4c744c777f13a80abc5c13f789fedf094259 data/minecraft/tags/enchantment/incompatible/sharpness.json
-947fd1440bf24d758a103626c07b91a9274b7e68 data/minecraft/tags/enchantment/incompatible/smite.json
+// 1.21.1	2025-01-19T22:41:23.37778	Tags for minecraft:enchantment mod id vanilla
+27ca5adb6c5db77383e930973f6336bd2d558371 data/minecraft/tags/enchantment/exclusive_set/armor.json
+8f66a60868ff752d22a0132c1bccedfb3b0fce40 data/minecraft/tags/enchantment/exclusive_set/bow.json
+e27b5102709fe33ca34f1c922546d3ead2178b95 data/minecraft/tags/enchantment/exclusive_set/crossbow.json
+1d879624dab6dc7f3b83e7dd6b2e4934064e2fd0 data/minecraft/tags/enchantment/exclusive_set/damage.json

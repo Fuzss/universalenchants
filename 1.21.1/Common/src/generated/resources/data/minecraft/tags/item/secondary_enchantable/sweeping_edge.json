@@ -1,0 +1,9 @@
+{
+  "values": [
+    "#minecraft:axes",
+    {
+      "id": "#c:tools/spear",
+      "required": false
+    }
+  ]
+}

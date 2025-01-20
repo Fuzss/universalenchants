@@ -1,145 +1,127 @@
 package fuzs.universalenchants.handler;
 
+import com.google.common.collect.ImmutableList;
 import fuzs.puzzleslib.api.event.v1.core.EventResult;
 import fuzs.puzzleslib.api.event.v1.data.DefaultedFloat;
 import fuzs.puzzleslib.api.event.v1.data.MutableInt;
+import fuzs.universalenchants.core.CompositeHolderSet;
 import fuzs.universalenchants.init.ModRegistry;
-import net.minecraft.sounds.SoundEvents;
-import net.minecraft.sounds.SoundSource;
-import net.minecraft.tags.DamageTypeTags;
+import net.minecraft.core.Holder;
+import net.minecraft.core.HolderLookup;
+import net.minecraft.core.HolderSet;
+import net.minecraft.core.RegistryAccess;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.util.Mth;
 import net.minecraft.world.damagesource.DamageSource;
-import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EquipmentSlotGroup;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.projectile.AbstractArrow;
-import net.minecraft.world.entity.projectile.ThrownTrident;
-import net.minecraft.world.item.*;
+import net.minecraft.world.item.BowItem;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.TridentItem;
+import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.item.enchantment.Enchantments;
-import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.Nullable;
 
-public class ItemCompatHandler {
-    private static final float BOW_MULTISHOT_ANGLE = 6.25F;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+import java.util.function.Consumer;
 
-    public static EventResult onArrowLoose(Player player, ItemStack stack, Level level, MutableInt charge, boolean hasAmmo) {
-        // multishot enchantment for bows
-        if (hasAmmo && EnchantmentHelper.getItemEnchantmentLevel(Enchantments.MULTISHOT, stack) > 0) {
-            float velocity = BowItem.getPowerForTime(charge.getAsInt());
-            if (!level.isClientSide && velocity >= 0.1F) {
-                ItemStack projectile = player.getProjectile(stack);
-                ArrowItem item = (ArrowItem) (projectile.getItem() instanceof ArrowItem ?
-                        projectile.getItem() :
-                        Items.ARROW);
-                for (int i = 0; i < 2; i++) {
-                    createAndShootArrow(player, stack, level, item, projectile, -BOW_MULTISHOT_ANGLE + i * BOW_MULTISHOT_ANGLE * 2.0F, velocity);
+public class ItemCompatHandler {
+    private static final Set<EquipmentSlotGroup> ARMOR_EQUIPMENT_SLOT_GROUPS = Set.of(EquipmentSlotGroup.FEET,
+            EquipmentSlotGroup.LEGS,
+            EquipmentSlotGroup.CHEST,
+            EquipmentSlotGroup.HEAD,
+            EquipmentSlotGroup.ARMOR);
+
+    public static void onTagsUpdated(RegistryAccess registryAccess, boolean client) {
+        // use this event to modify registered enchantments directly, relevant fields are made mutable via access widener
+        HolderLookup.RegistryLookup<Item> itemLookup = registryAccess.lookupOrThrow(Registries.ITEM);
+        HolderLookup.RegistryLookup<Enchantment> enchantmentLookup = registryAccess.lookupOrThrow(Registries.ENCHANTMENT);
+        enchantmentLookup.listElements().forEach((Holder.Reference<Enchantment> holder) -> {
+            Enchantment.EnchantmentDefinition enchantmentDefinition = holder.value().definition();
+            // allow all armor enchantments to also work for the body equipment slot
+            // they need to separately support such items though
+            if (!enchantmentDefinition.slots().contains(EquipmentSlotGroup.BODY)) {
+                for (EquipmentSlotGroup slot : enchantmentDefinition.slots()) {
+                    if (ARMOR_EQUIPMENT_SLOT_GROUPS.contains(slot)) {
+                        ImmutableList.Builder<EquipmentSlotGroup> builder = ImmutableList.builder();
+                        builder.addAll(enchantmentDefinition.slots());
+                        builder.add(EquipmentSlotGroup.BODY);
+                        enchantmentDefinition.slots = builder.build();
+                    }
                 }
             }
-        }
-
-        return EventResult.PASS;
+            // replaces the supported item holder sets with a custom composite holder set that includes one additional tag per enchantment
+            setSupportedEnchantmentItems(itemLookup.get(ModRegistry.getSecondaryEnchantableItemTag(holder.key())),
+                    enchantmentDefinition.supportedItems(),
+                    (HolderSet<Item> holderSet) -> {
+                        enchantmentDefinition.supportedItems = holderSet;
+                    });
+            enchantmentDefinition.primaryItems().ifPresent((HolderSet<Item> holderSetX) -> {
+                setSupportedEnchantmentItems(itemLookup.get(ModRegistry.getPrimaryEnchantableItemTag(holder.key())),
+                        holderSetX,
+                        (HolderSet<Item> holderSet) -> {
+                            enchantmentDefinition.primaryItems = Optional.of(holderSet);
+                        });
+            });
+        });
     }
 
-    private static void createAndShootArrow(Player player, ItemStack stack, Level level, ArrowItem item, ItemStack projectile, float shootAngle, float velocity) {
-        AbstractArrow abstractArrow = item.createArrow(level, projectile, player);
-        abstractArrow.shootFromRotation(player,
-                player.getXRot() + shootAngle,
-                player.getYRot(),
-                0.0F,
-                velocity * 3.0F,
-                1.5F
-        );
-        if (velocity == 1.0F) {
-            abstractArrow.setCritArrow(true);
+    private static void setSupportedEnchantmentItems(Optional<HolderSet.Named<Item>> optional, HolderSet<Item> supportedItems, Consumer<HolderSet<Item>> consumer) {
+        HolderSet<Item> holderSet = optional.map((HolderSet.Named<Item> holderSetX) -> (HolderSet<Item>) holderSetX)
+                .orElse(HolderSet.empty());
+        consumer.accept(new CompositeHolderSet<>(List.of(supportedItems, holderSet)));
+    }
+
+    public static EventResult onShieldBlock(LivingEntity blockingEntity, DamageSource damageSource, DefaultedFloat damageAmount) {
+        if (blockingEntity.level() instanceof ServerLevel serverLevel) {
+            if (damageSource.isDirect() && damageSource.getEntity() instanceof LivingEntity attackingEntity) {
+                EnchantmentHelper.doPostAttackEffectsWithItemSource(serverLevel,
+                        blockingEntity,
+                        damageSource,
+                        blockingEntity.getUseItem());
+                float attackKnockback = (float) blockingEntity.getAttributeValue(Attributes.ATTACK_KNOCKBACK);
+                attackKnockback = EnchantmentHelper.modifyKnockback(serverLevel,
+                        blockingEntity.getUseItem(),
+                        attackingEntity,
+                        damageSource,
+                        attackKnockback);
+                // also fixes a vanilla bug where shield do not deal knockback in LivingEntity::blockedByShield,
+                // since the knockback method is called on the blocking entity and not the attacking entity
+                // if that should not happen, so knockback only applies when the actual knockback enchantment is present
+                // include a check here if the knockback is different from the original attribute value
+                attackingEntity.knockback(0.5 * attackKnockback,
+                        blockingEntity.getX() - attackingEntity.getX(),
+                        blockingEntity.getZ() - attackingEntity.getZ());
+            }
         }
-        applyPowerEnchantment(abstractArrow, stack);
-        applyPunchEnchantment(abstractArrow, stack);
-        applyFlameEnchantment(abstractArrow, stack);
-        applyPiercingEnchantment(abstractArrow, stack);
-        applyLootingEnchantment(abstractArrow, stack);
-        abstractArrow.pickup = AbstractArrow.Pickup.CREATIVE_ONLY;
-        level.addFreshEntity(abstractArrow);
-        level.playSound(null,
-                player.getX(),
-                player.getY(),
-                player.getZ(),
-                SoundEvents.ARROW_SHOOT,
-                SoundSource.PLAYERS,
-                1.0F,
-                1.0F / (level.getRandom().nextFloat() * 0.4F + 1.2F) + velocity * 0.5F
-        );
+        return EventResult.PASS;
     }
 
     public static EventResult onUseItemTick(LivingEntity entity, ItemStack useItem, MutableInt useItemRemaining) {
-        Item item2 = useItem.getItem();
-        int duration2 = useItem.getUseDuration() - useItemRemaining.getAsInt();
-        if (item2 instanceof BowItem && duration2 < 20 || item2 instanceof TridentItem && duration2 < 10) {
+        Item item = useItem.getItem();
+        int itemUseDuration = useItem.getUseDuration(entity) - useItemRemaining.getAsInt();
+        if (item instanceof BowItem && itemUseDuration < 20 || item instanceof TridentItem && itemUseDuration < 10) {
             // quick charge enchantment for bows and tridents
-            int quickChargeLevel = EnchantmentHelper.getItemEnchantmentLevel(Enchantments.QUICK_CHARGE, useItem);
-            useItemRemaining.mapInt(duration -> duration - quickChargeLevel);
+            // values same as crossbow, but speed improvements is not relative to actual item use duration now
+            float chargingTime = EnchantmentHelper.modifyCrossbowChargingTime(useItem, entity, 1.25F);
+            useItemRemaining.mapInt(duration -> duration - Mth.floor((1.25F - chargingTime) / 0.25F));
         }
-
         return EventResult.PASS;
     }
 
-    public static void onLootingLevel(LivingEntity entity, @Nullable DamageSource damageSource, MutableInt lootingLevel) {
-        if (damageSource == null) return;
-        Entity source = damageSource.getDirectEntity();
-        if (source instanceof AbstractArrow abstractArrow) {
-            // the whole trident stack is saved anyway, so use it
-            if (source instanceof ThrownTrident) {
-                ItemStack stack = abstractArrow.getPickupItemStackOrigin();
-                int level = EnchantmentHelper.getItemEnchantmentLevel(Enchantments.MOB_LOOTING, stack);
-                if (level > 0) {
-                    lootingLevel.accept(level);
-                }
-            } else {
-                // overwrite anything set by vanilla, even when enchantment is not present (since the whole holding a looting sword and getting looting applied to ranged kills doesn't make a lot of sense)
-                lootingLevel.accept(ModRegistry.ARROW_LOOTING_CAPABILITY.get(abstractArrow).getLevel());
+    public static void onComputeEnchantedLootBonus(LivingEntity entity, @Nullable DamageSource damageSource, Holder<Enchantment> enchantment, MutableInt enchantmentLevel) {
+        if (enchantment.is(Enchantments.LOOTING) && enchantmentLevel.getAsInt() == 0) {
+            if (damageSource != null && damageSource.getDirectEntity() instanceof AbstractArrow abstractArrow) {
+                enchantmentLevel.accept(EnchantmentHelper.getItemEnchantmentLevel(enchantment,
+                        abstractArrow.getWeaponItem()));
             }
-        }
-    }
-
-    public static EventResult onShieldBlock(LivingEntity blocker, DamageSource source, DefaultedFloat blockedDamage) {
-        if (!source.is(DamageTypeTags.IS_PROJECTILE) && source.getDirectEntity() instanceof LivingEntity attacker) {
-            int level = EnchantmentHelper.getItemEnchantmentLevel(Enchantments.THORNS, blocker.getUseItem());
-            Enchantments.THORNS.doPostHurt(blocker, attacker, level);
-        }
-
-        return EventResult.PASS;
-    }
-
-    public static void applyPowerEnchantment(AbstractArrow arrow, ItemStack stack) {
-        int powerLevel = EnchantmentHelper.getItemEnchantmentLevel(Enchantments.POWER_ARROWS, stack);
-        if (powerLevel > 0) {
-            arrow.setBaseDamage(arrow.getBaseDamage() + (double) powerLevel * 0.5 + 0.5);
-        }
-    }
-
-    public static void applyPunchEnchantment(AbstractArrow arrow, ItemStack stack) {
-        int punchLevel = EnchantmentHelper.getItemEnchantmentLevel(Enchantments.PUNCH_ARROWS, stack);
-        if (punchLevel > 0) {
-            arrow.setKnockback(punchLevel);
-        }
-    }
-
-    public static void applyFlameEnchantment(AbstractArrow arrow, ItemStack stack) {
-        if (EnchantmentHelper.getItemEnchantmentLevel(Enchantments.FLAMING_ARROWS, stack) > 0) {
-            arrow.setSecondsOnFire(100);
-        }
-    }
-
-    public static void applyPiercingEnchantment(AbstractArrow arrow, ItemStack stack) {
-        int pierceLevel = EnchantmentHelper.getItemEnchantmentLevel(Enchantments.PIERCING, stack);
-        if (pierceLevel > 0) {
-            arrow.setPierceLevel((byte) pierceLevel);
-        }
-    }
-
-    public static void applyLootingEnchantment(AbstractArrow abstractArrow, ItemStack stack) {
-        int level = EnchantmentHelper.getItemEnchantmentLevel(Enchantments.MOB_LOOTING, stack);
-        if (level > 0) {
-            ModRegistry.ARROW_LOOTING_CAPABILITY.get(abstractArrow).setLevel((byte) level);
         }
     }
 }

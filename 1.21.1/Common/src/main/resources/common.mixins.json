@@ -4,26 +4,14 @@
   "compatibilityLevel": "JAVA_17",
   "package": "${modGroup}.mixin",
   "mixins": [
-    "BowItemMixin",
-    "CrossbowItemMixin",
-    "EnchantCommandMixin",
-    "EnchantmentHelperMixin",
-    "FrostWalkerEnchantmentMixin",
-    "GrindstoneMenuMixin",
-    "GrindstoneMenu\$SlotMixin",
-    "HorseArmorItemMixin",
-    "HorseInventoryMenu\$SlotMixin",
-    "ItemStackMixin",
+    "AnimalArmorItemMixin",
     "LivingEntityMixin",
     "ShearsItemMixin",
     "ShieldItemMixin",
-    "ThrownTridentMixin",
-    "TridentItemMixin",
-    "accessor.AbstractArrowAccessor"
+    "ThrownTridentMixin"
   ],
   "client": [
-    "client.HorseArmorLayerMixin",
-    "client.accessor.I18nAccessor"
+    "client.HorseArmorLayerMixin"
   ],
   "injectors": {
     "defaultRequire": 1

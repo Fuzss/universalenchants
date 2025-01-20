@@ -1,0 +1,7 @@
+{
+  "remove": [
+    "minecraft:multishot",
+    "minecraft:piercing"
+  ],
+  "values": []
+}

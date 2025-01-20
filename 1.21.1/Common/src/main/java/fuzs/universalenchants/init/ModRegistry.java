@@ -1,26 +1,28 @@
 package fuzs.universalenchants.init;
 
-import fuzs.puzzleslib.api.capability.v3.CapabilityController;
-import fuzs.puzzleslib.api.capability.v3.data.EntityCapabilityKey;
-import fuzs.puzzleslib.api.init.v3.tags.BoundTagFactory;
+import fuzs.puzzleslib.api.init.v3.tags.TagFactory;
 import fuzs.universalenchants.UniversalEnchants;
-import fuzs.universalenchants.capability.ArrowLootingCapability;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.tags.TagKey;
-import net.minecraft.world.entity.projectile.AbstractArrow;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.level.block.Block;
 
 public class ModRegistry {
-    static final BoundTagFactory TAGS = BoundTagFactory.make(UniversalEnchants.MOD_ID);
-    public static final TagKey<Block> FROSTED_ICE_REPLACEABLES = TAGS.registerBlockTag("frosted_ice_replaceables");
-    static final CapabilityController CAPABILITIES = CapabilityController.from(UniversalEnchants.MOD_ID);
-    public static final EntityCapabilityKey<AbstractArrow, ArrowLootingCapability> ARROW_LOOTING_CAPABILITY = CAPABILITIES.registerEntityCapability(
-            "arrow_looting",
-            ArrowLootingCapability.class,
-            ArrowLootingCapability::new,
-            AbstractArrow.class
-    );
+    static final TagFactory TAGS = TagFactory.make(UniversalEnchants.MOD_ID);
+    public static final TagKey<Block> FROSTED_ICE_REPLACEABLES_BLOCK_TAG = TAGS.registerBlockTag(
+            "frosted_ice_replaceables");
 
-    public static void touch() {
+    public static void bootstrap() {
+        // NO-OP
+    }
 
+    public static TagKey<Item> getPrimaryEnchantableItemTag(ResourceKey<Enchantment> resourceKey) {
+        return TagKey.create(Registries.ITEM, resourceKey.location().withPrefix("primary_enchantable/"));
+    }
+
+    public static TagKey<Item> getSecondaryEnchantableItemTag(ResourceKey<Enchantment> resourceKey) {
+        return TagKey.create(Registries.ITEM, resourceKey.location().withPrefix("secondary_enchantable/"));
     }
 }

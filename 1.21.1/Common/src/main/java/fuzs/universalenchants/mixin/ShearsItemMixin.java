@@ -4,7 +4,6 @@ import fuzs.universalenchants.UniversalEnchants;
 import fuzs.universalenchants.config.ServerConfig;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ShearsItem;
-import net.minecraft.world.item.ShieldItem;
 import org.spongepowered.asm.mixin.Mixin;
 
 @Mixin(ShearsItem.class)

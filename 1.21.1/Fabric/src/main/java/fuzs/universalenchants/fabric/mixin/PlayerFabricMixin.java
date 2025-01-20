@@ -1,12 +1,14 @@
 package fuzs.universalenchants.fabric.mixin;
 
-import net.minecraft.world.InteractionHand;
+import com.llamalad7.mixinextras.injector.ModifyReturnValue;
+import fuzs.puzzleslib.api.event.v1.data.DefaultedValue;
+import fuzs.universalenchants.handler.BetterEnchantsHandler;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.enchantment.EnchantmentHelper;
-import net.minecraft.world.item.enchantment.Enchantments;
+import net.minecraft.world.item.ProjectileWeaponItem;
 import net.minecraft.world.level.Level;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -19,15 +21,27 @@ abstract class PlayerFabricMixin extends LivingEntity {
         super(entityType, level);
     }
 
-    @ModifyVariable(method = "attack", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/player/Player;getItemInHand(Lnet/minecraft/world/InteractionHand;)Lnet/minecraft/world/item/ItemStack;"), ordinal = 3)
-    public boolean attack(boolean canPerformSweepAction) {
-        // the injection we use on Forge would only be called when sweeping is allowed (which doesn't work for us since we want to enable additional items),
-        // so we need this alternative mixin
-        // this will only be called when sweeping is allowed to happen and only the check for SwordItem is missing, since that's the behavior we want to change
-        // next line should always be false since the variable is not modified before this, but just keep it to be safe with other mods
-        if (canPerformSweepAction) return true;
-        // we only handle sweeping edge case, all swords independent of enchantment are still handled by vanilla after this
-        ItemStack itemstack = this.getItemInHand(InteractionHand.MAIN_HAND);
-        return EnchantmentHelper.getItemEnchantmentLevel(Enchantments.SWEEPING_EDGE, itemstack) > 0;
+    @ModifyVariable(
+            method = "attack", at = @At(
+            value = "CONSTANT", args = "classValue=net/minecraft/world/item/SwordItem"
+    ), ordinal = 3
+    )
+    public boolean attack(boolean isSweepingSupported) {
+        // sweeping is hardcoded to instances of the sword item class, so we check for the attribute value instead
+        // this is patched in before vanilla, so we are overridden again if vanilla sets the value to true, but that is fine,
+        // since all swords should still support sweeping regardless of the sweeping edge enchantment being present
+        return isSweepingSupported || this.getAttributeValue(Attributes.SWEEPING_DAMAGE_RATIO) > 0.0;
+    }
+
+    @Deprecated(forRemoval = true)
+    @ModifyReturnValue(method = "getProjectile", at = @At("RETURN"))
+    public ItemStack getProjectile(ItemStack projectileItemStack, ItemStack weaponItemStack) {
+        if (weaponItemStack.getItem() instanceof ProjectileWeaponItem) {
+            DefaultedValue<ItemStack> projectileItemStackValue = DefaultedValue.fromValue(projectileItemStack);
+            BetterEnchantsHandler.onGetProjectile(this, weaponItemStack, projectileItemStackValue);
+            return projectileItemStackValue.getAsOptional().orElse(projectileItemStack);
+        } else {
+            return projectileItemStack;
+        }
     }
 }
