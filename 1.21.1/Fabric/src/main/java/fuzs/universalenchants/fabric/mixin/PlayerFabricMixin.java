@@ -23,7 +23,8 @@ abstract class PlayerFabricMixin extends LivingEntity {
 
     @ModifyVariable(
             method = "attack", at = @At(
-            value = "CONSTANT", args = "classValue=net/minecraft/world/item/SwordItem"
+            value = "INVOKE",
+            target = "Lnet/minecraft/world/entity/player/Player;getItemInHand(Lnet/minecraft/world/InteractionHand;)Lnet/minecraft/world/item/ItemStack;"
     ), ordinal = 3
     )
     public boolean attack(boolean isSweepingSupported) {
