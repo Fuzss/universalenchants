@@ -2,9 +2,10 @@ package fuzs.universalenchants.data;
 
 import fuzs.puzzleslib.api.data.v2.core.DataProviderContext;
 import fuzs.puzzleslib.api.data.v2.tags.AbstractTagProvider;
+import fuzs.universalenchants.init.ModRegistry;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.tags.EnchantmentTags;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.Enchantments;
 
@@ -16,9 +17,31 @@ public class ModEnchantmentTagProvider extends AbstractTagProvider<Enchantment> 
 
     @Override
     public void addTags(HolderLookup.Provider registries) {
-        this.add(EnchantmentTags.BOW_EXCLUSIVE).remove(Enchantments.INFINITY, Enchantments.MENDING);
-        this.add(EnchantmentTags.CROSSBOW_EXCLUSIVE).remove(Enchantments.MULTISHOT, Enchantments.PIERCING);
-        this.add(EnchantmentTags.DAMAGE_EXCLUSIVE).remove(Enchantments.SHARPNESS);
-        this.add(EnchantmentTags.ARMOR_EXCLUSIVE).remove(Enchantments.PROTECTION);
+        this.addInclusiveEnchantments(Enchantments.INFINITY, Enchantments.MENDING);
+        this.addInclusiveEnchantments(Enchantments.MULTISHOT, Enchantments.PIERCING);
+        this.addInclusiveEnchantments(Enchantments.SHARPNESS,
+                Enchantments.SMITE,
+                Enchantments.BANE_OF_ARTHROPODS,
+                Enchantments.IMPALING,
+                Enchantments.DENSITY,
+                Enchantments.BREACH);
+        this.addInclusiveEnchantments(Enchantments.DENSITY, Enchantments.SHARPNESS, Enchantments.BREACH);
+        this.addInclusiveEnchantments(Enchantments.BREACH, Enchantments.SHARPNESS, Enchantments.DENSITY);
+        this.addInclusiveEnchantments(Enchantments.PROTECTION,
+                Enchantments.BLAST_PROTECTION,
+                Enchantments.FIRE_PROTECTION,
+                Enchantments.PROJECTILE_PROTECTION);
+    }
+
+    @SafeVarargs
+    private void addInclusiveEnchantments(ResourceKey<Enchantment> primaryEnchantment, ResourceKey<Enchantment>... secondaryEnchantments) {
+        for (ResourceKey<Enchantment> secondaryEnchantment : secondaryEnchantments) {
+            this.addInclusiveEnchantments(primaryEnchantment, secondaryEnchantment);
+        }
+    }
+
+    private void addInclusiveEnchantments(ResourceKey<Enchantment> primaryEnchantment, ResourceKey<Enchantment> secondaryEnchantment) {
+        this.add(ModRegistry.getInclusiveSetEnchantmentTag(primaryEnchantment)).add(secondaryEnchantment);
+        this.add(ModRegistry.getInclusiveSetEnchantmentTag(secondaryEnchantment)).add(primaryEnchantment);
     }
 }

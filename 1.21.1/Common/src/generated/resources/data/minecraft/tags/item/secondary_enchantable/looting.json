@@ -6,6 +6,10 @@
       "required": false
     },
     {
+      "id": "#c:tools/mace",
+      "required": false
+    },
+    {
       "id": "#c:tools/bow",
       "required": false
     },

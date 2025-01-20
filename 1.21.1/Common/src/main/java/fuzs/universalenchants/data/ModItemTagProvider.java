@@ -31,26 +31,28 @@ public class ModItemTagProvider extends AbstractTagProvider<Item> {
 
     @Override
     public void addTags(HolderLookup.Provider provider) {
-        this.addSupportedItems(ItemTags.SWORDS, Enchantments.IMPALING);
+        this.addSupportedItems(ItemTags.SWORDS, Enchantments.IMPALING, Enchantments.BREACH);
         this.addSupportedItems(ItemTags.AXES,
                 Enchantments.SHARPNESS,
                 Enchantments.SMITE,
                 Enchantments.BANE_OF_ARTHROPODS,
-                Enchantments.KNOCKBACK,
-                Enchantments.FIRE_ASPECT,
                 Enchantments.LOOTING,
-                Enchantments.SWEEPING_EDGE,
-                Enchantments.IMPALING);
+                Enchantments.IMPALING,
+                Enchantments.BREACH);
         this.addSupportedItems("c:tools/spear",
                 Enchantments.SHARPNESS,
                 Enchantments.SMITE,
                 Enchantments.BANE_OF_ARTHROPODS,
-                Enchantments.KNOCKBACK,
-                Enchantments.FIRE_ASPECT,
                 Enchantments.LOOTING,
-                Enchantments.SWEEPING_EDGE,
+                Enchantments.BREACH,
                 Enchantments.QUICK_CHARGE,
                 Enchantments.PIERCING);
+        this.addSupportedItems("c:tools/mace",
+                Enchantments.SHARPNESS,
+                Enchantments.SMITE,
+                Enchantments.BANE_OF_ARTHROPODS,
+                Enchantments.LOOTING,
+                Enchantments.IMPALING);
         this.addSupportedItems("c:tools/bow",
                 Enchantments.PIERCING,
                 Enchantments.MULTISHOT,

@@ -4,6 +4,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [v21.1.2-1.21.1] - 2025-01-20
+### Added
+- Add support for mace enchantments thanks to [Winter Veritas](https://github.com/winterveritas)
+### Changed
+- Not all sword enchantments are any longer made compatible with other weapons
+  - The following enchantments now remain sword-exclusive to keep swords as a unique weapon type: knockback, fire aspect, sweeping edge
+  - Of course, you can add those enchantments back manually to the appropriate item tags to revert this change
+### Fixed
+- Fix sharpness and protection not being compatible with other damage / protection enchantments
+
 ## [v21.1.1-1.21.1] - 2025-01-20
 ### Fixed
 - Fix startup crash on Fabric due to a mixin being unable to remap

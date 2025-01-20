@@ -12,6 +12,7 @@ import net.minecraft.core.HolderSet;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.tags.TagKey;
 import net.minecraft.util.Mth;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.EquipmentSlotGroup;
@@ -30,6 +31,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.BinaryOperator;
 import java.util.function.Consumer;
 
 public class ItemCompatHandler {
@@ -44,7 +46,8 @@ public class ItemCompatHandler {
         HolderLookup.RegistryLookup<Item> itemLookup = registryAccess.lookupOrThrow(Registries.ITEM);
         HolderLookup.RegistryLookup<Enchantment> enchantmentLookup = registryAccess.lookupOrThrow(Registries.ENCHANTMENT);
         enchantmentLookup.listElements().forEach((Holder.Reference<Enchantment> holder) -> {
-            Enchantment.EnchantmentDefinition enchantmentDefinition = holder.value().definition();
+            Enchantment enchantment = holder.value();
+            Enchantment.EnchantmentDefinition enchantmentDefinition = enchantment.definition();
             // allow all armor enchantments to also work for the body equipment slot
             // they need to separately support such items though
             if (!enchantmentDefinition.slots().contains(EquipmentSlotGroup.BODY)) {
@@ -57,14 +60,24 @@ public class ItemCompatHandler {
                     }
                 }
             }
+            // replaces exclusive enchantment sets with a custom composite holder set that supports one additional inclusive set tag per enchantment
+            setEnchantmentProperty(enchantmentLookup,
+                    ModRegistry.getInclusiveSetEnchantmentTag(holder.key()),
+                    enchantment.exclusiveSet(),
+                    (HolderSet<Enchantment> holderSet) -> {
+                        enchantment.exclusiveSet = holderSet;
+                    },
+                    CompositeHolderSet.Removal::new);
             // replaces the supported item holder sets with a custom composite holder set that includes one additional tag per enchantment
-            setSupportedEnchantmentItems(itemLookup.get(ModRegistry.getSecondaryEnchantableItemTag(holder.key())),
+            setSupportedEnchantmentItems(itemLookup,
+                    ModRegistry.getSecondaryEnchantableItemTag(holder.key()),
                     enchantmentDefinition.supportedItems(),
                     (HolderSet<Item> holderSet) -> {
                         enchantmentDefinition.supportedItems = holderSet;
                     });
             enchantmentDefinition.primaryItems().ifPresent((HolderSet<Item> holderSetX) -> {
-                setSupportedEnchantmentItems(itemLookup.get(ModRegistry.getPrimaryEnchantableItemTag(holder.key())),
+                setSupportedEnchantmentItems(itemLookup,
+                        ModRegistry.getPrimaryEnchantableItemTag(holder.key()),
                         holderSetX,
                         (HolderSet<Item> holderSet) -> {
                             enchantmentDefinition.primaryItems = Optional.of(holderSet);
@@ -73,10 +86,19 @@ public class ItemCompatHandler {
         });
     }
 
-    private static void setSupportedEnchantmentItems(Optional<HolderSet.Named<Item>> optional, HolderSet<Item> supportedItems, Consumer<HolderSet<Item>> consumer) {
-        HolderSet<Item> holderSet = optional.map((HolderSet.Named<Item> holderSetX) -> (HolderSet<Item>) holderSetX)
+    private static <T> void setSupportedEnchantmentItems(HolderLookup.RegistryLookup<T> registryLookup, TagKey<T> tagKey, HolderSet<T> supportedItems, Consumer<HolderSet<T>> holderSetSetter) {
+        setEnchantmentProperty(registryLookup,
+                tagKey,
+                supportedItems,
+                holderSetSetter,
+                (HolderSet<T> o1, HolderSet<T> o2) -> new CompositeHolderSet.Or<>(List.of(o1, o2)));
+    }
+
+    private static <T> void setEnchantmentProperty(HolderLookup.RegistryLookup<T> registryLookup, TagKey<T> tagKey, HolderSet<T> originalHolderSet, Consumer<HolderSet<T>> holderSetSetter, BinaryOperator<HolderSet<T>> holderSetCombiner) {
+        Optional<HolderSet.Named<T>> optional = registryLookup.get(tagKey);
+        HolderSet<T> newHolderSet = optional.map((HolderSet.Named<T> holderSetX) -> (HolderSet<T>) holderSetX)
                 .orElse(HolderSet.empty());
-        consumer.accept(new CompositeHolderSet<>(List.of(supportedItems, holderSet)));
+        holderSetSetter.accept(holderSetCombiner.apply(originalHolderSet, newHolderSet));
     }
 
     public static EventResult onShieldBlock(LivingEntity blockingEntity, DamageSource damageSource, DefaultedFloat damageAmount) {
