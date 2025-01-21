@@ -4,7 +4,36 @@ A Minecraft mod. Downloads can be found on [CurseForge](https://www.curseforge.c
 
 ![](https://raw.githubusercontent.com/Fuzss/modresources/main/pages/data/universalenchants/banner.png)
 
-## Configuring the mod
+## Configuration (1.21+)
+As of Minecraft 1.21 enchantments have received a major implementation overhaul and are now fully controlled by data packs. For detailed instructions check out the [Minecraft Wiki](https://minecraft.wiki/w/Enchantment_definition).
+
+Universal Enchants only makes a few minor additions to vanilla's enchanting implementation now to help achieve its goal in a mod compatible way.
+
+### New Item Tags
+What items support which enchantments in vanilla is controlled via the `supported_items` and `primary_items` enchantment properties. Unfortunately vanilla reuses the tags used here between multiple enchantments, and so removing or supporting items for individual enchantments is a bit tricky.
+
+Therefore Universal Enchants dynamically implements two additional item tags per enchantment for adding new items. One for adding to `supported_items`, and a second one for `primary_items`.
+
+#### Tag Format
+- `<namespace>:secondary_enchantable/<path>` for adding to `supported_items`
+- `<namespace>:primary_enchantable/<path>` for adding to `primary_items`
+
+#### Example
+- `minecraft:efficiency` → `data/minecraft/tags/item/secondary_enchantable/efficiency.json`
+- `minecraft:efficiency` → `data/minecraft/tags/item/primary_enchantable/efficiency.json`
+
+### New Enchantment Tags
+Furthermore what enchantments can be applied on a single item simultaneously is controlled via the `exclusive_set` enchantment property. Once again vanilla reuses the same tag for multiple enchantments.
+
+Here Universal Enchants also adds one additional enchantment tag per enchantment for overriding entries in the vanilla set, so that enchantment compatibility can be restored.
+
+#### Tag Format
+- `<namespace>:inclusive_set/<path>`
+
+#### Example
+- `minecraft:efficiency` → `data/minecraft/tags/enchantment/inclusive_set/efficiency.json`
+
+## Configuration (-1.20.1)
 Universal Enchants allows you to define what enchantments can be applied to what items, and which enchantments are compatible with each other (meaning can be applied on a single item at the same time). This is done via individual `.json` config files (one per enchantment) found in `.minecraft/config/universalenchants`.
 
 The internal implementation of individual enchantments is rather complex and relies on a bunch of hard-coded special cases. All items enabled by default in the `items` fields are guaranteed to work, everything beyond that is untested and probably does not work, especially modded enchantments.
