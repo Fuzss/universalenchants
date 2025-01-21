@@ -6,8 +6,4 @@ dependencies {
 
     // Puzzles Lib
     modApi libs.puzzleslib.fabric
-
-    // NeoForge Data Pack Extensions
-    include libs.neoforgedatapackextensions.fabric
-    modLocalRuntime libs.neoforgedatapackextensions.fabric
 }
