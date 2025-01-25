@@ -1,0 +1,19 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "compatibilityLevel": "JAVA_17",
+  "package": "${modGroup}.mixin",
+  "mixins": [
+    "AnimalArmorItemMixin",
+    "LivingEntityMixin",
+    "ShearsItemMixin",
+    "ShieldItemMixin",
+    "ThrownTridentMixin"
+  ],
+  "client": [
+    "client.HorseArmorLayerMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}
