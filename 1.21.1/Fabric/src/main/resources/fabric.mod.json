@@ -39,7 +39,6 @@
     "fabricloader": ">=${minFabricVersion}",
     "fabric-api": ">=${minFabricApiVersion}",
     "puzzleslib": ">=${minPuzzlesVersion}",
-    "neoforgedatapackextensions": "*",
     "minecraft": "${minecraftVersion}",
     "java": ">=17"
   }
