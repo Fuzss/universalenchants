@@ -1,0 +1,10 @@
+{
+  "values": [
+    "#minecraft:swords",
+    "#minecraft:axes",
+    {
+      "id": "#c:tools/mace",
+      "required": false
+    }
+  ]
+}
