@@ -44,6 +44,16 @@ public abstract class CompositeHolderSet<T> extends HolderSet.ListBacked<T> {
         return super.canSerializeIn(owner);
     }
 
+    @Override
+    public boolean isBound() {
+        for (HolderSet<T> holderSet : this.components) {
+            if (!holderSet.isBound()) {
+                return false;
+            }
+        }
+        return true;
+    }
+
     public static class Or<T> extends CompositeHolderSet<T> {
 
         public Or(List<HolderSet<T>> components) {

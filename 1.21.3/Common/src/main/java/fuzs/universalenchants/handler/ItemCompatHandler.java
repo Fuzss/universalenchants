@@ -2,14 +2,12 @@ package fuzs.universalenchants.handler;
 
 import com.google.common.collect.ImmutableList;
 import fuzs.puzzleslib.api.event.v1.core.EventResult;
-import fuzs.puzzleslib.api.event.v1.data.DefaultedFloat;
 import fuzs.puzzleslib.api.event.v1.data.MutableInt;
 import fuzs.universalenchants.core.CompositeHolderSet;
 import fuzs.universalenchants.init.ModRegistry;
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.HolderSet;
-import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.TagKey;
@@ -41,10 +39,10 @@ public class ItemCompatHandler {
             EquipmentSlotGroup.HEAD,
             EquipmentSlotGroup.ARMOR);
 
-    public static void onTagsUpdated(RegistryAccess registryAccess, boolean client) {
+    public static void onTagsUpdated(HolderLookup.Provider registries, boolean client) {
         // use this event to modify registered enchantments directly, relevant fields are made mutable via access widener
-        HolderLookup.RegistryLookup<Item> itemLookup = registryAccess.lookupOrThrow(Registries.ITEM);
-        HolderLookup.RegistryLookup<Enchantment> enchantmentLookup = registryAccess.lookupOrThrow(Registries.ENCHANTMENT);
+        HolderLookup.RegistryLookup<Item> itemLookup = registries.lookupOrThrow(Registries.ITEM);
+        HolderLookup.RegistryLookup<Enchantment> enchantmentLookup = registries.lookupOrThrow(Registries.ENCHANTMENT);
         enchantmentLookup.listElements().forEach((Holder.Reference<Enchantment> holder) -> {
             Enchantment enchantment = holder.value();
             Enchantment.EnchantmentDefinition enchantmentDefinition = enchantment.definition();
@@ -101,7 +99,7 @@ public class ItemCompatHandler {
         holderSetSetter.accept(holderSetCombiner.apply(originalHolderSet, newHolderSet));
     }
 
-    public static EventResult onShieldBlock(LivingEntity blockingEntity, DamageSource damageSource, DefaultedFloat damageAmount) {
+    public static EventResult onShieldBlock(LivingEntity blockingEntity, DamageSource damageSource, float damageAmount) {
         if (blockingEntity.level() instanceof ServerLevel serverLevel) {
             if (damageSource.isDirect() && damageSource.getEntity() instanceof LivingEntity attackingEntity) {
                 EnchantmentHelper.doPostAttackEffectsWithItemSource(serverLevel,
