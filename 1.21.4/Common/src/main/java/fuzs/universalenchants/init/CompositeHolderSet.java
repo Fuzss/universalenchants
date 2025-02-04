@@ -1,4 +1,4 @@
-package fuzs.universalenchants.core;
+package fuzs.universalenchants.init;
 
 import com.google.common.collect.Sets;
 import com.mojang.datafixers.util.Either;

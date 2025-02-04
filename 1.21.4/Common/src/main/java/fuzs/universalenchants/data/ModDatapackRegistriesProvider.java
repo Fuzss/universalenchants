@@ -1,6 +1,6 @@
 package fuzs.universalenchants.data;
 
-import fuzs.puzzleslib.api.data.v2.AbstractRegistriesDatapackGenerator;
+import fuzs.puzzleslib.api.data.v2.AbstractDatapackRegistriesProvider;
 import fuzs.puzzleslib.api.data.v2.core.DataProviderContext;
 import fuzs.universalenchants.init.ModRegistry;
 import net.minecraft.advancements.critereon.DamageSourcePredicate;
@@ -32,14 +32,18 @@ import net.minecraft.world.level.storage.loot.predicates.LootItemRandomChanceCon
 
 import java.util.Optional;
 
-public class ModRegistriesDatapackProvider extends AbstractRegistriesDatapackGenerator<Enchantment> {
+public class ModDatapackRegistriesProvider extends AbstractDatapackRegistriesProvider {
 
-    public ModRegistriesDatapackProvider(DataProviderContext context) {
-        super(Registries.ENCHANTMENT, context);
+    public ModDatapackRegistriesProvider(DataProviderContext context) {
+        super(context);
     }
 
     @Override
-    public void addBootstrap(BootstrapContext<Enchantment> context) {
+    public void addBootstrap(RegistryBoostrapConsumer consumer) {
+        consumer.add(Registries.ENCHANTMENT, ModDatapackRegistriesProvider::boostrapEnchantments);
+    }
+
+    static void boostrapEnchantments(BootstrapContext<Enchantment> context) {
         HolderGetter<Item> itemLookup = context.lookup(Registries.ITEM);
         HolderGetter<Enchantment> enchantmentLookup = context.lookup(Registries.ENCHANTMENT);
         // allow frost walker to replace sea vegetation and itself, also remove on ground check to enable jump-sprinting across water

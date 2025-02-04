@@ -100,7 +100,7 @@ public class ModItemTagProvider extends AbstractTagProvider<Item> {
     private void addSupportedItems(Consumer<AbstractTagAppender<Item>> consumer, ResourceKey<Enchantment>... enchantments) {
         for (ResourceKey<Enchantment> enchantment : enchantments) {
             TagKey<Item> tagKey = ModRegistry.getSecondaryEnchantableItemTag(enchantment);
-            consumer.accept(this.add(tagKey));
+            consumer.accept(this.tag(tagKey));
         }
     }
 }

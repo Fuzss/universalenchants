@@ -16,7 +16,7 @@ public class ModBlockTagProvider extends AbstractTagProvider<Block> {
 
     @Override
     public void addTags(HolderLookup.Provider registries) {
-        this.add(ModRegistry.FROSTED_ICE_REPLACEABLES_BLOCK_TAG)
+        this.tag(ModRegistry.FROSTED_ICE_REPLACEABLES_BLOCK_TAG)
                 .add(Blocks.WATER,
                         Blocks.BUBBLE_COLUMN,
                         Blocks.KELP,

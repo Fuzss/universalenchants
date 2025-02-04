@@ -7,7 +7,7 @@ import fuzs.universalenchants.UniversalEnchants;
 import fuzs.universalenchants.data.ModBlockTagProvider;
 import fuzs.universalenchants.data.ModEnchantmentTagProvider;
 import fuzs.universalenchants.data.ModItemTagProvider;
-import fuzs.universalenchants.data.ModRegistriesDatapackProvider;
+import fuzs.universalenchants.data.ModDatapackRegistriesProvider;
 import fuzs.universalenchants.handler.BetterEnchantsHandler;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.bus.api.IEventBus;
@@ -25,7 +25,7 @@ public class UniversalEnchantsNeoForge {
                 ModItemTagProvider::new,
                 ModBlockTagProvider::new,
                 ModEnchantmentTagProvider::new,
-                ModRegistriesDatapackProvider::new);
+                ModDatapackRegistriesProvider::new);
     }
 
     @Deprecated(forRemoval = true)
