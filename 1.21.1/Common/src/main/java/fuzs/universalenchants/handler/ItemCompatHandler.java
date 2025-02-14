@@ -141,8 +141,10 @@ public class ItemCompatHandler {
     public static void onComputeEnchantedLootBonus(LivingEntity entity, @Nullable DamageSource damageSource, Holder<Enchantment> enchantment, MutableInt enchantmentLevel) {
         if (enchantment.is(Enchantments.LOOTING) && enchantmentLevel.getAsInt() == 0) {
             if (damageSource != null && damageSource.getDirectEntity() instanceof AbstractArrow abstractArrow) {
-                enchantmentLevel.accept(EnchantmentHelper.getItemEnchantmentLevel(enchantment,
-                        abstractArrow.getWeaponItem()));
+                ItemStack itemStack = abstractArrow.getWeaponItem();
+                if (itemStack != null) {
+                    enchantmentLevel.accept(EnchantmentHelper.getItemEnchantmentLevel(enchantment, itemStack));
+                }
             }
         }
     }
