@@ -33,7 +33,7 @@ import java.util.function.BinaryOperator;
 import java.util.function.Consumer;
 
 public class ItemCompatHandler {
-    private static final Set<EquipmentSlotGroup> ARMOR_EQUIPMENT_SLOT_GROUPS = Set.of(EquipmentSlotGroup.FEET,
+    public static final Set<EquipmentSlotGroup> ARMOR_EQUIPMENT_SLOT_GROUPS = Set.of(EquipmentSlotGroup.FEET,
             EquipmentSlotGroup.LEGS,
             EquipmentSlotGroup.CHEST,
             EquipmentSlotGroup.HEAD,
