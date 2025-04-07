@@ -2,6 +2,7 @@ package fuzs.universalenchants.handler;
 
 import com.google.common.collect.ImmutableList;
 import fuzs.puzzleslib.api.event.v1.core.EventResult;
+import fuzs.puzzleslib.api.event.v1.data.DefaultedFloat;
 import fuzs.puzzleslib.api.event.v1.data.MutableInt;
 import fuzs.universalenchants.init.CompositeHolderSet;
 import fuzs.universalenchants.init.ModRegistry;
@@ -99,7 +100,7 @@ public class ItemCompatHandler {
         holderSetSetter.accept(holderSetCombiner.apply(originalHolderSet, newHolderSet));
     }
 
-    public static EventResult onShieldBlock(LivingEntity blockingEntity, DamageSource damageSource, float damageAmount) {
+    public static EventResult onShieldBlock(LivingEntity blockingEntity, DamageSource damageSource, DefaultedFloat blockedDamage) {
         if (blockingEntity.level() instanceof ServerLevel serverLevel) {
             if (damageSource.isDirect() && damageSource.getEntity() instanceof LivingEntity attackingEntity) {
                 EnchantmentHelper.doPostAttackEffectsWithItemSource(serverLevel,

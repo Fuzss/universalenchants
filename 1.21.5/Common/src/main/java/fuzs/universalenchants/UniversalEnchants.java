@@ -17,14 +17,15 @@ import net.minecraft.core.component.DataComponentPatch;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
+import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
-import net.minecraft.world.item.AnimalArmorItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ShearsItem;
 import net.minecraft.world.item.ShieldItem;
 import net.minecraft.world.item.component.ItemAttributeModifiers;
 import net.minecraft.world.item.enchantment.Enchantable;
+import net.minecraft.world.item.equipment.Equippable;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -50,19 +51,28 @@ public class UniversalEnchants implements ModConstructor {
                 consumer.accept((DataComponentMap components) -> {
                     return DataComponentPatch.builder().set(DataComponents.ENCHANTABLE, new Enchantable(1)).build();
                 });
-            } else if (item instanceof AnimalArmorItem) {
+            } else {
                 consumer.accept((DataComponentMap components) -> {
-                    ItemAttributeModifiers itemAttributeModifiers = components.getOrDefault(DataComponents.ATTRIBUTE_MODIFIERS,
-                            ItemAttributeModifiers.EMPTY);
-                    double defenseValue = itemAttributeModifiers.modifiers()
-                            .stream()
-                            .filter(entry -> entry.attribute().is(Attributes.ARMOR))
-                            .map(ItemAttributeModifiers.Entry::modifier)
-                            .mapToDouble(AttributeModifier::amount)
-                            .sum();
-                    return DataComponentPatch.builder()
-                            .set(DataComponents.ENCHANTABLE, new Enchantable(Math.max(1, Mth.ceil(defenseValue))))
-                            .build();
+                    if (!components.has(DataComponents.ENCHANTABLE)) {
+                        Equippable equippable = components.get(DataComponents.EQUIPPABLE);
+                        if (equippable != null && equippable.slot() == EquipmentSlot.BODY) {
+                            ItemAttributeModifiers itemAttributeModifiers = components.getOrDefault(DataComponents.ATTRIBUTE_MODIFIERS,
+                                    ItemAttributeModifiers.EMPTY);
+                            double defenseValue = itemAttributeModifiers.modifiers()
+                                    .stream()
+                                    .filter((ItemAttributeModifiers.Entry entry) -> entry.attribute()
+                                            .is(Attributes.ARMOR))
+                                    .map(ItemAttributeModifiers.Entry::modifier)
+                                    .mapToDouble(AttributeModifier::amount)
+                                    .sum();
+                            return DataComponentPatch.builder()
+                                    .set(DataComponents.ENCHANTABLE,
+                                            new Enchantable(Math.max(1, Mth.ceil(defenseValue))))
+                                    .build();
+                        }
+                    }
+
+                    return DataComponentPatch.EMPTY;
                 });
             }
         });

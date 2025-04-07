@@ -28,9 +28,10 @@ public class ItemTooltipHandler {
     public static void onItemTooltip(ItemStack itemStack, List<Component> tooltipLines, Item.TooltipContext tooltipContext, @Nullable Player player, TooltipFlag tooltipFlag) {
         // armor enchantments are now compatible with player and animals armor slots, attributes therefore are displayed for both slot types
         // remove the attribute lines again that do not fit the type of armor
-        ItemAttributeModifiers itemAttributeModifiers = itemStack.get(DataComponents.ATTRIBUTE_MODIFIERS);
-        if (itemAttributeModifiers != null && itemAttributeModifiers.showInTooltip()) {
-            Collection<EquipmentSlotGroup> equipmentSlotGroups = getEquipmentSlotGroupsToRemove(itemStack);
+        if (!itemStack.getOrDefault(DataComponents.ATTRIBUTE_MODIFIERS, ItemAttributeModifiers.EMPTY)
+                .modifiers()
+                .isEmpty()) {
+            Collection<EquipmentSlotGroup> equipmentSlotGroups = getEquipmentSlotGroupsForRemoval(itemStack);
             for (EquipmentSlotGroup equipmentSlotGroup : equipmentSlotGroups) {
                 boolean isRemoving = false;
                 for (int i = 0; i < tooltipLines.size(); i++) {
@@ -56,7 +57,7 @@ public class ItemTooltipHandler {
         }
     }
 
-    private static Collection<EquipmentSlotGroup> getEquipmentSlotGroupsToRemove(ItemStack itemStack) {
+    private static Collection<EquipmentSlotGroup> getEquipmentSlotGroupsForRemoval(ItemStack itemStack) {
         Equippable equippable = itemStack.get(DataComponents.EQUIPPABLE);
         if (equippable != null && equippable.slot() == EquipmentSlot.BODY) {
             return ItemCompatHandler.ARMOR_EQUIPMENT_SLOT_GROUPS;
