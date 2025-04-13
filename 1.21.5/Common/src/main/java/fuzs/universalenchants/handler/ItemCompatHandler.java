@@ -13,6 +13,7 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.TagKey;
 import net.minecraft.util.Mth;
+import net.minecraft.util.Unit;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.EquipmentSlotGroup;
 import net.minecraft.world.entity.LivingEntity;
@@ -39,6 +40,7 @@ public class ItemCompatHandler {
             EquipmentSlotGroup.CHEST,
             EquipmentSlotGroup.HEAD,
             EquipmentSlotGroup.ARMOR);
+    static final ThreadLocal<Unit> IS_BLOCKING_WITH_SHIELD = new ThreadLocal<>();
 
     public static void onTagsUpdated(HolderLookup.Provider registries, boolean client) {
         // use this event to modify registered enchantments directly, relevant fields are made mutable via access widener
@@ -103,23 +105,28 @@ public class ItemCompatHandler {
     public static EventResult onShieldBlock(LivingEntity blockingEntity, DamageSource damageSource, DefaultedFloat blockedDamage) {
         if (blockingEntity.level() instanceof ServerLevel serverLevel) {
             if (damageSource.isDirect() && damageSource.getEntity() instanceof LivingEntity attackingEntity) {
-                EnchantmentHelper.doPostAttackEffectsWithItemSource(serverLevel,
-                        blockingEntity,
-                        damageSource,
-                        blockingEntity.getUseItem());
-                float attackKnockback = (float) blockingEntity.getAttributeValue(Attributes.ATTACK_KNOCKBACK);
-                attackKnockback = EnchantmentHelper.modifyKnockback(serverLevel,
-                        blockingEntity.getUseItem(),
-                        attackingEntity,
-                        damageSource,
-                        attackKnockback);
-                // also fixes a vanilla bug where shield do not deal knockback in LivingEntity::blockedByShield,
-                // since the knockback method is called on the blocking entity and not the attacking entity
-                // if that should not happen, so knockback only applies when the actual knockback enchantment is present
-                // include a check here if the knockback is different from the original attribute value
-                attackingEntity.knockback(0.5 * attackKnockback,
-                        blockingEntity.getX() - attackingEntity.getX(),
-                        blockingEntity.getZ() - attackingEntity.getZ());
+                // fix for mods hooking into post attack effects and triggering this event (namely Apotheosis)
+                if (IS_BLOCKING_WITH_SHIELD.get() == null) {
+                    IS_BLOCKING_WITH_SHIELD.set(Unit.INSTANCE);
+                    EnchantmentHelper.doPostAttackEffectsWithItemSource(serverLevel,
+                            blockingEntity,
+                            damageSource,
+                            blockingEntity.getUseItem());
+                    float attackKnockback = (float) blockingEntity.getAttributeValue(Attributes.ATTACK_KNOCKBACK);
+                    attackKnockback = EnchantmentHelper.modifyKnockback(serverLevel,
+                            blockingEntity.getUseItem(),
+                            attackingEntity,
+                            damageSource,
+                            attackKnockback);
+                    // also fixes a vanilla bug where shield do not deal knockback in LivingEntity::blockedByShield,
+                    // since the knockback method is called on the blocking entity and not the attacking entity
+                    // if that should not happen, so knockback only applies when the actual knockback enchantment is present
+                    // include a check here if the knockback is different from the original attribute value
+                    attackingEntity.knockback(0.5 * attackKnockback,
+                            blockingEntity.getX() - attackingEntity.getX(),
+                            blockingEntity.getZ() - attackingEntity.getZ());
+                    IS_BLOCKING_WITH_SHIELD.remove();
+                }
             }
         }
         return EventResult.PASS;
