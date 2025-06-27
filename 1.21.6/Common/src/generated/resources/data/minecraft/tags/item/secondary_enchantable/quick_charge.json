@@ -1,0 +1,12 @@
+{
+  "values": [
+    {
+      "id": "#c:tools/spear",
+      "required": false
+    },
+    {
+      "id": "#c:tools/bow",
+      "required": false
+    }
+  ]
+}
