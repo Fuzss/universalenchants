@@ -2,37 +2,40 @@ package fuzs.universalenchants.handler;
 
 import com.google.common.collect.ImmutableList;
 import fuzs.puzzleslib.api.event.v1.core.EventResult;
-import fuzs.puzzleslib.api.event.v1.data.DefaultedFloat;
+import fuzs.puzzleslib.api.event.v1.data.MutableFloat;
 import fuzs.puzzleslib.api.event.v1.data.MutableInt;
 import fuzs.universalenchants.init.CompositeHolderSet;
 import fuzs.universalenchants.init.ModRegistry;
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.HolderSet;
+import net.minecraft.core.component.DataComponentMap;
+import net.minecraft.core.component.DataComponentPatch;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.TagKey;
 import net.minecraft.util.Mth;
 import net.minecraft.util.Unit;
 import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.EquipmentSlotGroup;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
-import net.minecraft.world.entity.projectile.AbstractArrow;
-import net.minecraft.world.item.BowItem;
-import net.minecraft.world.item.Item;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.TridentItem;
+import net.minecraft.world.item.*;
+import net.minecraft.world.item.component.ItemAttributeModifiers;
+import net.minecraft.world.item.enchantment.Enchantable;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
-import net.minecraft.world.item.enchantment.Enchantments;
-import org.jetbrains.annotations.Nullable;
+import net.minecraft.world.item.equipment.Equippable;
 
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.BinaryOperator;
 import java.util.function.Consumer;
+import java.util.function.Function;
 
 public class ItemCompatHandler {
     public static final Set<EquipmentSlotGroup> ARMOR_EQUIPMENT_SLOT_GROUPS = Set.of(EquipmentSlotGroup.FEET,
@@ -41,6 +44,35 @@ public class ItemCompatHandler {
             EquipmentSlotGroup.HEAD,
             EquipmentSlotGroup.ARMOR);
     static final ThreadLocal<Unit> IS_BLOCKING_WITH_SHIELD = new ThreadLocal<>();
+
+    public static void onFinalizeItemComponents(Item item, Consumer<Function<DataComponentMap, DataComponentPatch>> consumer) {
+        if (item instanceof ShearsItem || item instanceof ShieldItem) {
+            consumer.accept((DataComponentMap components) -> {
+                return DataComponentPatch.builder().set(DataComponents.ENCHANTABLE, new Enchantable(1)).build();
+            });
+        } else {
+            consumer.accept((DataComponentMap components) -> {
+                if (!components.has(DataComponents.ENCHANTABLE)) {
+                    Equippable equippable = components.get(DataComponents.EQUIPPABLE);
+                    if (equippable != null && equippable.slot() == EquipmentSlot.BODY) {
+                        ItemAttributeModifiers itemAttributeModifiers = components.getOrDefault(DataComponents.ATTRIBUTE_MODIFIERS,
+                                ItemAttributeModifiers.EMPTY);
+                        double defenseValue = itemAttributeModifiers.modifiers()
+                                .stream()
+                                .filter((ItemAttributeModifiers.Entry entry) -> entry.attribute().is(Attributes.ARMOR))
+                                .map(ItemAttributeModifiers.Entry::modifier)
+                                .mapToDouble(AttributeModifier::amount)
+                                .sum();
+                        return DataComponentPatch.builder()
+                                .set(DataComponents.ENCHANTABLE, new Enchantable(Math.max(1, Mth.ceil(defenseValue))))
+                                .build();
+                    }
+                }
+
+                return DataComponentPatch.EMPTY;
+            });
+        }
+    }
 
     public static void onTagsUpdated(HolderLookup.Provider registries, boolean client) {
         // use this event to modify registered enchantments directly, relevant fields are made mutable via access widener
@@ -102,7 +134,7 @@ public class ItemCompatHandler {
         holderSetSetter.accept(holderSetCombiner.apply(originalHolderSet, newHolderSet));
     }
 
-    public static EventResult onShieldBlock(LivingEntity blockingEntity, DamageSource damageSource, DefaultedFloat blockedDamage) {
+    public static EventResult onShieldBlock(LivingEntity blockingEntity, DamageSource damageSource, MutableFloat blockedDamage) {
         if (blockingEntity.level() instanceof ServerLevel serverLevel) {
             if (damageSource.isDirect() && damageSource.getEntity() instanceof LivingEntity attackingEntity) {
                 // fix for mods hooking into post attack effects and triggering this event (namely Apotheosis)
@@ -142,16 +174,5 @@ public class ItemCompatHandler {
             useItemRemaining.mapInt(duration -> duration - Mth.floor((1.25F - chargingTime) / 0.25F));
         }
         return EventResult.PASS;
-    }
-
-    public static void onComputeEnchantedLootBonus(LivingEntity entity, @Nullable DamageSource damageSource, Holder<Enchantment> enchantment, MutableInt enchantmentLevel) {
-        if (enchantment.is(Enchantments.LOOTING) && enchantmentLevel.getAsInt() == 0) {
-            if (damageSource != null && damageSource.getDirectEntity() instanceof AbstractArrow abstractArrow) {
-                ItemStack itemStack = abstractArrow.getWeaponItem();
-                if (itemStack != null) {
-                    enchantmentLevel.accept(EnchantmentHelper.getItemEnchantmentLevel(enchantment, itemStack));
-                }
-            }
-        }
     }
 }

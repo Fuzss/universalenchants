@@ -1,11 +1,9 @@
 package fuzs.universalenchants.handler;
 
 import fuzs.puzzleslib.api.event.v1.core.EventResult;
-import fuzs.puzzleslib.api.event.v1.data.DefaultedInt;
 import fuzs.puzzleslib.api.event.v1.data.MutableFloat;
 import fuzs.puzzleslib.api.event.v1.data.MutableInt;
 import fuzs.puzzleslib.api.event.v1.data.MutableValue;
-import fuzs.puzzleslib.api.init.v3.registry.LookupHelper;
 import fuzs.puzzleslib.api.item.v2.EnchantingHelper;
 import fuzs.universalenchants.UniversalEnchants;
 import fuzs.universalenchants.config.ServerConfig;
@@ -22,13 +20,12 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.item.enchantment.Enchantments;
-import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import org.jetbrains.annotations.Nullable;
 
 public class BetterEnchantsHandler {
 
-    public static void onGetProjectile(LivingEntity livingEntity, ItemStack weaponItemStack, MutableValue<ItemStack> projectileItemStack) {
+    public static void onPickProjectile(LivingEntity livingEntity, ItemStack weaponItemStack, MutableValue<ItemStack> projectileItemStack) {
         if (!UniversalEnchants.CONFIG.get(ServerConfig.class).trueInfinity) return;
         if (livingEntity.level() instanceof ServerLevel serverLevel && projectileItemStack.get().isEmpty()) {
             ItemStack itemStack = new ItemStack(Items.ARROW);
@@ -47,11 +44,10 @@ public class BetterEnchantsHandler {
         return EventResult.PASS;
     }
 
-    public static EventResult onFarmlandTrample(Level level, BlockPos blockPos, BlockState blockState, double fallDistance, Entity entity) {
+    public static EventResult onFarmlandTrample(ServerLevel serverLevel, BlockPos blockPos, BlockState blockState, double fallDistance, Entity entity) {
         if (!UniversalEnchants.CONFIG.get(ServerConfig.class).noFarmlandTrample) return EventResult.PASS;
         if (entity instanceof LivingEntity livingEntity) {
-            Holder<Enchantment> enchantment = LookupHelper.lookupEnchantment(livingEntity,
-                    Enchantments.FEATHER_FALLING);
+            Holder<Enchantment> enchantment = EnchantingHelper.lookup(livingEntity, Enchantments.FEATHER_FALLING);
             if (EnchantmentHelper.getEnchantmentLevel(enchantment, livingEntity) > 0) {
                 return EventResult.INTERRUPT;
             }
@@ -59,24 +55,24 @@ public class BetterEnchantsHandler {
         return EventResult.PASS;
     }
 
-    public static EventResult onLivingExperienceDrop(LivingEntity entity, @Nullable Player attackingPlayer, DefaultedInt droppedExperience) {
+    public static EventResult onLivingExperienceDrop(LivingEntity entity, @Nullable Player attackingPlayer, MutableInt droppedExperience) {
         if (!UniversalEnchants.CONFIG.get(ServerConfig.class).lootBonusBoostsXp) return EventResult.PASS;
         // very basic hack for multiplying xp by looting level
         // e.g. our code for looting on ranged weapons will not trigger as the damage source is not correct
-        // (it will still trigger though when they ranged weapon is still in the main hand, since vanilla checks the main hand enchantments)
+        // (it will still trigger though when the ranged weapon is still in the main hand, since vanilla checks the main hand enchantments)
         // unfortunately the original damage source is not obtainable in this context
-        int enchantmentLevel = EnchantingHelper.getMobLootingLevel(entity,
-                attackingPlayer,
-                attackingPlayer != null ? entity.level().damageSources().playerAttack(attackingPlayer) : null);
-        if (enchantmentLevel > 0) {
-            droppedExperience.mapDefaultInt(value -> getDroppedXp(value, enchantmentLevel));
+        if (attackingPlayer != null) {
+            int enchantmentLevel = EnchantingHelper.getEnchantmentLevel(Enchantments.LOOTING, attackingPlayer);
+            if (enchantmentLevel > 0) {
+                droppedExperience.mapInt((int value) -> getDroppedXp(value, enchantmentLevel));
+            }
         }
         return EventResult.PASS;
     }
 
     public static void onDropExperience(ServerLevel serverLevel, BlockPos blockPos, BlockState blockState, Player player, ItemStack itemInHand, MutableInt experienceToDrop) {
         if (!UniversalEnchants.CONFIG.get(ServerConfig.class).lootBonusBoostsXp) return;
-        Holder<Enchantment> enchantment = LookupHelper.lookupEnchantment(serverLevel, Enchantments.FORTUNE);
+        Holder<Enchantment> enchantment = EnchantingHelper.lookup(serverLevel, Enchantments.FORTUNE);
         int enchantmentLevel = EnchantmentHelper.getItemEnchantmentLevel(enchantment, itemInHand);
         if (enchantmentLevel > 0) {
             experienceToDrop.mapInt(value -> getDroppedXp(value, enchantmentLevel));

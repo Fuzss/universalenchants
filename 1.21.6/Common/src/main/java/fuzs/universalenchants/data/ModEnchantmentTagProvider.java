@@ -41,7 +41,7 @@ public class ModEnchantmentTagProvider extends AbstractTagProvider<Enchantment> 
     }
 
     private void addInclusiveEnchantments(ResourceKey<Enchantment> primaryEnchantment, ResourceKey<Enchantment> secondaryEnchantment) {
-        this.tag(ModRegistry.getInclusiveSetEnchantmentTag(primaryEnchantment)).add(secondaryEnchantment);
-        this.tag(ModRegistry.getInclusiveSetEnchantmentTag(secondaryEnchantment)).add(primaryEnchantment);
+        this.tag(ModRegistry.getInclusiveSetEnchantmentTag(primaryEnchantment)).addKey(secondaryEnchantment);
+        this.tag(ModRegistry.getInclusiveSetEnchantmentTag(secondaryEnchantment)).addKey(primaryEnchantment);
     }
 }

@@ -1,19 +1,18 @@
 package fuzs.universalenchants.neoforge;
 
 import fuzs.puzzleslib.api.core.v1.ModConstructor;
-import fuzs.puzzleslib.api.event.v1.data.MutableValue;
 import fuzs.puzzleslib.neoforge.api.data.v2.core.DataProviderHelper;
 import fuzs.universalenchants.UniversalEnchants;
 import fuzs.universalenchants.data.ModBlockTagProvider;
+import fuzs.universalenchants.data.ModDatapackRegistriesProvider;
 import fuzs.universalenchants.data.ModEnchantmentTagProvider;
 import fuzs.universalenchants.data.ModItemTagProvider;
-import fuzs.universalenchants.data.ModDatapackRegistriesProvider;
 import fuzs.universalenchants.handler.BetterEnchantsHandler;
-import net.minecraft.world.item.ItemStack;
+import net.minecraft.server.level.ServerLevel;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.neoforge.common.NeoForge;
-import net.neoforged.neoforge.event.entity.living.LivingGetProjectileEvent;
+import net.neoforged.neoforge.event.level.BlockEvent;
 
 @Mod(UniversalEnchants.MOD_ID)
 public class UniversalEnchantsNeoForge {
@@ -28,12 +27,16 @@ public class UniversalEnchantsNeoForge {
                 ModDatapackRegistriesProvider::new);
     }
 
-    @Deprecated(forRemoval = true)
     private static void registerEventHandlers(IEventBus eventBus) {
-        eventBus.addListener((final LivingGetProjectileEvent evt) -> {
-            MutableValue<ItemStack> ammoItemStack = MutableValue.fromEvent(evt::setProjectileItemStack,
-                    evt::getProjectileItemStack);
-            BetterEnchantsHandler.onGetProjectile(evt.getEntity(), evt.getProjectileWeaponItemStack(), ammoItemStack);
+        eventBus.addListener((final BlockEvent.FarmlandTrampleEvent evt) -> {
+            if (!(evt.getLevel() instanceof ServerLevel serverLevel)) return;
+            if (BetterEnchantsHandler.onFarmlandTrample(serverLevel,
+                    evt.getPos(),
+                    evt.getState(),
+                    evt.getFallDistance(),
+                    evt.getEntity()).isInterrupt()) {
+                evt.setCanceled(true);
+            }
         });
     }
 }
