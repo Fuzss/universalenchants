@@ -77,7 +77,7 @@ public class ModItemTagProvider extends AbstractTagProvider<Item> {
                 Enchantments.BINDING_CURSE,
                 Enchantments.SOUL_SPEED,
                 Enchantments.VANISHING_CURSE);
-        this.addSupportedItems("c:tools/shield", Enchantments.THORNS, Enchantments.KNOCKBACK);
+        this.addSupportedItems("c:tools/shield", Enchantments.THORNS, Enchantments.KNOCKBACK, Enchantments.FIRE_ASPECT);
         this.addSupportedItems("c:armors", Enchantments.THORNS);
     }
 

@@ -18,6 +18,7 @@ import net.minecraft.tags.TagKey;
 import net.minecraft.util.Mth;
 import net.minecraft.util.Unit;
 import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.EquipmentSlotGroup;
 import net.minecraft.world.entity.LivingEntity;
@@ -25,10 +26,9 @@ import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.item.*;
 import net.minecraft.world.item.component.ItemAttributeModifiers;
-import net.minecraft.world.item.enchantment.Enchantable;
-import net.minecraft.world.item.enchantment.Enchantment;
-import net.minecraft.world.item.enchantment.EnchantmentHelper;
+import net.minecraft.world.item.enchantment.*;
 import net.minecraft.world.item.equipment.Equippable;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 import java.util.Optional;
@@ -137,11 +137,11 @@ public class ItemCompatHandler {
     public static EventResult onShieldBlock(LivingEntity blockingEntity, DamageSource damageSource, MutableFloat blockedDamage) {
         if (blockingEntity.level() instanceof ServerLevel serverLevel) {
             if (damageSource.isDirect() && damageSource.getEntity() instanceof LivingEntity attackingEntity) {
-                // fix for mods hooking into post attack effects and triggering this event (namely Apotheosis)
+                // fix for mods hooking into post-attack effects and triggering this event (namely Apotheosis)
                 if (IS_BLOCKING_WITH_SHIELD.get() == null) {
                     IS_BLOCKING_WITH_SHIELD.set(Unit.INSTANCE);
-                    EnchantmentHelper.doPostAttackEffectsWithItemSource(serverLevel,
-                            blockingEntity,
+                    doPostAttackEffectsWithItemSource(serverLevel,
+                            attackingEntity,
                             damageSource,
                             blockingEntity.getUseItem());
                     float attackKnockback = (float) blockingEntity.getAttributeValue(Attributes.ATTACK_KNOCKBACK);
@@ -150,7 +150,7 @@ public class ItemCompatHandler {
                             attackingEntity,
                             damageSource,
                             attackKnockback);
-                    // also fixes a vanilla bug where shield do not deal knockback in LivingEntity::blockedByShield,
+                    // also fixes a vanilla bug where shields do not deal knockback in LivingEntity::blockedByShield,
                     // since the knockback method is called on the blocking entity and not the attacking entity
                     // if that should not happen, so knockback only applies when the actual knockback enchantment is present
                     // include a check here if the knockback is different from the original attribute value
@@ -164,12 +164,41 @@ public class ItemCompatHandler {
         return EventResult.PASS;
     }
 
+    /**
+     * An adjusted version of
+     * {@link EnchantmentHelper#doPostAttackEffectsWithItemSource(ServerLevel, Entity, DamageSource, ItemStack)} that
+     * runs the post-attack for the victim also for
+     * {@link EnchantmentHelper#runIterationOnItem(ItemStack, EquipmentSlot, LivingEntity,
+     * EnchantmentHelper.EnchantmentInSlotVisitor)}, and not just
+     * {@link EnchantmentHelper#runIterationOnEquipment(LivingEntity, EnchantmentHelper.EnchantmentInSlotVisitor)}.
+     * <p>
+     * This allows shield enchantments such as thorns and fire aspect to work correctly.
+     */
+    public static void doPostAttackEffectsWithItemSource(ServerLevel serverLevel, Entity entity, DamageSource damageSource, @Nullable ItemStack itemSource) {
+        if (itemSource != null) {
+            if (entity instanceof LivingEntity livingEntity) {
+                EnchantmentHelper.runIterationOnItem(itemSource,
+                        EquipmentSlot.MAINHAND,
+                        livingEntity,
+                        (Holder<Enchantment> holder, int enchantmentLevel, EnchantedItemInUse enchantedItemInUse) -> holder.value()
+                                .doPostAttack(serverLevel,
+                                        enchantmentLevel,
+                                        enchantedItemInUse,
+                                        EnchantmentTarget.VICTIM,
+                                        entity,
+                                        damageSource));
+            }
+        }
+
+        EnchantmentHelper.doPostAttackEffectsWithItemSource(serverLevel, entity, damageSource, itemSource);
+    }
+
     public static EventResult onUseItemTick(LivingEntity entity, ItemStack useItem, MutableInt useItemRemaining) {
         Item item = useItem.getItem();
         int itemUseDuration = useItem.getUseDuration(entity) - useItemRemaining.getAsInt();
         if (item instanceof BowItem && itemUseDuration < 20 || item instanceof TridentItem && itemUseDuration < 10) {
             // quick charge enchantment for bows and tridents
-            // values same as crossbow, but speed improvements is not relative to actual item use duration now
+            // the values are the same as for crossbows, but speed improvement is not relative to actual item use duration now
             float chargingTime = EnchantmentHelper.modifyCrossbowChargingTime(useItem, entity, 1.25F);
             useItemRemaining.mapInt(duration -> duration - Mth.floor((1.25F - chargingTime) / 0.25F));
         }

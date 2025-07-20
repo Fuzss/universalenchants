@@ -21,10 +21,10 @@ public class UniversalEnchantsNeoForge {
         ModConstructor.construct(UniversalEnchants.MOD_ID, UniversalEnchants::new);
         registerEventHandlers(NeoForge.EVENT_BUS);
         DataProviderHelper.registerDataProviders(UniversalEnchants.MOD_ID,
+                ModDatapackRegistriesProvider::new,
                 ModItemTagProvider::new,
                 ModBlockTagProvider::new,
-                ModEnchantmentTagProvider::new,
-                ModDatapackRegistriesProvider::new);
+                ModEnchantmentTagProvider::new);
     }
 
     private static void registerEventHandlers(IEventBus eventBus) {

@@ -43,7 +43,7 @@ public class ModDatapackRegistriesProvider extends AbstractDatapackRegistriesPro
         consumer.add(Registries.ENCHANTMENT, ModDatapackRegistriesProvider::boostrapEnchantments);
     }
 
-    static void boostrapEnchantments(BootstrapContext<Enchantment> context) {
+    public static void boostrapEnchantments(BootstrapContext<Enchantment> context) {
         HolderGetter<Item> itemLookup = context.lookup(Registries.ITEM);
         HolderGetter<Enchantment> enchantmentLookup = context.lookup(Registries.ENCHANTMENT);
         // allow frost walker to replace sea vegetation and itself, also remove on ground check to enable jump-sprinting across water
