@@ -2,11 +2,11 @@
   "values": [
     "#minecraft:axes",
     {
-      "id": "#c:tools/spear",
+      "id": "#c:tools/mace",
       "required": false
     },
     {
-      "id": "#c:tools/mace",
+      "id": "#c:tools/spear",
       "required": false
     }
   ]

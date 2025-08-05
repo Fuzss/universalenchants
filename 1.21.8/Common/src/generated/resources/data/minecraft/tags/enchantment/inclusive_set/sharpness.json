@@ -1,11 +1,11 @@
 {
   "values": [
-    "minecraft:smite",
     "minecraft:bane_of_arthropods",
-    "minecraft:impaling",
-    "minecraft:density",
+    "minecraft:breach",
     "minecraft:breach",
     "minecraft:density",
-    "minecraft:breach"
+    "minecraft:density",
+    "minecraft:impaling",
+    "minecraft:smite"
   ]
 }

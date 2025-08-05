@@ -1,8 +1,8 @@
 {
   "values": [
-    "minecraft:sharpness",
+    "minecraft:density",
     "minecraft:density",
     "minecraft:sharpness",
-    "minecraft:density"
+    "minecraft:sharpness"
   ]
 }

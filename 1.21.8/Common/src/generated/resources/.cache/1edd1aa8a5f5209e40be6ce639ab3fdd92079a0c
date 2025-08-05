@@ -1,8 +1,8 @@
-// 1.21.8	2025-07-18T14:25:15.885535	Tags for minecraft:enchantment mod id vanilla
+// 1.21.8	2025-08-05T15:43:26.382493	Tags for minecraft:enchantment mod id vanilla
 ea07204701e693ceffbacca4360401acd16b2879 data/minecraft/tags/enchantment/inclusive_set/bane_of_arthropods.json
 65309b9f8caeeda9835de7c9232533f4c56b8444 data/minecraft/tags/enchantment/inclusive_set/blast_protection.json
-a15330b153810f6148011a6a54e5987dd7c1b137 data/minecraft/tags/enchantment/inclusive_set/breach.json
-6af5a09ba20b816f353c8caa8d2314c84df393e5 data/minecraft/tags/enchantment/inclusive_set/density.json
+ef224c975a8f14f32fd155b32e33408e17b06050 data/minecraft/tags/enchantment/inclusive_set/breach.json
+acca573d6593be763d5b00794b1279981103c78f data/minecraft/tags/enchantment/inclusive_set/density.json
 65309b9f8caeeda9835de7c9232533f4c56b8444 data/minecraft/tags/enchantment/inclusive_set/fire_protection.json
 ea07204701e693ceffbacca4360401acd16b2879 data/minecraft/tags/enchantment/inclusive_set/impaling.json
 3c39c5be6d18cb8105adca1358412a4ecc8db634 data/minecraft/tags/enchantment/inclusive_set/infinity.json
@@ -11,5 +11,5 @@ df6cec8412d544e220f60b8aa79ae8293f6e3707 data/minecraft/tags/enchantment/inclusi
 8b63ae481b06dc7961b40796c627aa4800a905aa data/minecraft/tags/enchantment/inclusive_set/piercing.json
 65309b9f8caeeda9835de7c9232533f4c56b8444 data/minecraft/tags/enchantment/inclusive_set/projectile_protection.json
 13d0c524d86ff6739331c175f885c84c8b119c98 data/minecraft/tags/enchantment/inclusive_set/protection.json
-07710470af7d67a69169171005d68cba109a8c18 data/minecraft/tags/enchantment/inclusive_set/sharpness.json
+55556c0ce5666a5e577cbc4e4c6b31879611d833 data/minecraft/tags/enchantment/inclusive_set/sharpness.json
 ea07204701e693ceffbacca4360401acd16b2879 data/minecraft/tags/enchantment/inclusive_set/smite.json

@@ -4,7 +4,7 @@ import com.google.common.collect.ImmutableList;
 import fuzs.puzzleslib.api.event.v1.core.EventResult;
 import fuzs.puzzleslib.api.event.v1.data.MutableFloat;
 import fuzs.puzzleslib.api.event.v1.data.MutableInt;
-import fuzs.universalenchants.init.CompositeHolderSet;
+import fuzs.universalenchants.core.CompositeHolderSet;
 import fuzs.universalenchants.init.ModRegistry;
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderLookup;
