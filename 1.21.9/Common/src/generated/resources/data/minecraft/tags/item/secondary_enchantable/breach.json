@@ -1,0 +1,10 @@
+{
+  "values": [
+    "#minecraft:axes",
+    "#minecraft:swords",
+    {
+      "id": "#c:tools/spear",
+      "required": false
+    }
+  ]
+}

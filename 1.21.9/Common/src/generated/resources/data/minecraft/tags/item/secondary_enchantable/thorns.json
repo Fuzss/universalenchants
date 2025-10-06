@@ -1,0 +1,17 @@
+{
+  "values": [
+    {
+      "id": "#c:armors",
+      "required": false
+    },
+    "minecraft:diamond_horse_armor",
+    "minecraft:golden_horse_armor",
+    "minecraft:iron_horse_armor",
+    "minecraft:leather_horse_armor",
+    {
+      "id": "#c:tools/shield",
+      "required": false
+    },
+    "minecraft:wolf_armor"
+  ]
+}
