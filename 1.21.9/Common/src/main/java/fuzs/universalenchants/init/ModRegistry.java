@@ -12,10 +12,12 @@ import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.level.block.Block;
 
 public class ModRegistry {
-    public static final RegistrySetBuilder REGISTRY_SET_BUILDER = new RegistrySetBuilder().add(Registries.ENCHANTMENT, ModDatapackRegistriesProvider::boostrapEnchantments);
+    public static final RegistrySetBuilder REGISTRY_SET_BUILDER = new RegistrySetBuilder().add(Registries.ENCHANTMENT,
+            ModDatapackRegistriesProvider::boostrapEnchantments);
     static final TagFactory TAGS = TagFactory.make(UniversalEnchants.MOD_ID);
     public static final TagKey<Block> FROSTED_ICE_REPLACEABLES_BLOCK_TAG = TAGS.registerBlockTag(
             "frosted_ice_replaceables");
+    public static final TagKey<Item> ANIMAL_ARMOR_ITEM_TAG = TAGS.registerItemTag("animal_armor");
 
     public static void bootstrap() {
         // NO-OP

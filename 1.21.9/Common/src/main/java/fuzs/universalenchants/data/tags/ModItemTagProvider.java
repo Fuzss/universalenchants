@@ -1,4 +1,4 @@
-package fuzs.universalenchants.data;
+package fuzs.universalenchants.data.tags;
 
 import fuzs.puzzleslib.api.data.v2.core.DataProviderContext;
 import fuzs.puzzleslib.api.data.v2.tags.AbstractTagAppender;
@@ -14,16 +14,9 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.Enchantments;
 
-import java.util.Collection;
-import java.util.Set;
 import java.util.function.Consumer;
 
 public class ModItemTagProvider extends AbstractTagProvider<Item> {
-    static final Set<Item> ANIMAL_ARMOR_ITEMS = Set.of(Items.LEATHER_HORSE_ARMOR,
-            Items.IRON_HORSE_ARMOR,
-            Items.GOLDEN_HORSE_ARMOR,
-            Items.DIAMOND_HORSE_ARMOR,
-            Items.WOLF_ARMOR);
 
     public ModItemTagProvider(DataProviderContext context) {
         super(Registries.ITEM, context);
@@ -31,6 +24,13 @@ public class ModItemTagProvider extends AbstractTagProvider<Item> {
 
     @Override
     public void addTags(HolderLookup.Provider provider) {
+        this.tag(ModRegistry.ANIMAL_ARMOR_ITEM_TAG)
+                .add(Items.LEATHER_HORSE_ARMOR,
+                        Items.COPPER_HORSE_ARMOR,
+                        Items.IRON_HORSE_ARMOR,
+                        Items.GOLDEN_HORSE_ARMOR,
+                        Items.DIAMOND_HORSE_ARMOR,
+                        Items.WOLF_ARMOR);
         this.addSupportedItems(ItemTags.SWORDS, Enchantments.IMPALING, Enchantments.BREACH);
         this.addSupportedItems(ItemTags.AXES,
                 Enchantments.SHARPNESS,
@@ -64,7 +64,7 @@ public class ModItemTagProvider extends AbstractTagProvider<Item> {
                 Enchantments.POWER,
                 Enchantments.INFINITY,
                 Enchantments.LOOTING);
-        this.addSupportedItems(ANIMAL_ARMOR_ITEMS,
+        this.addSupportedItems(ModRegistry.ANIMAL_ARMOR_ITEM_TAG,
                 Enchantments.PROTECTION,
                 Enchantments.FIRE_PROTECTION,
                 Enchantments.FEATHER_FALLING,
@@ -79,11 +79,6 @@ public class ModItemTagProvider extends AbstractTagProvider<Item> {
                 Enchantments.VANISHING_CURSE);
         this.addSupportedItems("c:tools/shield", Enchantments.THORNS, Enchantments.KNOCKBACK, Enchantments.FIRE_ASPECT);
         this.addSupportedItems("c:armors", Enchantments.THORNS);
-    }
-
-    @SafeVarargs
-    private void addSupportedItems(Collection<Item> items, ResourceKey<Enchantment>... enchantments) {
-        this.addSupportedItems(tagAppender -> tagAppender.add(items.toArray(Item[]::new)), enchantments);
     }
 
     @SafeVarargs
