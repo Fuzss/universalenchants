@@ -16,9 +16,9 @@ import net.minecraft.world.item.enchantment.Enchantments;
 
 import java.util.function.Consumer;
 
-public class ModItemTagProvider extends AbstractTagProvider<Item> {
+public class ModItemTagsProvider extends AbstractTagProvider<Item> {
 
-    public ModItemTagProvider(DataProviderContext context) {
+    public ModItemTagsProvider(DataProviderContext context) {
         super(Registries.ITEM, context);
     }
 
