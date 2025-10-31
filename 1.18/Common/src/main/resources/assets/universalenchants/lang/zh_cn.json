@@ -1,0 +1,4 @@
+{
+  "commands.enchant.remove.success.single": "已移除%2$s物品上的%1$s附魔",
+  "commands.enchant.remove.success.multiple": "已移除实体%2$s上的%1$s附魔"
+}
