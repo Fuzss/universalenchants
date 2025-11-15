@@ -24,6 +24,10 @@ public class UniversalEnchants implements ModConstructor {
     public static final Logger LOGGER = LogManager.getLogger(MOD_NAME);
 
     public static final ConfigHolder CONFIG = ConfigHolder.builder(MOD_ID).server(ServerConfig.class);
+    public static final ResourceLocation COMPATIBLE_BOW_ENCHANTMENTS_LOCATION = id("compatible_bow_enchantments");
+    public static final ResourceLocation COMPATIBLE_CROSSBOW_ENCHANTMENTS_LOCATION = id(
+            "compatible_crossbow_enchantments");
+    public static final ResourceLocation COMPATIBLE_MACE_ENCHANTMENTS_LOCATION = id("compatible_mace_enchantments");
     public static final ResourceLocation COMPATIBLE_DAMAGE_ENCHANTMENTS_LOCATION = id("compatible_damage_enchantments");
     public static final ResourceLocation COMPATIBLE_PROTECTION_ENCHANTMENTS_LOCATION = id(
             "compatible_protection_enchantments");
@@ -48,6 +52,15 @@ public class UniversalEnchants implements ModConstructor {
 
     @Override
     public void onAddDataPackFinders(PackRepositorySourcesContext context) {
+        context.registerBuiltInPack(COMPATIBLE_BOW_ENCHANTMENTS_LOCATION,
+                Component.literal("Compatible Bow Enchantments"),
+                true);
+        context.registerBuiltInPack(COMPATIBLE_CROSSBOW_ENCHANTMENTS_LOCATION,
+                Component.literal("Compatible Crossbow Enchantments"),
+                true);
+        context.registerBuiltInPack(COMPATIBLE_MACE_ENCHANTMENTS_LOCATION,
+                Component.literal("Compatible Mace Enchantments"),
+                true);
         context.registerBuiltInPack(COMPATIBLE_DAMAGE_ENCHANTMENTS_LOCATION,
                 Component.literal("Compatible Damage Enchantments"),
                 false);
