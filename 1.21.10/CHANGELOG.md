@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [v21.10.3-1.21.10] - 2025-11-19
+
+### Fixed
+
+- Fix firing a projectile weapon from the main hand with infinity but without any ammo not playing the item animation in
+  survival mode when a usable item (like a shield) is held in the offhand
+
 ## [v21.10.2-1.21.10] - 2025-11-15
 
 ### Changed
