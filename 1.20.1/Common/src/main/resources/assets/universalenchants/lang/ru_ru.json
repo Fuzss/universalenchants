@@ -1,0 +1,4 @@
+{
+  "commands.enchant.remove.success.single": "Убраны чары «%s» с предмета %s",
+  "commands.enchant.remove.success.multiple": "Убраны чары «%s» с предметов %s сущностей"
+}
