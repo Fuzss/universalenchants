@@ -8,6 +8,6 @@ dependencies {
 
 multiloader {
     mixins {
-        mixin("LivingEntityMixin", "ThrownTridentMixin")
+        mixin("LivingEntityMixin", "PlayerMixin", "ThrownTridentMixin")
     }
 }

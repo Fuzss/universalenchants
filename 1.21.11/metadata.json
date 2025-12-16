@@ -1,0 +1,61 @@
+{
+    "mod": {
+        "id": "universalenchants",
+        "group": "fuzs.universalenchants",
+        "name": "Universal Enchants",
+        "version": "21.11.0",
+        "authors": [
+            "Fuzs"
+        ],
+        "description": "Better enchantments! Use them on all tools and weapons. Infinity crossbow, or looting trident anyone?",
+        "license": "MPL-2.0"
+    },
+    "dependencies": [
+        {
+            "name": "fabricapi",
+            "type": "required",
+            "platforms": [
+                "fabric"
+            ]
+        },
+        {
+            "name": "forgeconfigapiport",
+            "type": "required",
+            "platforms": [
+                "fabric"
+            ]
+        },
+        {
+            "name": "puzzleslib",
+            "type": "required",
+            "platforms": [
+                "fabric",
+                "neoforge"
+            ]
+        }
+    ],
+    "links": [
+        {
+            "name": "github",
+            "slug": "universalenchants"
+        },
+        {
+            "name": "curseforge",
+            "slug": "universal-enchants",
+            "id": "593958"
+        },
+        {
+            "name": "modrinth",
+            "slug": "universal-enchants",
+            "id": "DT56YDir"
+        }
+    ],
+    "environments": {
+        "client": "unsupported",
+        "server": "required"
+    },
+    "platforms": [
+        "fabric",
+        "neoforge"
+    ]
+}

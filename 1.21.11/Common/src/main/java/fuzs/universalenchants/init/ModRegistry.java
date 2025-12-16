@@ -3,8 +3,8 @@ package fuzs.universalenchants.init;
 import fuzs.puzzleslib.api.data.v2.AbstractDatapackRegistriesProvider;
 import fuzs.puzzleslib.api.init.v3.tags.TagFactory;
 import fuzs.universalenchants.UniversalEnchants;
-import net.minecraft.advancements.critereon.DamageSourcePredicate;
-import net.minecraft.advancements.critereon.TagPredicate;
+import net.minecraft.advancements.criterion.DamageSourcePredicate;
+import net.minecraft.advancements.criterion.TagPredicate;
 import net.minecraft.core.HolderGetter;
 import net.minecraft.core.RegistrySetBuilder;
 import net.minecraft.core.Vec3i;
@@ -38,22 +38,21 @@ public class ModRegistry {
     static final TagFactory TAGS = TagFactory.make(UniversalEnchants.MOD_ID);
     public static final TagKey<Block> FROSTED_ICE_REPLACEABLES_BLOCK_TAG = TAGS.registerBlockTag(
             "frosted_ice_replaceables");
-    public static final TagKey<Item> ANIMAL_ARMOR_ITEM_TAG = TAGS.registerItemTag("animal_armor");
 
     public static void bootstrap() {
         // NO-OP
     }
 
     public static TagKey<Item> getPrimaryEnchantableItemTag(ResourceKey<Enchantment> resourceKey) {
-        return TagKey.create(Registries.ITEM, resourceKey.location().withPrefix("primary_enchantable/"));
+        return TagKey.create(Registries.ITEM, resourceKey.identifier().withPrefix("primary_enchantable/"));
     }
 
     public static TagKey<Item> getSecondaryEnchantableItemTag(ResourceKey<Enchantment> resourceKey) {
-        return TagKey.create(Registries.ITEM, resourceKey.location().withPrefix("secondary_enchantable/"));
+        return TagKey.create(Registries.ITEM, resourceKey.identifier().withPrefix("secondary_enchantable/"));
     }
 
     public static TagKey<Enchantment> getInclusiveSetEnchantmentTag(ResourceKey<Enchantment> resourceKey) {
-        return TagKey.create(Registries.ENCHANTMENT, resourceKey.location().withPrefix("inclusive_set/"));
+        return TagKey.create(Registries.ENCHANTMENT, resourceKey.identifier().withPrefix("inclusive_set/"));
     }
 
     public static void boostrapEnchantments(BootstrapContext<Enchantment> context) {

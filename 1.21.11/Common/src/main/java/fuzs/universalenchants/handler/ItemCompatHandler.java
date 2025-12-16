@@ -17,6 +17,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.TagKey;
 import net.minecraft.util.Mth;
 import net.minecraft.util.Unit;
+import net.minecraft.world.InteractionHand;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EquipmentSlot;
@@ -28,7 +29,7 @@ import net.minecraft.world.item.*;
 import net.minecraft.world.item.component.ItemAttributeModifiers;
 import net.minecraft.world.item.enchantment.*;
 import net.minecraft.world.item.equipment.Equippable;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import java.util.List;
 import java.util.Optional;
@@ -161,6 +162,7 @@ public class ItemCompatHandler {
                 }
             }
         }
+
         return EventResult.PASS;
     }
 
@@ -193,15 +195,16 @@ public class ItemCompatHandler {
         EnchantmentHelper.doPostAttackEffectsWithItemSource(serverLevel, entity, damageSource, itemSource);
     }
 
-    public static EventResult onUseItemTick(LivingEntity entity, ItemStack useItem, MutableInt useItemRemaining) {
-        Item item = useItem.getItem();
-        int itemUseDuration = useItem.getUseDuration(entity) - useItemRemaining.getAsInt();
+    public static EventResult onUseItemTick(LivingEntity livingEntity, ItemStack itemStack, InteractionHand interactionHand, MutableInt remainingUseDuration) {
+        Item item = itemStack.getItem();
+        int itemUseDuration = itemStack.getUseDuration(livingEntity) - remainingUseDuration.getAsInt();
         if (item instanceof BowItem && itemUseDuration < 20 || item instanceof TridentItem && itemUseDuration < 10) {
             // quick charge enchantment for bows and tridents
             // the values are the same as for crossbows, but speed improvement is not relative to actual item use duration now
-            float chargingTime = EnchantmentHelper.modifyCrossbowChargingTime(useItem, entity, 1.25F);
-            useItemRemaining.mapInt(duration -> duration - Mth.floor((1.25F - chargingTime) / 0.25F));
+            float chargingTime = EnchantmentHelper.modifyCrossbowChargingTime(itemStack, livingEntity, 1.25F);
+            remainingUseDuration.mapAsInt(duration -> duration - Mth.floor((1.25F - chargingTime) / 0.25F));
         }
+
         return EventResult.PASS;
     }
 }

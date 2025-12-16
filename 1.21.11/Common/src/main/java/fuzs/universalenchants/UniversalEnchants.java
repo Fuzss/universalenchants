@@ -4,7 +4,6 @@ import fuzs.puzzleslib.api.config.v3.ConfigHolder;
 import fuzs.puzzleslib.api.core.v1.ModConstructor;
 import fuzs.puzzleslib.api.core.v1.context.PackRepositorySourcesContext;
 import fuzs.puzzleslib.api.core.v1.context.PayloadTypesContext;
-import fuzs.puzzleslib.api.core.v1.utility.ResourceLocationHelper;
 import fuzs.puzzleslib.api.event.v1.FinalizeItemComponentsCallback;
 import fuzs.puzzleslib.api.event.v1.core.EventPhase;
 import fuzs.puzzleslib.api.event.v1.entity.living.*;
@@ -16,7 +15,7 @@ import fuzs.universalenchants.handler.ItemCompatHandler;
 import fuzs.universalenchants.init.ModRegistry;
 import fuzs.universalenchants.network.ClientboundStopUsingItemMessage;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -26,13 +25,11 @@ public class UniversalEnchants implements ModConstructor {
     public static final Logger LOGGER = LogManager.getLogger(MOD_NAME);
 
     public static final ConfigHolder CONFIG = ConfigHolder.builder(MOD_ID).server(ServerConfig.class);
-    public static final ResourceLocation COMPATIBLE_BOW_ENCHANTMENTS_LOCATION = id("compatible_bow_enchantments");
-    public static final ResourceLocation COMPATIBLE_CROSSBOW_ENCHANTMENTS_LOCATION = id(
-            "compatible_crossbow_enchantments");
-    public static final ResourceLocation COMPATIBLE_MACE_ENCHANTMENTS_LOCATION = id("compatible_mace_enchantments");
-    public static final ResourceLocation COMPATIBLE_DAMAGE_ENCHANTMENTS_LOCATION = id("compatible_damage_enchantments");
-    public static final ResourceLocation COMPATIBLE_PROTECTION_ENCHANTMENTS_LOCATION = id(
-            "compatible_protection_enchantments");
+    public static final Identifier COMPATIBLE_BOW_ENCHANTMENTS_LOCATION = id("compatible_bow_enchantments");
+    public static final Identifier COMPATIBLE_CROSSBOW_ENCHANTMENTS_LOCATION = id("compatible_crossbow_enchantments");
+    public static final Identifier COMPATIBLE_MACE_ENCHANTMENTS_LOCATION = id("compatible_mace_enchantments");
+    public static final Identifier COMPATIBLE_DAMAGE_ENCHANTMENTS_LOCATION = id("compatible_damage_enchantments");
+    public static final Identifier COMPATIBLE_PROTECTION_ENCHANTMENTS_LOCATION = id("compatible_protection_enchantments");
 
     @Override
     public void onConstructMod() {
@@ -77,7 +74,7 @@ public class UniversalEnchants implements ModConstructor {
                 false);
     }
 
-    public static ResourceLocation id(String path) {
-        return ResourceLocationHelper.fromNamespaceAndPath(MOD_ID, path);
+    public static Identifier id(String path) {
+        return Identifier.fromNamespaceAndPath(MOD_ID, path);
     }
 }

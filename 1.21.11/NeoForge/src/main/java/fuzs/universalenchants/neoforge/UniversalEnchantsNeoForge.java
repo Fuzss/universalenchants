@@ -11,7 +11,7 @@ import fuzs.universalenchants.data.tags.ModItemTagsProvider;
 import fuzs.universalenchants.handler.BetterEnchantsHandler;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.packs.PackType;
 import net.minecraft.world.item.enchantment.Enchantment;
@@ -68,8 +68,8 @@ public class UniversalEnchantsNeoForge {
     }
 
     @SafeVarargs
-    private static void registerBuiltInDataProviders(ResourceLocation resourceLocation, ResourceKey<Enchantment> primaryEnchantment, ResourceKey<Enchantment>... secondaryEnchantments) {
-        DataProviderHelper.registerDataProviders(resourceLocation,
+    private static void registerBuiltInDataProviders(Identifier identifier, ResourceKey<Enchantment> primaryEnchantment, ResourceKey<Enchantment>... secondaryEnchantments) {
+        DataProviderHelper.registerDataProviders(identifier,
                 PackType.SERVER_DATA,
                 (NeoForgeDataProviderContext context) -> {
                     return new ModEnchantmentTagsProvider(context) {

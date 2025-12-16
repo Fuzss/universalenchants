@@ -1,8 +1,19 @@
 {
   "values": [
-    "#universalenchants:animal_armor",
     {
       "id": "#c:armors",
+      "required": false
+    },
+    {
+      "id": "#c:armors/horse",
+      "required": false
+    },
+    {
+      "id": "#c:armors/nautilus",
+      "required": false
+    },
+    {
+      "id": "#c:armors/wolf",
       "required": false
     },
     {

@@ -24,12 +24,15 @@ import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.level.block.state.BlockState;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 public class BetterEnchantsHandler {
 
     public static void onPickProjectile(LivingEntity livingEntity, ItemStack weaponItemStack, MutableValue<ItemStack> projectileItemStack) {
-        if (!UniversalEnchants.CONFIG.get(ServerConfig.class).trueInfinity) return;
+        if (!UniversalEnchants.CONFIG.get(ServerConfig.class).trueInfinity) {
+            return;
+        }
+
         if (livingEntity.level() instanceof ServerLevel serverLevel && projectileItemStack.get().isEmpty()) {
             ItemStack itemStack = new ItemStack(Items.ARROW);
             if (EnchantmentHelper.processAmmoUse(serverLevel, weaponItemStack, itemStack, 1) == 0) {
@@ -50,6 +53,7 @@ public class BetterEnchantsHandler {
         if (!(entity instanceof Player) && source.is(DamageTypeTags.IS_PROJECTILE)) {
             entity.invulnerableTime = 0;
         }
+
         return EventResult.PASS;
     }
 
@@ -61,6 +65,7 @@ public class BetterEnchantsHandler {
                 return EventResult.INTERRUPT;
             }
         }
+
         return EventResult.PASS;
     }
 
@@ -73,9 +78,10 @@ public class BetterEnchantsHandler {
         if (attackingPlayer != null) {
             int enchantmentLevel = EnchantingHelper.getEnchantmentLevel(Enchantments.LOOTING, attackingPlayer);
             if (enchantmentLevel > 0) {
-                droppedExperience.mapInt((int value) -> getDroppedXp(value, enchantmentLevel));
+                droppedExperience.mapAsInt((int value) -> getDroppedXp(value, enchantmentLevel));
             }
         }
+
         return EventResult.PASS;
     }
 
@@ -84,7 +90,7 @@ public class BetterEnchantsHandler {
         Holder<Enchantment> enchantment = EnchantingHelper.lookup(serverLevel, Enchantments.FORTUNE);
         int enchantmentLevel = EnchantmentHelper.getItemEnchantmentLevel(enchantment, itemInHand);
         if (enchantmentLevel > 0) {
-            experienceToDrop.mapInt(value -> getDroppedXp(value, enchantmentLevel));
+            experienceToDrop.mapAsInt((int value) -> getDroppedXp(value, enchantmentLevel));
         }
     }
 

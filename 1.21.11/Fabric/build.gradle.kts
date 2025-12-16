@@ -9,6 +9,6 @@ dependencies {
 
 multiloader {
     mixins {
-        mixin("FarmBlockFabricMixin", "PlayerFabricMixin")
+        mixin("FarmBlockFabricMixin")
     }
 }

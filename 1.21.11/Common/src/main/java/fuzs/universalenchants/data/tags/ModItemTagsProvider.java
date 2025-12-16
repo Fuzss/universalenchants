@@ -10,7 +10,6 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Item;
-import net.minecraft.world.item.Items;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.Enchantments;
 
@@ -24,13 +23,6 @@ public class ModItemTagsProvider extends AbstractTagProvider<Item> {
 
     @Override
     public void addTags(HolderLookup.Provider provider) {
-        this.tag(ModRegistry.ANIMAL_ARMOR_ITEM_TAG)
-                .add(Items.LEATHER_HORSE_ARMOR,
-                        Items.COPPER_HORSE_ARMOR,
-                        Items.IRON_HORSE_ARMOR,
-                        Items.GOLDEN_HORSE_ARMOR,
-                        Items.DIAMOND_HORSE_ARMOR,
-                        Items.WOLF_ARMOR);
         this.addSupportedItems(ItemTags.SWORDS, Enchantments.IMPALING, Enchantments.BREACH);
         this.addSupportedItems(ItemTags.AXES,
                 Enchantments.SHARPNESS,
@@ -64,7 +56,15 @@ public class ModItemTagsProvider extends AbstractTagProvider<Item> {
                 Enchantments.POWER,
                 Enchantments.INFINITY,
                 Enchantments.LOOTING);
-        this.addSupportedItems(ModRegistry.ANIMAL_ARMOR_ITEM_TAG,
+        this.addLandAnimalSupportedItems("c:armors/horse");
+        this.addLandAnimalSupportedItems("c:armors/wolf");
+        this.addWaterAnimalSupportedItems("c:armors/nautilus");
+        this.addSupportedItems("c:tools/shield", Enchantments.THORNS, Enchantments.KNOCKBACK, Enchantments.FIRE_ASPECT);
+        this.addSupportedItems("c:armors", Enchantments.THORNS);
+    }
+
+    private void addLandAnimalSupportedItems(String tagKey) {
+        this.addSupportedItems(tagKey,
                 Enchantments.PROTECTION,
                 Enchantments.FIRE_PROTECTION,
                 Enchantments.FEATHER_FALLING,
@@ -77,18 +77,32 @@ public class ModItemTagsProvider extends AbstractTagProvider<Item> {
                 Enchantments.BINDING_CURSE,
                 Enchantments.SOUL_SPEED,
                 Enchantments.VANISHING_CURSE);
-        this.addSupportedItems("c:tools/shield", Enchantments.THORNS, Enchantments.KNOCKBACK, Enchantments.FIRE_ASPECT);
-        this.addSupportedItems("c:armors", Enchantments.THORNS);
+    }
+
+    private void addWaterAnimalSupportedItems(String tagKey) {
+        this.addSupportedItems(tagKey,
+                Enchantments.PROTECTION,
+                Enchantments.FIRE_PROTECTION,
+                Enchantments.FEATHER_FALLING,
+                Enchantments.BLAST_PROTECTION,
+                Enchantments.PROJECTILE_PROTECTION,
+                Enchantments.THORNS,
+                Enchantments.BINDING_CURSE,
+                Enchantments.VANISHING_CURSE);
     }
 
     @SafeVarargs
     private void addSupportedItems(String tagKey, ResourceKey<Enchantment>... enchantments) {
-        this.addSupportedItems(tagAppender -> tagAppender.addOptionalTag(tagKey), enchantments);
+        this.addSupportedItems((AbstractTagAppender<Item> tagAppender) -> {
+            tagAppender.addOptionalTag(tagKey);
+        }, enchantments);
     }
 
     @SafeVarargs
     private void addSupportedItems(TagKey<Item> tagKey, ResourceKey<Enchantment>... enchantments) {
-        this.addSupportedItems(tagAppender -> tagAppender.addTag(tagKey), enchantments);
+        this.addSupportedItems((AbstractTagAppender<Item> tagAppender) -> {
+            tagAppender.addTag(tagKey);
+        }, enchantments);
     }
 
     @SafeVarargs
