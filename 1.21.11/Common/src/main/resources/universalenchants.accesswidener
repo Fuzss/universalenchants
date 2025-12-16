@@ -1,0 +1,13 @@
+accessWidener   v2  named
+accessible  field   net/minecraft/world/item/enchantment/Enchantment$EnchantmentDefinition  supportedItems  Lnet/minecraft/core/HolderSet;
+mutable field   net/minecraft/world/item/enchantment/Enchantment$EnchantmentDefinition  supportedItems  Lnet/minecraft/core/HolderSet;
+accessible  field   net/minecraft/world/item/enchantment/Enchantment$EnchantmentDefinition  primaryItems    Ljava/util/Optional;
+mutable field   net/minecraft/world/item/enchantment/Enchantment$EnchantmentDefinition  primaryItems    Ljava/util/Optional;
+accessible  field   net/minecraft/world/item/enchantment/Enchantment$EnchantmentDefinition  slots   Ljava/util/List;
+mutable field   net/minecraft/world/item/enchantment/Enchantment$EnchantmentDefinition  slots   Ljava/util/List;
+accessible  field   net/minecraft/world/item/enchantment/Enchantment    exclusiveSet    Lnet/minecraft/core/HolderSet;
+mutable field   net/minecraft/world/item/enchantment/Enchantment    exclusiveSet    Lnet/minecraft/core/HolderSet;
+accessible  field   net/minecraft/world/entity/projectile/AbstractArrow piercingIgnoreEntityIds Lit/unimi/dsi/fastutil/ints/IntOpenHashSet;
+accessible  field   net/minecraft/world/entity/projectile/AbstractArrow piercedAndKilledEntities    Ljava/util/List;
+accessible  field   net/minecraft/client/player/LocalPlayer startedUsingItem    Z
+accessible  field   net/minecraft/client/player/LocalPlayer usingItemHand   Lnet/minecraft/world/InteractionHand;

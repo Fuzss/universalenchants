@@ -1,0 +1,13 @@
+{
+  "values": [
+    "#universalenchants:animal_armor",
+    {
+      "id": "#c:armors",
+      "required": false
+    },
+    {
+      "id": "#c:tools/shield",
+      "required": false
+    }
+  ]
+}
