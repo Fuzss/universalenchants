@@ -31,6 +31,7 @@ public class ModItemTagsProvider extends AbstractTagProvider<Item> {
                 Enchantments.LOOTING,
                 Enchantments.IMPALING,
                 Enchantments.BREACH);
+        // Do not add Fire Aspect, it does not fit well with the aquatic theme of tridents.
         this.addSupportedItems("c:tools/spear",
                 Enchantments.SHARPNESS,
                 Enchantments.SMITE,
@@ -39,12 +40,15 @@ public class ModItemTagsProvider extends AbstractTagProvider<Item> {
                 Enchantments.BREACH,
                 Enchantments.QUICK_CHARGE,
                 Enchantments.PIERCING);
+        // Do not add Knockback, since maces already have their own knock back mechanic with an exclusive enchantment.
+        // Fire Aspect is already supported in vanilla.
         this.addSupportedItems("c:tools/mace",
                 Enchantments.SHARPNESS,
                 Enchantments.SMITE,
                 Enchantments.BANE_OF_ARTHROPODS,
                 Enchantments.LOOTING,
                 Enchantments.IMPALING);
+        this.addSupportedItems(ItemTags.SPEARS, Enchantments.IMPALING, Enchantments.BREACH);
         this.addSupportedItems("c:tools/bow",
                 Enchantments.PIERCING,
                 Enchantments.MULTISHOT,

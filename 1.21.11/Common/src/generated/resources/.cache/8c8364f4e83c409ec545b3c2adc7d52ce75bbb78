@@ -1,15 +1,15 @@
-// 1.21.11	2025-12-16T12:57:19.712042	Tags for minecraft:item mod id vanilla
+// 1.21.11	2025-12-25T21:26:52.538932	Tags for minecraft:item mod id vanilla
 612b5fbe4bb5565bc836a36a198888bba286abb0 data/minecraft/tags/item/secondary_enchantable/bane_of_arthropods.json
 c6c5d87ae9b4aa10ae08e0139d70e4a20d1491e7 data/minecraft/tags/item/secondary_enchantable/binding_curse.json
 c6c5d87ae9b4aa10ae08e0139d70e4a20d1491e7 data/minecraft/tags/item/secondary_enchantable/blast_protection.json
-486973f1c056ce25c3040e1d4fabc17d44a86738 data/minecraft/tags/item/secondary_enchantable/breach.json
+0bf51baa919fe9a461498f37aea65f944c5c394f data/minecraft/tags/item/secondary_enchantable/breach.json
 9fee7f5215e76ba5c1b2e1d5ec0ecf1edc00a61b data/minecraft/tags/item/secondary_enchantable/depth_strider.json
 c6c5d87ae9b4aa10ae08e0139d70e4a20d1491e7 data/minecraft/tags/item/secondary_enchantable/feather_falling.json
 2bcf0095e15e46fd0f6db6b9c4264c1169924451 data/minecraft/tags/item/secondary_enchantable/fire_aspect.json
 c6c5d87ae9b4aa10ae08e0139d70e4a20d1491e7 data/minecraft/tags/item/secondary_enchantable/fire_protection.json
 739e1926ae0d7370575e7c125017764652f076b0 data/minecraft/tags/item/secondary_enchantable/flame.json
 9fee7f5215e76ba5c1b2e1d5ec0ecf1edc00a61b data/minecraft/tags/item/secondary_enchantable/frost_walker.json
-ab322ccdb415433675ce6c80551c4f91b0697aff data/minecraft/tags/item/secondary_enchantable/impaling.json
+2528e8e154709ece393c819ce71c5a10169aa2bc data/minecraft/tags/item/secondary_enchantable/impaling.json
 739e1926ae0d7370575e7c125017764652f076b0 data/minecraft/tags/item/secondary_enchantable/infinity.json
 2bcf0095e15e46fd0f6db6b9c4264c1169924451 data/minecraft/tags/item/secondary_enchantable/knockback.json
 d6c41962258a77bfd863943604909cc0e87c7c26 data/minecraft/tags/item/secondary_enchantable/looting.json

@@ -1,6 +1,7 @@
 {
   "values": [
     "#minecraft:axes",
+    "#minecraft:spears",
     "#minecraft:swords",
     {
       "id": "#c:tools/spear",
