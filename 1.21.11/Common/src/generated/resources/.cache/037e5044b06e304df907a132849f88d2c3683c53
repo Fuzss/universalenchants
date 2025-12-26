@@ -1,3 +1,7 @@
-// 1.21.11	2025-12-16T12:33:36.795451	universalenchants:compatible_mace_enchantments/Tags for minecraft:enchantment mod id vanilla
+// 1.21.11	2025-12-26T18:55:48.277543	universalenchants:compatible_mace_enchantments/Tags for minecraft:enchantment mod id vanilla
+a23f22cdab6572362f7402976dcd995b94825841 data/universalenchants/datapacks/compatible_mace_enchantments/data/minecraft/tags/enchantment/inclusive_set/bane_of_arthropods.json
 a23f22cdab6572362f7402976dcd995b94825841 data/universalenchants/datapacks/compatible_mace_enchantments/data/minecraft/tags/enchantment/inclusive_set/breach.json
-08174fb2788758ba88e5738e96a5ce0e6df6750b data/universalenchants/datapacks/compatible_mace_enchantments/data/minecraft/tags/enchantment/inclusive_set/density.json
+69169de557085a019c42a7aab20e758ed46599fa data/universalenchants/datapacks/compatible_mace_enchantments/data/minecraft/tags/enchantment/inclusive_set/density.json
+a23f22cdab6572362f7402976dcd995b94825841 data/universalenchants/datapacks/compatible_mace_enchantments/data/minecraft/tags/enchantment/inclusive_set/impaling.json
+a23f22cdab6572362f7402976dcd995b94825841 data/universalenchants/datapacks/compatible_mace_enchantments/data/minecraft/tags/enchantment/inclusive_set/sharpness.json
+a23f22cdab6572362f7402976dcd995b94825841 data/universalenchants/datapacks/compatible_mace_enchantments/data/minecraft/tags/enchantment/inclusive_set/smite.json

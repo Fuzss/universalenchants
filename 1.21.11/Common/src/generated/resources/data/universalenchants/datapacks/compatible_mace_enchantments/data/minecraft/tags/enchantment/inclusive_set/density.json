@@ -1,5 +1,9 @@
 {
   "values": [
-    "minecraft:breach"
+    "minecraft:bane_of_arthropods",
+    "minecraft:breach",
+    "minecraft:impaling",
+    "minecraft:sharpness",
+    "minecraft:smite"
   ]
 }

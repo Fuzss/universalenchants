@@ -1,8 +1,9 @@
-// 1.21.11	2025-12-25T21:26:52.538932	Tags for minecraft:item mod id vanilla
+// 1.21.11	2025-12-26T17:31:04.100843	Tags for minecraft:item mod id vanilla
 612b5fbe4bb5565bc836a36a198888bba286abb0 data/minecraft/tags/item/secondary_enchantable/bane_of_arthropods.json
 c6c5d87ae9b4aa10ae08e0139d70e4a20d1491e7 data/minecraft/tags/item/secondary_enchantable/binding_curse.json
 c6c5d87ae9b4aa10ae08e0139d70e4a20d1491e7 data/minecraft/tags/item/secondary_enchantable/blast_protection.json
 0bf51baa919fe9a461498f37aea65f944c5c394f data/minecraft/tags/item/secondary_enchantable/breach.json
+84f86c2488734798b954adf1286004e80e230f8c data/minecraft/tags/item/secondary_enchantable/channeling.json
 9fee7f5215e76ba5c1b2e1d5ec0ecf1edc00a61b data/minecraft/tags/item/secondary_enchantable/depth_strider.json
 c6c5d87ae9b4aa10ae08e0139d70e4a20d1491e7 data/minecraft/tags/item/secondary_enchantable/feather_falling.json
 2bcf0095e15e46fd0f6db6b9c4264c1169924451 data/minecraft/tags/item/secondary_enchantable/fire_aspect.json

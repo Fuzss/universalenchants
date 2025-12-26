@@ -47,7 +47,8 @@ public class ModItemTagsProvider extends AbstractTagProvider<Item> {
                 Enchantments.SMITE,
                 Enchantments.BANE_OF_ARTHROPODS,
                 Enchantments.LOOTING,
-                Enchantments.IMPALING);
+                Enchantments.IMPALING,
+                Enchantments.CHANNELING);
         this.addSupportedItems(ItemTags.SPEARS, Enchantments.IMPALING, Enchantments.BREACH);
         this.addSupportedItems("c:tools/bow",
                 Enchantments.PIERCING,

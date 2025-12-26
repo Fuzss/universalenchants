@@ -10,8 +10,8 @@ import fuzs.universalenchants.data.tags.ModEnchantmentTagsProvider;
 import fuzs.universalenchants.data.tags.ModItemTagsProvider;
 import fuzs.universalenchants.handler.BetterEnchantsHandler;
 import net.minecraft.core.HolderLookup;
-import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.packs.PackType;
 import net.minecraft.world.item.enchantment.Enchantment;
@@ -30,6 +30,7 @@ public class UniversalEnchantsNeoForge {
         DataProviderHelper.registerDataProviders(UniversalEnchants.MOD_ID,
                 ModDatapackRegistriesProvider::new,
                 ModItemTagsProvider::new,
+                ModEnchantmentTagsProvider::new,
                 ModBlockTagsProvider::new);
         registerBuiltInDataProviders(UniversalEnchants.COMPATIBLE_BOW_ENCHANTMENTS_LOCATION,
                 Enchantments.INFINITY,
@@ -39,13 +40,16 @@ public class UniversalEnchantsNeoForge {
                 Enchantments.PIERCING);
         registerBuiltInDataProviders(UniversalEnchants.COMPATIBLE_MACE_ENCHANTMENTS_LOCATION,
                 Enchantments.DENSITY,
-                Enchantments.BREACH);
+                Enchantments.BREACH,
+                Enchantments.SHARPNESS,
+                Enchantments.SMITE,
+                Enchantments.BANE_OF_ARTHROPODS,
+                Enchantments.IMPALING);
         registerBuiltInDataProviders(UniversalEnchants.COMPATIBLE_DAMAGE_ENCHANTMENTS_LOCATION,
                 Enchantments.SHARPNESS,
                 Enchantments.SMITE,
                 Enchantments.BANE_OF_ARTHROPODS,
                 Enchantments.IMPALING,
-                Enchantments.DENSITY,
                 Enchantments.BREACH);
         registerBuiltInDataProviders(UniversalEnchants.COMPATIBLE_PROTECTION_ENCHANTMENTS_LOCATION,
                 Enchantments.PROTECTION,
