@@ -4,15 +4,17 @@ A Minecraft mod. Downloads can be found on [CurseForge](https://www.curseforge.c
 
 ![](https://raw.githubusercontent.com/Fuzss/modresources/main/pages/data/universalenchants/banner.png)
 
-## Configuration (1.21+)
-As of Minecraft 1.21 enchantments have received a major implementation overhaul and are now fully controlled by data packs. For detailed instructions check out the [Minecraft Wiki](https://minecraft.wiki/w/Enchantment_definition).
+## Configuration (for Minecraft 1.21+)
+Starting with Minecraft 1.21 enchantments received a major implementation overhaul and were fully migrated to data pack driven definitions. For vanilla behavior and background details see the official documentation on the [Minecraft Wiki](https://minecraft.wiki/w/Enchantment_definition).
 
-Universal Enchants only makes a few minor additions to vanilla's enchanting implementation now to help achieve its goal in a mod compatible way.
+Universal Enchants builds on top of this system with a small set of targeted extensions. The goal is to allow fine grained control over enchantment behavior while remaining fully compatible with vanilla and other mods.
 
 ### New Item Tags
-What items support which enchantments in vanilla is controlled via the `supported_items` and `primary_items` enchantment properties. Unfortunately vanilla reuses the tags used here between multiple enchantments, and so removing or supporting items for individual enchantments is a bit tricky.
+In vanilla the items that an enchantment can be applied to are defined using the `supported_items` and `primary_items` properties. These properties usually reference shared item tags that are reused by multiple enchantment
 
-Therefore Universal Enchants dynamically implements two additional item tags per enchantment for adding new items. One for adding to `supported_items`, and a second one for `primary_items`.
+Because of this reuse it is difficult to add or remove items for a single enchantment without affecting others.
+
+Universal Enchants solves this by injecting two additional item tags per enchantment. These tags are merged into the vanilla item lists at runtime and only affect the targeted enchantment.
 
 #### Tag Format
 - `<namespace>:secondary_enchantable/<path>` for adding to `supported_items`
@@ -23,17 +25,58 @@ Therefore Universal Enchants dynamically implements two additional item tags per
 - `minecraft:efficiency` → `data/minecraft/tags/item/primary_enchantable/efficiency.json`
 
 ### New Enchantment Tags
-Furthermore what enchantments can be applied on a single item simultaneously is controlled via the `exclusive_set` enchantment property. Once again vanilla reuses the same tag for multiple enchantments.
+Which enchantments are mutually exclusive is defined by the `exclusive_set` property. Similar to item tags vanilla frequently shares the same exclusion tag across multiple enchantments, which makes selective compatibility changes difficult.
 
-Here Universal Enchants also adds one additional enchantment tag per enchantment for overriding entries in the vanilla set, so that enchantment compatibility can be restored.
+Universal Enchants introduces per enchantment override tags that are applied in addition to vanilla definitions.
 
 #### Tag Format
-- `<namespace>:inclusive_set/<path>`
+- `<namespace>:inclusive_set/<path>` for removing from `exclusive_set`
+- `<namespace>:exclusive_set/<path>` for adding to `exclusive_set` (for Minecraft 1.21.11+)
 
 #### Example
 - `minecraft:efficiency` → `data/minecraft/tags/enchantment/inclusive_set/efficiency.json`
+- `minecraft:efficiency` → `data/minecraft/tags/enchantment/exclusive_set/efficiency.json`
 
-## Configuration (-1.20.1)
+### Included Compatibility Data Packs (for Minecraft 1.21.10+)
+Universal Enchants ships with several optional data packs that relax common vanilla compatibility restrictions. Each pack focuses on a specific item or enchantment group.
+
+The packs can be enabled or disabled from the `Data Packs` screen when creating a world or via the `/datapack` command in existing worlds and when playing on multiplayer servers.
+
+#### `universalenchants:compatible_bow_enchantments` (default: `true`)
+
+- `minecraft:mending`: `minecraft:infinity`
+- `minecraft:infinity`: `minecraft:mending`
+
+#### `universalenchants:compatible_crossbow_enchantments` (default: `true`)
+
+- `minecraft:multishot`: `minecraft:piercing`
+- `minecraft:piercing`: `minecraft:multishot`
+
+#### `universalenchants:compatible_mace_enchantments` (default: `true`)
+
+- `minecraft:density`: `minecraft:sharpness`, `minecraft:smite`, `minecraft:bane_of_arthropods`, `minecraft:impaling`, `minecraft:breach`
+- `minecraft:sharpness`: `minecraft:density`
+- `minecraft:smite`: `minecraft:density`
+- `minecraft:bane_of_arthropods`: `minecraft:density`
+- `minecraft:impaling`: `minecraft:density`
+- `minecraft:breach`: `minecraft:density`
+
+#### `universalenchants:compatible_damage_enchantments` (default: `false`)
+
+- `minecraft:sharpness`: `minecraft:smite`, `minecraft:bane_of_arthropods`, `minecraft:impaling`, `minecraft:breach`
+- `minecraft:smite`: `minecraft:sharpness`
+- `minecraft:bane_of_arthropods`: `minecraft:sharpness`
+- `minecraft:impaling`: `minecraft:sharpness`
+- `minecraft:breach`: `minecraft:sharpness`
+
+#### `universalenchants:compatible_protection_enchantments` (default: `false`)
+
+- `minecraft:protection`: `minecraft:blast_protection`, `minecraft:fire_protection`, `minecraft:projectile_protection`
+- `minecraft:blast_protection`: `minecraft:protection`
+- `minecraft:fire_protection`: `minecraft:protection`
+- `minecraft:projectile_protection`: `minecraft:protection`
+
+## Configuration (for Minecraft -1.20.1)
 Universal Enchants allows you to define what enchantments can be applied to what items, and which enchantments are compatible with each other (meaning can be applied on a single item at the same time). This is done via individual `.json` config files (one per enchantment) found in `.minecraft/config/universalenchants`.
 
 The internal implementation of individual enchantments is rather complex and relies on a bunch of hard-coded special cases. All items enabled by default in the `items` fields are guaranteed to work, everything beyond that is untested and probably does not work, especially modded enchantments.
